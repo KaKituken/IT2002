@@ -1,6 +1,6 @@
 import './App.scss'
-import TableView from './components/TableView'
-import EditView from './components/EditView'
+import TableView from '../../components/TableView'
+import EditView from '../../components/EditView'
 import { useState } from 'react'
 
 // ? This interface/object template/class - defines the JSON structure of the displayed table/relation for this application

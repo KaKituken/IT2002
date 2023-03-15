@@ -1,0 +1,19 @@
+navigator {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 136px;
+
+    background-color: #000000;
+    color: #FFFFFF;
+}
+
+navigator div {
+    cursor: pointer;
+}

@@ -1,0 +1,15 @@
+#icon-name {
+    position: absolute;
+    width: 111px;
+    height: 26px;
+    left: 37px;
+    top: 31px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 18px;
+
+    color: #FFFFFF;
+}

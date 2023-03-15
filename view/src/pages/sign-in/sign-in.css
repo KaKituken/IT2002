@@ -1,0 +1,93 @@
+h1 {
+    position: absolute;
+    width: 514px;
+    height: 82px;
+    left: calc(50% - 514px/2);
+    top: 151px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 48px;
+    line-height: 58px;
+    text-align: center;
+
+    color: #FFFFFF;
+}
+
+#sign-in-form {
+    position: absolute;
+    width: 975px;
+    height: 495px;
+    left: calc(50% - 975px/2);
+    top: 293px;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+
+    gap: 207px;
+    row-gap: 0px;
+
+    background: #3A4656;
+}
+
+.info-box {
+    display: block;
+    width: 276px;
+    height: 68px;
+}
+
+.info-box > p {
+    padding-left: 10px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 300;
+    font-size: 20px;
+    line-height: 24px;
+
+    color: #FFFFFF;
+}
+
+.info-box > input {
+    margin-top: -10px;
+
+    width: 276px;
+    height: 36px;
+
+    background: #FFFFFF;
+    border-radius: 20px;
+}
+
+.form-side{
+    display: flex;
+    flex-flow: column;
+
+    height: 358px;
+
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+}
+
+.submit-button {
+    position: relative;
+    width: 108px;
+    height: 29px;
+    left: 380px;
+    top: 25px;
+
+    background: #0390BC;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 29px;
+    text-align: center;
+
+    color: #FFFFFF;
+}

@@ -1,4 +1,4 @@
-import { RelationView } from "../App"
+import { RelationView } from "../pages/index/App"
 
 interface TableViewProps {
     relationView: RelationView

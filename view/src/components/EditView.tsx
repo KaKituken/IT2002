@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import FieldRowView from "./FieldRowView"
 import * as api from '../api'
-import { RelationView } from "../App"
+import { RelationView } from "../pages/index/App"
 
 // ? A custom `type` in TypeScript - defining a map (just as Python dictionaries), whose keys and values are both strings
 export type StringMap = { [dtype: string]: string }
