@@ -1,8 +1,12 @@
 import "./Icon.css"
 
-function Icon() {
+interface IconProps {
+    color: string
+}
+
+function Icon(props: IconProps) {
     return (
-        <p id="icon-name">BidForRental</p>
+        <p id="icon-name" className={props.color}>BidForRental</p>
     )
 }
 

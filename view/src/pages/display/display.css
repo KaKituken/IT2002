@@ -1,0 +1,13 @@
+#display-box {
+    position: absolute;
+    width: 1031px;
+    /* height: 2021px; */
+    left: 51px;
+    top: 100px;
+
+    display: flex;
+    flex-flow: column;
+    gap: 50px;
+
+    background: #D9D9D9;
+}

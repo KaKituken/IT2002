@@ -18,7 +18,7 @@ function App(){
 
     return(
         <div className="App">
-            <Icon></Icon>
+            <Icon color="white"></Icon>
             <h1 id="title">{userType}</h1>
             <div id="sign-in-form">
                 <div className="form-side">

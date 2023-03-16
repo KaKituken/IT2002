@@ -1,0 +1,108 @@
+#title {
+    position: absolute;
+    width: 249px;
+    height: 58px;
+    left: 93px;
+    top: 111px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 44px;
+
+    color: #000000;
+}
+
+.photo-box {
+    position: absolute;
+    width: 80%;
+    height: 142px;
+    left: 93px;
+    top: 195px;
+    overflow-x: scroll;
+
+    display: flex;
+    gap: 60px;
+}
+
+.photo-box > img {
+    width: 249px;
+    height: 142px;
+}
+
+.provide-form {
+    position: absolute;
+    width: 579px;
+    height: 479px;
+    left: 89px;
+    top: 422px;
+
+    display: flex;
+    flex-flow: column;
+    flex-wrap: wrap;
+
+    justify-content: space-around;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.form-item {
+    width: 240px;
+    height: 74px;
+}
+
+.form-item > p {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+
+    color: #000000;
+}
+
+.form-item > input {
+    width: 240px;
+    height: 47px;
+
+    background: #ECEAEA;
+    border-radius: 10px;
+    border-color: white;
+    border: 0;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+
+    color: #000000;
+}
+
+#submit-btn {
+    position: absolute;
+    width: 108px;
+    height: 29px;
+    left: 520px;
+    top: 950px;
+
+    background: #0390BC;
+    border-radius: 10px;
+    border: 0;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 29px;
+    text-align: center;
+
+    color: #FFFFFF;
+}
+
+#see-all-bids {
+    position: absolute;
+    left: 916px;
+    top: 421px;
+}

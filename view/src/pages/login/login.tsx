@@ -10,7 +10,7 @@ function App(){
 
     return (
         <div className="App">
-            <Icon></Icon>
+            <Icon color="white"></Icon>
             <p id="title">Sign Up As</p>
             <div id="button-group">
                 <button onClick={() => handelOnClick('Provider')}>Provider</button>

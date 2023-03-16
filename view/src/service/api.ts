@@ -29,3 +29,7 @@ export async function signIn(params:SignInForm) {
         console.log(res.data)
     }
 }
+
+export async function getHouseImages() {
+    return []
+}

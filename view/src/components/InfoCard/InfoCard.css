@@ -1,0 +1,135 @@
+.InfoCard-background {
+    width: 1031px;
+    height: 467px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+
+    background-color: white;
+}
+
+.InfoCard-background > #InfoCard-photo-box {
+    width: 580px;
+    height: 404px;
+
+    display: flex;
+    flex-flow: column;
+    justify-content: space-between;
+}
+
+.InfoCard-background > #InfoCard-info-box {
+    width: 374px;
+    height: 404px;
+}
+
+#photo-box-line1{
+    width: 580px;
+    height: 220px;
+}
+
+#photo-box-line2{
+    width: 580px;
+    height: 153px;
+
+    display: flex;
+    justify-content: space-between;
+}
+
+#photo-box-line1 > div {
+    width: 580px;
+    height: 220px;
+
+    overflow: hidden;
+}
+
+#photo-box-line2 > div {
+    width: 276px;
+    height: 153px;
+
+    overflow: hidden;
+}
+
+
+#InfoCard-photo-box img{
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+}
+
+#InfoCard-info-box {
+    position: relative;
+}
+
+#InfoCard-info-box > #house-name {
+    width: 333px;
+    height: 31px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 24px;
+
+    color: #000000;
+}
+
+#InfoCard-info-box > #house-location {
+    width: 291px;
+    height: 28px;
+
+    margin-top: -4%;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 18px;
+
+    color: rgba(0, 0, 0, 0.56);
+}
+
+#InfoCard-info-box > #tbox{
+    /* width: 326px; */
+    height: 22px;
+}
+
+#InfoCard-info-box span{
+    margin-right: 8%;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 18px;
+
+    color: #000000;
+}
+
+#InfoCard-info-box #Make-bid {
+    position: absolute;
+
+    width: 108px;
+    height: 29px;
+    right: 0;
+    bottom: 0;
+
+    background: #0390BC;
+    border-radius: 10px;
+    border: 0;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 29px;
+    text-align: center;
+
+    color: #FFFFFF;
+}
+
+#InfoCard-info-box #Make-bid:hover{
+    cursor: pointer;
+}

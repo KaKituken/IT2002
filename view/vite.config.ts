@@ -8,9 +8,11 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
+        // main: resolve(__dirname, 'index.html'),
         login: resolve(__dirname, 'login.html'),
-        signIn: resolve(__dirname, 'sign-in.html')
+        signIn: resolve(__dirname, 'sign-in.html'),
+        provider: resolve(__dirname, 'provider.html'),
+        display: resolve(__dirname, 'display.html')
       },
     },
   }
