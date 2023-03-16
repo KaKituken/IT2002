@@ -16,12 +16,12 @@ No api request.
 
   ```json
   {
-      firstName: "..",
-      lastName: "..",
-      email: "..",
-      age: 123,
-      nationality: "..",
-      sex: ".."
+      "firstName": "..",
+      "lastName": "..",
+      "email": "..",
+      "age": 123,
+      "nationality": "..",
+      "sex": ".."
   }
   ```
 
@@ -29,9 +29,9 @@ No api request.
 
   ```json
   {
-      status: true/false
-      token: "..."
-      details: "..."
+      "status": true/false,
+      "token": "...",
+      "details": "..."
   }
   ```
 
@@ -49,7 +49,7 @@ No api request.
 
   ```json
   {
-      email: "..",
+      "email": "..",
   }
   ```
 
@@ -57,9 +57,87 @@ No api request.
 
   ```json
   {
-      status: true/false
-      token: "..."
-      details: "..."
+      "status": true/false,
+      "token": "...",
+      "details": "...",
   }
   ```
 
+## Provider Page
+
+### Upload house info
+
+- Route: `/provide-house`
+
+- Request: `POST`
+
+- Param:
+
+  ```json
+  {
+      "houseInfo":{
+          "name": "", 		// string
+          "location": "", 	//  string
+          "price": 0, 		// number
+          "size": 0, 			// number
+          "rooms": 0, 		// number
+          "startDate": "",	// Date
+          "endDate": "",		// Date
+          "currentBid": "",	// number
+          "description": "",	// string
+          "images": [
+              "url1",
+              "url2"
+          ],					// Array<string>
+      },
+      "token": ""				// string
+  }
+  
+  ```
+
+- Response:
+
+  ```json
+  {
+      "status": true/false,
+      "details": "...",
+  }
+  ```
+
+## Display Page
+
+### Get house info list
+
+- Route: `/house-list`
+
+- Request: `GET`
+
+- Param: 
+
+- Response:
+
+  ```json
+  {
+      "status": true/false,
+      "houseInfoList": [
+          {
+              "name": "", 		// string
+              "location": "", 	//  string
+              "price": 0, 		// number
+              "size": 0, 			// number
+              "rooms": 0, 		// number
+              "startDate": "",	// Date
+              "endDate": "",		// Date
+              "currentBid": "",	// number
+              "description": "",	// string
+              "images": [
+                  "url1",
+                  "url2"
+              ],					// Array<string>
+          },
+          // ...
+      ]
+  }
+  ```
+
+  
