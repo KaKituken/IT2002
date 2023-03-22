@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import html from 'vite-plugin-html'
 import { resolve } from 'path'
 
 // https://vitejs.dev/config/
@@ -12,7 +13,8 @@ export default defineConfig({
         login: resolve(__dirname, 'login.html'),
         signIn: resolve(__dirname, 'sign-in.html'),
         provider: resolve(__dirname, 'provider.html'),
-        display: resolve(__dirname, 'display.html')
+        display: resolve(__dirname, 'display.html'),
+        welcome: resolve(__dirname, 'welcome.html')
       },
     },
   }

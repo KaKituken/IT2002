@@ -1,0 +1,251 @@
+.big-container {
+    position: absolute;
+    width: 1268px;
+    height: 926px;
+    left: 107px;
+    top: 130px;
+
+    display: flex;
+    justify-content: space-between;
+}
+
+.house-box {
+    box-sizing: border-box;
+
+    width: 775px;
+    height: 926px;
+
+    background: #FFFFFF;
+    border: 3px solid #AEACAC;
+}
+
+.image-preview {
+    width: 100%;
+    height: 460px;
+}
+
+.info-box {
+    box-sizing: border-box;
+
+    width: 100%;
+    height: 278px;
+    padding: 25px 14px 0px 31px ;
+}
+
+#box-head {
+    width: 100%;
+    height: 68px;
+
+    display: flex;
+    justify-content: space-between;
+}
+
+#line-head {
+    width: 60%;
+    height: 100%;
+}
+
+.info-box .house-name {
+    height: 40px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 39px;
+
+    color: #000000;
+}
+
+.info-box .house-add {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+
+    color: rgba(0, 0, 0, 0.56);
+}
+
+.info-box .house-price {
+    width: auto;
+    height: 40px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 40px;
+}
+
+#box-body{
+    width: 100%;
+    height: 184px;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+}
+
+#body-left {
+    width: 201px;
+    height: 164px;
+
+    display: flex;
+    flex-flow: column;
+
+    justify-content: space-between;
+}
+
+#body-right {
+    width: 335px;
+    height: 100%;
+
+    display: flex;
+    flex-flow: column;
+
+    justify-content: space-between;
+}
+
+#body-left > #current-bid {
+    width: 178px;
+    height: 22px;
+}
+
+#body-left > #enter-bid {
+    width: 200px;
+    height: 61px;
+}
+
+#enter-bid > div {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+}
+
+#enter-bid > input {
+    width: 200px;
+    height: 35px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #000000;
+    border-radius: 20px;
+}
+
+#make-bid-btn {
+    width: 108px;
+    height: 29px;
+
+    align-self: flex-end;
+    
+    background: #0390BC;
+    border-radius: 10px;
+    border: 0;
+
+    line-height: 29px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    color: white;
+}
+
+#body-right .info-item {
+    width: 100%;
+    height: 30px;
+
+    display: flex;
+
+    line-height: 30px;
+}
+
+.info-item .item-title {
+    display: block;
+    width: 119px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+
+    color: rgba(0, 0, 0, 0.58);
+}
+
+.info-item .item-detial {
+    display: block;
+    width: 119px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+
+    color: #000000;
+}
+
+.provider-info {
+    box-sizing: border-box;
+    position: relative;
+
+    padding-left: 23px;
+    padding-right: 45px;
+    padding-top: 43px;
+    width: 458px;
+    height: 433px;
+}
+
+#contact-provider {
+    display: block;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 30px;
+
+    color: #000000;
+}
+
+.provider-photo {
+    position: absolute;
+
+    top: 43px;
+    right: 45px;
+    width: 106px;
+    height: 106px;
+
+    border-radius: calc(106px/2);
+    background-color: #000000;
+
+    overflow: hidden;
+}
+
+.provider-photo > img {
+    /* width: inherit; */
+    height: inherit;
+}
+
+.provider-btn {
+    width: 390px;
+    height: 62px;
+
+    background: #FFFFFF;
+    border: 1px solid #000000;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 20px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 20px;
+    text-align: center;
+}
+
+#provider-phone-number {
+    margin-top: 25%;
+
+}
+
+#provider-email {
+    margin-top: 8%;
+}

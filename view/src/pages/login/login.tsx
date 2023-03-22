@@ -1,30 +1,26 @@
 import './login.css'
 import Icon from '../../components/Icon/Icon'
 import BottomNav from '../../components/BottomNav/BottomNav'
-import { useState } from 'react'
-import { UserContext } from '../../GlobalContext'
+import * as api from '../../service/api'
 
 function App(){
-
-    const [userType, setUserType] = useState('Guest')
-
-    return (
-        <div className="App">
-            <Icon color="white"></Icon>
-            <p id="title">Sign Up As</p>
-            <div id="button-group">
-                <button onClick={() => handelOnClick('Provider')}>Provider</button>
-                <button onClick={() => handelOnClick('Renter')}>Renter</button>
-                <button onClick={() => handelOnClick('Guest')}>Guest</button>
+    return(
+        <div className='App'>
+            <Icon color='white'></Icon>
+            <h1>Login</h1>
+            <div id='info-box'>
+                <div className='input-box'>
+                    <span>Email</span>
+                    <input type="text"></input>
+                </div>
+                <div className='input-box' id='input-password'>
+                    <span>Password</span>
+                    <input type="password"></input>
+                </div>
+                <button id='login-btn'>Login</button>
             </div>
-            <BottomNav></BottomNav>
         </div>
     )
-
-    function handelOnClick(user: string){
-        setUserType(user)
-        console.log(userType)
-    }
 }
 
 export default App
