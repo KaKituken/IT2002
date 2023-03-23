@@ -239,6 +239,17 @@ def generate_insert_table_statement(insertion: Dict):
     return sqlalchemy.text(statement)
 
 
+"""
+CREATE TABLE table_name (v1 type1, v2 type2, ...);
+param: table: Dict
+table: {
+    "table_name": "table_name"
+    "table_body": {
+        "v1": "type1",
+        "v2": "type2"
+    }
+}
+"""
 def generate_create_table_statement(table: Dict):
     # ? First key is the name of the table
     table_name = table["name"]
@@ -264,6 +275,20 @@ PORT = 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
     # app.run("0.0.0.0", PORT)
+    # TODO: create schema
+    table = {}
+    table["table_name"] = "TestTable"
+    table['table_body'] = {}
+    table['table_body']["name"] = "VARCHAR(10)"
+    table['table_body']["age"] = "INT"
+    state = generate_create_table_statement(table)
+    db.execute(state)
+    db.commit()
+    statement = sqlalchemy.text("SELECT * FROM name;")
+    res = db.execute()
+    db.commit()
+    print(res)
+    # server run
     app.run("127.0.0.1", PORT)
     # ? Uncomment the below lines and comment the above lines below `if __name__ == "__main__":` in order to run on the production server
     # ? Note that you may have to install waitress running `pip install waitress`
