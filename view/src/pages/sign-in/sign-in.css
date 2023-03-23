@@ -91,3 +91,7 @@ h1 {
 
     color: #FFFFFF;
 }
+
+.submit-button:hover {
+    cursor: pointer;
+}

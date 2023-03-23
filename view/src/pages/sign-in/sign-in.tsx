@@ -74,6 +74,7 @@ function App(){
     )
 
     function handleSignIn(){
+        console.log('sign-in')
         let formData:api.SignInForm = {
             firstName: firstName,
             lastName: lastName,
