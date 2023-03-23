@@ -5,7 +5,7 @@ import json
 # ? flask - library used to write REST API endpoints (functions in simple words) to communicate with the client (view) application's interactions
 # ? request - is the default object used in the flask endpoints to get data from the requests
 # ? Response - is the default HTTP Response object, defining the format of the returned data by this api
-from flask import Flask, request, Response
+from flask import Flask, request, Response, jsonify
 # ? sqlalchemy is the main library we'll use here to interact with PostgresQL DBMS
 import sqlalchemy
 # ? Just a class to help while coding by suggesting methods etc. Can be totally removed if wanted, no change
@@ -20,10 +20,11 @@ CORS(app)
 
 # ? building our `engine` object from a custom configuration string
 # ? for this project, we'll use the default postgres user, on a database called `postgres` deployed on the same machine
-YOUR_POSTGRES_PASSWORD = "postgres"
-connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost/postgres"
+YOUR_POSTGRES_PASSWORD = "JUNjun11"
+# connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost/postgres"
+connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost:5432"
 engine = sqlalchemy.create_engine(
-    "postgresql://postgres:postgres@localhost/postgres"
+    connection_string
 )
 
 # ? `db` - the database (connection) object will be used for executing queries on the connected database named `postgres` in our deployed Postgres DBMS
@@ -38,6 +39,21 @@ data_types = {
 }
 
 # ? @app.get is called a decorator, from the Flask class, converting a simple python function to a REST API endpoint (function)
+
+
+@app.route("/hello", methods=["GET"])
+def hello():
+    return "Hello World"
+
+@app.route("/sign-in", methods=["POST"])
+def getname():
+    namedict = request.json
+    newname = namedict["lastName"]+namedict["firstName"]
+    status = (newname == "TianJunjie")
+    token = namedict["email"]
+    details = namedict["nationality"] + namedict["sex"]
+    return jsonify({"status":status, "token": token, "details": details})
+    
 
 
 @app.get("/table")
@@ -247,7 +263,8 @@ PORT = 2222
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
-    app.run("0.0.0.0", PORT)
+    # app.run("0.0.0.0", PORT)
+    app.run("127.0.0.1", PORT)
     # ? Uncomment the below lines and comment the above lines below `if __name__ == "__main__":` in order to run on the production server
     # ? Note that you may have to install waitress running `pip install waitress`
     # ? If you are willing to use waitress-serve command, please add `/home/sadm/.local/bin` to your ~/.bashrc
