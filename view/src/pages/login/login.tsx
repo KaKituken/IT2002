@@ -17,7 +17,7 @@ function App(){
                     <span>Password</span>
                     <input type="password"></input>
                 </div>
-                <button id='login-btn'>Login</button>
+                <button id='login-btn' onClick={()=>{window.location.href='sign-in.html'}}>Login</button>
             </div>
         </div>
     )

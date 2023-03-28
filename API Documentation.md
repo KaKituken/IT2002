@@ -21,7 +21,9 @@ No api request.
       "email": "..",
       "age": 123,
       "nationality": "..",
-      "sex": ".."
+      "sex": "..",
+      "password": "..",
+      "type": "renter/provider"
   }
   ```
 

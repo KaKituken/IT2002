@@ -18,14 +18,14 @@ h1 {
 #sign-in-form {
     position: absolute;
     width: 975px;
-    height: 495px;
+    height: 573px;
     left: calc(50% - 975px/2);
     top: 293px;
 
     display: flex;
     flex-flow: row;
     flex-wrap: wrap;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
 
     gap: 207px;
@@ -90,8 +90,4 @@ h1 {
     text-align: center;
 
     color: #FFFFFF;
-}
-
-.submit-button:hover {
-    cursor: pointer;
 }

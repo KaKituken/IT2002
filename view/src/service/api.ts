@@ -17,7 +17,9 @@ export interface SignInForm {
     email: string,
     age: number,
     nationality: string,
-    sex: string
+    sex: string,
+    password: string,
+    type: string
 }
 
 export interface ProviderForm {
