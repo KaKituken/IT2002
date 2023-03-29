@@ -10,6 +10,7 @@ from flask import Flask, request, Response, jsonify
 import sqlalchemy
 # ? Just a class to help while coding by suggesting methods etc. Can be totally removed if wanted, no change
 from typing import Dict
+import hashlib
 
 
 # ? web-based applications written in flask are simply called apps are initialized in this format from the Flask base class. You may see the contents of `__name__` by hovering on it while debugging if you're curious
@@ -20,11 +21,12 @@ CORS(app)
 
 # ? building our `engine` object from a custom configuration string
 # ? for this project, we'll use the default postgres user, on a database called `postgres` deployed on the same machine
-YOUR_POSTGRES_PASSWORD = "JUNjun11"
+YOUR_POSTGRES_PASSWORD = "Jishuhou524"
 # connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost/postgres"
 connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost:5432"
 engine = sqlalchemy.create_engine(
-    connection_string
+    connection_string,
+    future=True
 )
 
 # ? `db` - the database (connection) object will be used for executing queries on the connected database named `postgres` in our deployed Postgres DBMS
@@ -47,14 +49,34 @@ def hello():
 
 @app.route("/sign-in", methods=["POST"])
 def getname():
-    namedict = request.json
-    newname = namedict["lastName"]+namedict["firstName"]
-    status = (newname == "TianJunjie")
-    token = namedict["email"]
-    details = namedict["nationality"] + namedict["sex"]
-    return jsonify({"status":status, "token": token, "details": details})
+    param = request.json
+    att_list = ["firstName", "lastName", "email", "age", "nationality", "password", "type", "token"]
+    type_list = ["TEXT", "TEXT", "TEXT", 'INT', "TEXT", "TEXT", "TEXT", "TEXT"]
+    value_list = [param[x] for x in att_list[:-1]]
+    value_list.append(hashlib.md5((param['firstName']+param['lastName']+param['email']).encode()).hexdigest())    # calculate the token
+    insertion = {}
+    insertion['name'] = 'TestRegisterTable'
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    print(insertion)
+    try:
+        state = generate_insert_table_statement(insertion)
+        db.execute(state)
+        db.commit()
+        return jsonify({"status":True, "details": ""})
+    except Exception as e:
+        db.rollback()
+        return jsonify({"status":False, "token": "", "details": "insertion error"})
     
-
+@app.route("/log-in")
+def log_in():
+    param = request.json
+    att_list = ["email", "password"]
+    type_list = ["TEXT", "TEXT"]
 
 @app.get("/table")
 def get_relation():
@@ -210,6 +232,28 @@ def generate_update_table_statement(update: Dict):
     return sqlalchemy.text(statement)
 
 
+"""
+SELECT 
+"""
+def generate_simple_select_statement(selection: Dict):
+    return None
+
+
+"""
+INSERT INTO table_name VALUES(att1 type1, att2 type2, ...);
+param: table: Dict
+insertion: {
+    "name": "table_name",
+    "body": {
+        "att1": "value1",
+        "att2": "value2"
+    }
+    "valueTypes": {
+        "att1": "type1",
+        "att2": "type2"
+    }
+}
+"""
 def generate_insert_table_statement(insertion: Dict):
     # ? Fetching table name and the rows/tuples body object from the request
     table_name = insertion["name"]
@@ -236,6 +280,7 @@ def generate_insert_table_statement(insertion: Dict):
     # ? Combining it all into one statement and returning
     #! You may try to expand it to multiple tuple insertion in another method
     statement = statement + column_names+" VALUES "+column_values+";"
+    print(statement)
     return sqlalchemy.text(statement)
 
 
@@ -243,8 +288,8 @@ def generate_insert_table_statement(insertion: Dict):
 CREATE TABLE table_name (v1 type1, v2 type2, ...);
 param: table: Dict
 table: {
-    "table_name": "table_name"
-    "table_body": {
+    "name": "table_name"
+    "body": {
         "v1": "type1",
         "v2": "type2"
     }
@@ -269,25 +314,52 @@ def generate_create_table_statement(table: Dict):
 def create_app():
    return app
 
+def create_schema():
+    # TODO: create schema
+    table = {}
+    table["name"] = "TestRegisterTable"
+    table['body'] = {}
+    table['body']["firstName"] = "TEXT"
+    table['body']["lastName"] = "TEXT"
+    table['body']["email"] = "TEXT"
+    table['body']["age"] = "INT"
+    table['body']["nationality"] = "TEXT"
+    table['body']["password"] = "TEXT"
+    table['body']["type"] = "TEXT"
+    table['body']['token'] = "TEXT"
+    state = generate_create_table_statement(table)
+    db.execute(state)
+    db.commit()
+
+def fill_data():
+    # fill fake data into database
+    insertion = {}
+    insertion['name'] = "TestRegisterTable"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ["firstName", "lastName", "email", "age", "nationality", "password", "type", 'token']
+    type_list = ["TEXT", "TEXT", "TEXT", 'INT', "TEXT", "TEXT", "TEXT", "TEXT"]
+    value_list = ["Jixuan", "He", "123@qq.com", 23, "China", "12345678", "provider", "a79c7bb223f90e"]
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
 # ? The port where the debuggable DB management API is served
 PORT = 2222
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
     # app.run("0.0.0.0", PORT)
-    # TODO: create schema
-    table = {}
-    table["table_name"] = "TestTable"
-    table['table_body'] = {}
-    table['table_body']["name"] = "VARCHAR(10)"
-    table['table_body']["age"] = "INT"
-    state = generate_create_table_statement(table)
-    db.execute(state)
+    create_schema()
+    fill_data()
+    statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
+    res = db.execute(statement)
     db.commit()
-    statement = sqlalchemy.text("SELECT * FROM name;")
-    res = db.execute()
-    db.commit()
-    print(res)
+    print(generate_table_return_result(res))
     # server run
     app.run("127.0.0.1", PORT)
     # ? Uncomment the below lines and comment the above lines below `if __name__ == "__main__":` in order to run on the production server

@@ -4,6 +4,9 @@ import BottomNav from '../../components/BottomNav/BottomNav'
 import * as api from '../../service/api'
 
 function App(){
+
+    
+
     return(
         <div className='App'>
             <Icon color='white'></Icon>

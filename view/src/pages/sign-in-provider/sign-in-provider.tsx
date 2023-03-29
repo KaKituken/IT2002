@@ -2,9 +2,15 @@ import './sign-in-provider.css'
 import Icon from '../../components/Icon/Icon'
 import BottomNav from '../../components/BottomNav/BottomNav'
 import { useState } from 'react'
+// import { globalInfo } from '../../GlobalContext'
 import * as api from '../../service/api'
+import { useAppSelector, useAppDispatch } from '../../hooks';
+import { setValue } from '../../feature/userInfo/userInfoSlice';
 
 function App(){
+
+    const userType = useAppSelector((state) => state.userInfoTracker.value);
+    const dispatch = useAppDispatch();
 
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
@@ -18,7 +24,7 @@ function App(){
     return(
         <div className="App">
             <Icon color="white"></Icon>
-            <h1 id="title">Provider</h1>
+            <h1 id="title">{userType}</h1>
             <div id="sign-in-form">
                 <div className="form-side">
                     <div className="info-box">
@@ -65,7 +71,7 @@ function App(){
                                onChange={e => setSex(e.target.value)}>
                         </input>
                     </div>
-                    <div className="info-box"></div>
+                    <div className="info-box" onClick={()=>{console.log(userType)}}></div>
                 </div>
                 <div className="submit-button" onClick={handleSignIn}>Sign up</div>
             </div>
@@ -73,7 +79,7 @@ function App(){
         </div>
     )
 
-    function handleSignIn(){
+    async function handleSignIn(){
         let formData:api.SignInForm = {
             firstName: firstName,
             lastName: lastName,
@@ -84,12 +90,13 @@ function App(){
             password: password,
             type: "provider"
         }
-        let success = api.signIn(formData)
-        if(!success) {
-            return
-        }
+        let success = await api.signIn(formData)
+        if(success.status === true) {
+            window.location.href = 'login.html'
+        }   
         else{
             // jump
+            console.log(success.details)
         }
     }
 }

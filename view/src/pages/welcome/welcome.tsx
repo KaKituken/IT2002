@@ -1,15 +1,17 @@
-import './login.css'
+import './welcome.css'
 import Icon from '../../components/Icon/Icon'
 import BottomNav from '../../components/BottomNav/BottomNav'
-import { useState } from 'react'
-import { UserContext } from '../../GlobalContext'
+import { useAppSelector, useAppDispatch } from '../../hooks';
+import { setValue } from '../../feature/userInfo/userInfoSlice';
 
 function App(){
+    const userType = useAppSelector((state) => state.userInfoTracker.value);
+    const dispatch = useAppDispatch();
 
     return (
         <div className="App">
             <Icon color="white"></Icon>
-            <p id="title">Sign Up As</p>
+            <p id="title">{userType}</p>
             <div id="button-group">
                 <button onClick={() => handelOnClick('Provider')}>Provider</button>
                 <button onClick={() => handelOnClick('Renter')}>Renter</button>
@@ -21,10 +23,18 @@ function App(){
     )
 
     function handelOnClick(user: string){
-        if(user === 'Provider')
+        if(user === 'Provider'){
+            // globalInfo.setType('Provider')
+            // console.log(globalInfo.getType())
+            dispatch(setValue('Provider'))
+            console.log(userType)
+            // window.location.href = 'sign-in-provider.html'
+        }
+        else if(user === 'Renter'){
+            // globalInfo.setType('Renter')
+            dispatch(setValue('Renter'))
             window.location.href = 'sign-in-provider.html'
-        else if(user === 'Renter')
-            window.location.href = 'sign-in-renter.html'
+        }
         else
             window.location.href = 'display.html'
     }

@@ -1,7 +1,8 @@
 import apisauce from 'apisauce'
 import { HouseInfo } from '../components/InfoCard/InfoCard'
 
-const machineIP = "172.25.77.37"
+// const machineIP = "172.25.77.37"
+const machineIP = "127.0.0.1"
 const machinePort = "2222"
 const api = apisauce.create({
     baseURL: `http://${machineIP}:${machinePort}`,
@@ -27,15 +28,21 @@ export interface ProviderForm {
     token: String
 }
 
+export interface SignInReturn {
+    status: boolean
+    details: string
+}
+
 export async function signIn(params:SignInForm) {
     let res = await api.post('/sign-in', params)
     if (res.ok){
         console.log(res)
-        return res
+        return res.data as Promise<SignInReturn>
     }
     else {
         alert("Failed to sign in")
         console.log(res.data)
+        return res.data as Promise<SignInReturn>
     }
 }
 
