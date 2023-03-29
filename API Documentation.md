@@ -32,7 +32,6 @@ No api request.
   ```json
   {
       "status": true/false,
-      "token": "...",
       "details": "..."
   }
   ```
@@ -52,6 +51,7 @@ No api request.
   ```json
   {
       "email": "..",
+      "password": ".."
   }
   ```
 

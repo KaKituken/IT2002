@@ -1,0 +1,25 @@
+#sign-up-icon {
+    position: absolute;
+    width: 111px;
+    height: 26px;
+    right: 37px;
+    top: 31px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 18px;
+}
+
+.white {
+    color: white;
+}
+
+.black {
+    color: black;
+}
+
+#sign-up-icon:hover{
+    cursor: pointer;
+}

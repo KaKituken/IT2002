@@ -4,11 +4,10 @@ import BottomNav from '../../components/BottomNav/BottomNav'
 import { useState } from 'react'
 import * as api from '../../service/api'
 import { useAppSelector, useAppDispatch } from '../../hooks';
-import { setValue } from '../../feature/userInfo/userInfoSlice';
 
 function App(){
 
-    const userType = useAppSelector((state) => state.userInfoTracker.value);
+    const userType = useAppSelector((state) => state.userInfoTracker.userType);
     const dispatch = useAppDispatch();
 
     const [firstName, setFirstName] = useState('')
@@ -87,7 +86,7 @@ function App(){
             nationality: nationality,
             sex: sex,
             password: password,
-            type: "provider"
+            type: userType
         }
         let success = await api.signIn(formData)
         if(success.status === true) {
