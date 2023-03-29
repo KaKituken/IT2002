@@ -1,23 +1,27 @@
 .welcome-page {
+    position: absolute;
     height: 1024px;
+    width: 100vw;
+    left: 0;
+    top:0;
     background-color: #4D5D72;
 }
 
-button {
+.welcome-page button {
     cursor: pointer;
     transition: border-color 0.25s;
 }
 
-button:hover {
+.welcome-page button:hover {
     border-color: #646cff;
 }
 
-button:focus,
+.welcome-page button:focus,
 button:focus-visible {
     outline: 4px auto -webkit-focus-ring-color;
 }
 
-#title {
+.welcome-page #title {
     position: absolute;
     width: 514px;
     height: 82px;
@@ -34,7 +38,7 @@ button:focus-visible {
     color: #FFFFFF;
 }
 
-#button-group {
+.welcome-page #button-group {
     position: absolute;
     width: 511px;
     height: 586px;
@@ -50,7 +54,7 @@ button:focus-visible {
     border-radius: 20px;
 }
 
-#button-group > button {
+.welcome-page #button-group > button {
     width: 440px;
     height: 98px;
 
@@ -67,6 +71,6 @@ button:focus-visible {
     color: #000000;
 }
 
-u {
+.welcome-page u {
     color:goldenrod;
 }

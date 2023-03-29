@@ -21,7 +21,7 @@ function App(){
     
 
     return(
-        <div className="sign-in-provider-page">
+        <div className="sign-in-page">
             <Icon color="white"></Icon>
             <h1 id="title">{userType}</h1>
             <div id="sign-in-form">

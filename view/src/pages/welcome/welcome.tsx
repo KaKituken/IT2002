@@ -28,15 +28,15 @@ function App(){
         if(user === 'Provider'){
             dispatch(setValue('Provider'))
             console.log(userType)
-            navigate("/sign-in-provider");
+            navigate("/sign-in");
         }
         else if(user === 'Renter'){
             dispatch(setValue('Renter'))
             console.log(userType)
-            navigate("/sign-in-provider");
+            navigate("/sign-in");
         }
         else
-            navigate("/sign-in-provider");
+            navigate("/sign-in");
     }
 }
 
