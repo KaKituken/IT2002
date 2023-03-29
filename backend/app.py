@@ -72,11 +72,26 @@ def getname():
         db.rollback()
         return jsonify({"status":False, "token": "", "details": "insertion error"})
     
-@app.route("/log-in")
+@app.route("/log-in", methods=["POST"])
 def log_in():
     param = request.json
-    att_list = ["email", "password"]
-    type_list = ["TEXT", "TEXT"]
+    att_list = ["token"]
+    selection = {"table": "TestRegisterTable", "att": att_list, "condition": param}
+    statement = generate_conditional_select_statement(selection)
+    res = db.execute(statement)
+    db.commit()
+    response = {}
+    res = generate_table_return_result(res)
+    if len(res["rows"]) == 0:
+        response['status'] = False
+        response['token'] = ''
+        response['details'] = 'Wrong User Name or Password'
+    else:
+        response['status'] = True
+        response['token'] = res["rows"][0]['token']
+        response['details'] = ''
+    return jsonify(response)
+
 
 @app.get("/table")
 def get_relation():
@@ -173,7 +188,7 @@ def delete_row():
         return Response(str(e), 403)
 
 
-def generate_table_return_result(res):
+def generate_table_return_result(res) -> Dict:
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
 
@@ -201,8 +216,8 @@ def generate_table_return_result(res):
             ]
         }
     """
-    # ? Returns the stringified JSON object
-    return json.dumps(output)
+    # ? Returns the Dict
+    return output
 
 
 def generate_delete_statement(details: Dict):
@@ -233,10 +248,52 @@ def generate_update_table_statement(update: Dict):
 
 
 """
-SELECT 
+SELECT att1, att2,... FROM table_name
+param: selection: Dict
+selection: {
+    "table" : "table_name",
+    "att":[
+        "att1",
+        "att2"
+    ]
+}
 """
 def generate_simple_select_statement(selection: Dict):
-    return None
+    statement = "SELECT"
+    for att in selection["att"]:
+        statement += f" {att},"
+    statement = statement[:-1] + f" FROM {selection['table']}"
+    return sqlalchemy.text(statement)
+
+
+"""
+SELECT att1, att2,... FROM table_name WHERE att3=value1 AND att4=value2,...
+param: selection: Dict
+selection: {
+    "table" : "table_name",
+    "att": [
+        "att1",
+        "att2"
+    ]
+    "condition":{
+        "att3": value1
+        "att4": value2
+    }
+}
+"""
+def generate_conditional_select_statement(selection: Dict):
+    statement = "SELECT"
+    for att in selection["att"]:
+        statement += f" {att},"
+    statement = statement[:-1] + f" FROM {selection['table']}"
+    statement += " WHERE"
+    for att, val in selection["condition"].items():
+        if type(val) is str:
+            statement += f" {att}=\'{val}\' AND"
+        else:
+            statement += f" {att}={val} AND"
+    print(statement[:-4])
+    return sqlalchemy.text(statement[:-4])
 
 
 """

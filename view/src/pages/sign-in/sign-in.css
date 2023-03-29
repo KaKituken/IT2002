@@ -114,3 +114,7 @@ button:focus-visible {
 
     color: #FFFFFF;
 }
+
+.sign-in-page .submit-button:hover{
+    cursor: pointer;
+}
