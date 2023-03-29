@@ -5,10 +5,8 @@ import * as api from '../../service/api'
 
 function App(){
 
-    
-
     return(
-        <div className='App'>
+        <div className='login-page'>
             <Icon color='white'></Icon>
             <h1>Login</h1>
             <div id='info-box'>

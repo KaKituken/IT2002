@@ -1,10 +1,15 @@
-import './sign-in-renter.css'
+import './sign-in.css'
 import Icon from '../../components/Icon/Icon'
 import BottomNav from '../../components/BottomNav/BottomNav'
 import { useState } from 'react'
 import * as api from '../../service/api'
+import { useAppSelector, useAppDispatch } from '../../hooks';
+import { setValue } from '../../feature/userInfo/userInfoSlice';
 
 function App(){
+
+    const userType = useAppSelector((state) => state.userInfoTracker.value);
+    const dispatch = useAppDispatch();
 
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
@@ -16,9 +21,9 @@ function App(){
     
 
     return(
-        <div className="App">
+        <div className="sign-in-provider-page">
             <Icon color="white"></Icon>
-            <h1 id="title">Renter</h1>
+            <h1 id="title">{userType}</h1>
             <div id="sign-in-form">
                 <div className="form-side">
                     <div className="info-box">
@@ -73,7 +78,7 @@ function App(){
         </div>
     )
 
-    function handleSignIn(){
+    async function handleSignIn(){
         let formData:api.SignInForm = {
             firstName: firstName,
             lastName: lastName,
@@ -82,14 +87,15 @@ function App(){
             nationality: nationality,
             sex: sex,
             password: password,
-            type: "renter"
+            type: "provider"
         }
-        let success = api.signIn(formData)
-        if(!success) {
-            return
-        }
+        let success = await api.signIn(formData)
+        if(success.status === true) {
+            window.location.href = 'login'
+        }   
         else{
             // jump
+            console.log(success.details)
         }
     }
 }
