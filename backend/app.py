@@ -243,8 +243,8 @@ def generate_insert_table_statement(insertion: Dict):
 CREATE TABLE table_name (v1 type1, v2 type2, ...);
 param: table: Dict
 table: {
-    "table_name": "table_name"
-    "table_body": {
+    "name": "table_name"
+    "body": {
         "v1": "type1",
         "v2": "type2"
     }
@@ -263,6 +263,7 @@ def generate_create_table_statement(table: Dict):
         statement += (f"{key}"+" "+f"{value}"+",")
     # ? closing the final statement (by removing the last ',' and adding ');' termination and returning it
     statement = statement[:-1] + ");"
+    print(statement)
     return sqlalchemy.text(statement)
 
 # ? This method can be used by waitress-serve CLI 
@@ -277,15 +278,15 @@ if __name__ == "__main__":
     # app.run("0.0.0.0", PORT)
     # TODO: create schema
     table = {}
-    table["table_name"] = "TestTable"
-    table['table_body'] = {}
-    table['table_body']["name"] = "VARCHAR(10)"
-    table['table_body']["age"] = "INT"
+    table["name"] = "TestTable"
+    table['body'] = {}
+    table['body']["name"] = "VARCHAR(10)"
+    table['body']["age"] = "INT"
     state = generate_create_table_statement(table)
     db.execute(state)
     db.commit()
-    statement = sqlalchemy.text("SELECT * FROM name;")
-    res = db.execute()
+    statement = sqlalchemy.text("SELECT * FROM TestTable;")
+    res = db.execute(statement)
     db.commit()
     print(res)
     # server run
