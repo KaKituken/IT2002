@@ -10,6 +10,7 @@ from flask import Flask, request, Response, jsonify
 import sqlalchemy
 # ? Just a class to help while coding by suggesting methods etc. Can be totally removed if wanted, no change
 from typing import Dict
+import hashlib
 
 
 # ? web-based applications written in flask are simply called apps are initialized in this format from the Flask base class. You may see the contents of `__name__` by hovering on it while debugging if you're curious
@@ -24,7 +25,8 @@ YOUR_POSTGRES_PASSWORD = "Hai28449H%"
 # connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost/postgres"
 connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost:5432"
 engine = sqlalchemy.create_engine(
-    connection_string
+    connection_string,
+    future=True
 )
 
 # ? `db` - the database (connection) object will be used for executing queries on the connected database named `postgres` in our deployed Postgres DBMS
@@ -47,13 +49,48 @@ def hello():
 
 @app.route("/sign-in", methods=["POST"])
 def getname():
-    namedict = request.json
-    newname = namedict["lastName"]+namedict["firstName"]
-    status = (newname == "TianJunjie")
-    token = namedict["email"]
-    details = namedict["nationality"] + namedict["sex"]
-    return jsonify({"status":status, "token": token, "details": details})
+    param = request.json
+    att_list = ["firstName", "lastName", "email", "age", "nationality", "password", "type", "token"]
+    type_list = ["TEXT", "TEXT", "TEXT", 'INT', "TEXT", "TEXT", "TEXT", "TEXT"]
+    value_list = [param[x] for x in att_list[:-1]]
+    value_list.append(hashlib.md5((param['firstName']+param['lastName']+param['email']).encode()).hexdigest())    # calculate the token
+    insertion = {}
+    insertion['name'] = 'TestRegisterTable'
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    print(insertion)
+    try:
+        state = generate_insert_table_statement(insertion)
+        db.execute(state)
+        db.commit()
+        return jsonify({"status":True, "details": ""})
+    except Exception as e:
+        db.rollback()
+        return jsonify({"status":False, "token": "", "details": "insertion error"})
     
+@app.route("/log-in", methods=["POST"])
+def log_in():
+    param = request.json
+    att_list = ["token"]
+    selection = {"table": "TestRegisterTable", "att": att_list, "condition": param}
+    statement = generate_conditional_select_statement(selection)
+    res = db.execute(statement)
+    db.commit()
+    response = {}
+    res = generate_table_return_result(res)
+    if len(res["rows"]) == 0:
+        response['status'] = False
+        response['token'] = ''
+        response['details'] = 'Wrong User Name or Password'
+    else:
+        response['status'] = True
+        response['token'] = res["rows"][0]['token']
+        response['details'] = ''
+    return jsonify(response)
 
 
 @app.get("/table")
@@ -151,7 +188,7 @@ def delete_row():
         return Response(str(e), 403)
 
 
-def generate_table_return_result(res):
+def generate_table_return_result(res) -> Dict:
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
 
@@ -179,8 +216,8 @@ def generate_table_return_result(res):
             ]
         }
     """
-    # ? Returns the stringified JSON object
-    return json.dumps(output)
+    # ? Returns the Dict
+    return output
 
 
 def generate_delete_statement(details: Dict):
@@ -210,6 +247,70 @@ def generate_update_table_statement(update: Dict):
     return sqlalchemy.text(statement)
 
 
+"""
+SELECT att1, att2,... FROM table_name
+param: selection: Dict
+selection: {
+    "table" : "table_name",
+    "att":[
+        "att1",
+        "att2"
+    ]
+}
+"""
+def generate_simple_select_statement(selection: Dict):
+    statement = "SELECT"
+    for att in selection["att"]:
+        statement += f" {att},"
+    statement = statement[:-1] + f" FROM {selection['table']}"
+    return sqlalchemy.text(statement)
+
+
+"""
+SELECT att1, att2,... FROM table_name WHERE att3=value1 AND att4=value2,...
+param: selection: Dict
+selection: {
+    "table" : "table_name",
+    "att": [
+        "att1",
+        "att2"
+    ]
+    "condition":{
+        "att3": value1
+        "att4": value2
+    }
+}
+"""
+def generate_conditional_select_statement(selection: Dict):
+    statement = "SELECT"
+    for att in selection["att"]:
+        statement += f" {att},"
+    statement = statement[:-1] + f" FROM {selection['table']}"
+    statement += " WHERE"
+    for att, val in selection["condition"].items():
+        if type(val) is str:
+            statement += f" {att}=\'{val}\' AND"
+        else:
+            statement += f" {att}={val} AND"
+    print(statement[:-4])
+    return sqlalchemy.text(statement[:-4])
+
+
+"""
+INSERT INTO table_name VALUES(att1 type1, att2 type2, ...);
+param: table: Dict
+insertion: {
+    "name": "table_name",
+    "body": {
+        "att1": "value1",
+        "att2": "value2"
+    }
+    "valueTypes": {
+        "att1": "type1",
+        "att2": "type2"
+    }
+}
+"""
 def generate_insert_table_statement(insertion: Dict):
     # ? Fetching table name and the rows/tuples body object from the request
     table_name = insertion["name"]
@@ -236,9 +337,21 @@ def generate_insert_table_statement(insertion: Dict):
     # ? Combining it all into one statement and returning
     #! You may try to expand it to multiple tuple insertion in another method
     statement = statement + column_names+" VALUES "+column_values+";"
+    print(statement)
     return sqlalchemy.text(statement)
 
 
+"""
+CREATE TABLE table_name (v1 type1, v2 type2, ...);
+param: table: Dict
+table: {
+    "name": "table_name"
+    "body": {
+        "v1": "type1",
+        "v2": "type2"
+    }
+}
+"""
 def generate_create_table_statement(table: Dict):
     # ? First key is the name of the table
     table_name = table["name"]
@@ -258,12 +371,53 @@ def generate_create_table_statement(table: Dict):
 def create_app():
    return app
 
+def create_schema():
+    # TODO: create schema
+    table = {}
+    table["name"] = "TestRegisterTable"
+    table['body'] = {}
+    table['body']["firstName"] = "TEXT"
+    table['body']["lastName"] = "TEXT"
+    table['body']["email"] = "TEXT"
+    table['body']["age"] = "INT"
+    table['body']["nationality"] = "TEXT"
+    table['body']["password"] = "TEXT"
+    table['body']["type"] = "TEXT"
+    table['body']['token'] = "TEXT"
+    state = generate_create_table_statement(table)
+    db.execute(state)
+    db.commit()
+
+def fill_data():
+    # fill fake data into database
+    insertion = {}
+    insertion['name'] = "TestRegisterTable"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ["firstName", "lastName", "email", "age", "nationality", "password", "type", 'token']
+    type_list = ["TEXT", "TEXT", "TEXT", 'INT', "TEXT", "TEXT", "TEXT", "TEXT"]
+    value_list = ["Jixuan", "He", "123@qq.com", 23, "China", "12345678", "provider", "a79c7bb223f90e"]
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
 # ? The port where the debuggable DB management API is served
 PORT = 2222
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
     # app.run("0.0.0.0", PORT)
+    create_schema()
+    fill_data()
+    statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
+    res = db.execute(statement)
+    db.commit()
+    print(generate_table_return_result(res))
+    # server run
     app.run("127.0.0.1", PORT)
     # ? Uncomment the below lines and comment the above lines below `if __name__ == "__main__":` in order to run on the production server
     # ? Note that you may have to install waitress running `pip install waitress`

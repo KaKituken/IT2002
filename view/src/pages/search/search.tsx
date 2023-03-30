@@ -2,12 +2,10 @@ import './search.css'
 import Icon from '../../components/Icon/Icon'
 import BottomNav from '../../components/BottomNav/BottomNav'
 import { useContext, useState } from 'react'
-import { UserContext } from '../../GlobalContext'
 import * as api from '../../service/api'
 
 function App(){
 
-    const {userType, setUserType} = useContext(UserContext)
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
     const [email, setEmail] = useState('')
@@ -17,7 +15,7 @@ function App(){
     
 
     return(
-        <div className="App">
+        <div className="search-page">
             <Icon color="white"></Icon>
             <div className='wood-box'>
                 <div className='search-box'>

@@ -1,4 +1,9 @@
-.App h1 {
+.login-page {
+    height: 1024px;
+    background-color: #4D5D72;
+}
+
+.login-page h1 {
     position: absolute;
     width: 514px;
     height: 82px;

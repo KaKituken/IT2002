@@ -1,6 +1,7 @@
 import './display.css'
 import Icon from '../../components/Icon/Icon'
 import InfoCard from '../../components/InfoCard/InfoCard'
+import SignUpIcon from '../../components/SignUpIcon/SignUpIcon'
 import { HouseInfo } from '../../components/InfoCard/InfoCard'
 import { useState } from 'react'
 
@@ -60,6 +61,7 @@ function App(){
     return (
         <div className="App">
             <Icon color="black"></Icon>
+            <SignUpIcon color='black'></SignUpIcon>
             <div id="display-box">
                 {houseInfos.map((houseInfo, index) => (
                     <InfoCard name={houseInfo.name} 

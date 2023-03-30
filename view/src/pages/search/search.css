@@ -1,4 +1,27 @@
-.wood-box {
+.search-page {
+    position: absolute;
+    height: 1024px;
+    width: 100vw;
+    left: 0;
+    top:0;
+    background-color: #4D5D72;
+}
+
+button {
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+button:hover {
+    border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
+.search-page .wood-box {
     position: absolute;
     width: 100%;
     height: 946px;
@@ -9,7 +32,7 @@
     background-size: contain;
 }
 
-.wood-box > .search-box {
+.search-page .wood-box > .search-box {
     position: relative;
     width: 816px;
     height: 636px;
@@ -24,11 +47,11 @@
     background: rgba(217, 217, 217, 0.6);
 }
 
-.input-box {
+.search-page .input-box {
     width: 180px;
 }
 
-.input-box span {   
+.search-page .input-box span {   
     display: block;
 
     margin-left: 10px;
@@ -43,7 +66,7 @@
     color: #000000;
 }
 
-.input-box input {
+.search-page .input-box input {
     box-sizing: border-box;
     height: 50px;
     width: 180px;
@@ -53,11 +76,11 @@
     border-radius: 20px;
 }
 
-#location input{
+.search-page #location input{
     width: 420px;
 }
 
-.search-box > .type-tag-box {
+.search-page .search-box > .type-tag-box {
     width: 100%;
     height: 80px;
 
@@ -68,7 +91,7 @@
     justify-content: space-between;
 }
 
-.type-tag-box > .type-tag {
+.search-page .type-tag-box > .type-tag {
     box-sizing: border-box;
 
     width: 133px;
@@ -83,7 +106,7 @@
     line-height: 45px;
 }
 
-.search-box > .detail-info-box {
+.search-page .search-box > .detail-info-box {
     width: 100%;
     height: 189px;
     margin-top: 41px;
@@ -93,7 +116,7 @@
     justify-content: space-between;
 }
 
-#search-btn {
+.search-page #search-btn {
     position: absolute;
     bottom: 43px;
     right: 68px;

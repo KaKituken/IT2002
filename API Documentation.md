@@ -21,7 +21,9 @@ No api request.
       "email": "..",
       "age": 123,
       "nationality": "..",
-      "sex": ".."
+      "sex": "..",
+      "password": "..",
+      "type": "renter/provider"
   }
   ```
 
@@ -30,7 +32,6 @@ No api request.
   ```json
   {
       "status": true/false,
-      "token": "...",
       "details": "..."
   }
   ```
@@ -50,6 +51,7 @@ No api request.
   ```json
   {
       "email": "..",
+      "password": ".."
   }
   ```
 

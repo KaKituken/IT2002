@@ -1,11 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import html from 'vite-plugin-html'
 import { resolve } from 'path'
+import Pages from 'vite-plugin-pages'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    Pages({
+      pagesDir: 'pages',
+      extensions: ['html'],
+      exclude: ['**/layouts/*.html']
+    })
+  ],
   build: {
     rollupOptions: {
       input: {
@@ -17,5 +24,9 @@ export default defineConfig({
         welcome: resolve(__dirname, 'welcome.html')
       },
     },
-  }
+  },
+  server: {
+    host: 'localhost',
+    port: 3000, // 可以自行指定端口号
+  },
 })

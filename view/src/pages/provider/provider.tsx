@@ -23,7 +23,7 @@ function App(){
     ]
 
     return(
-        <div className="App">
+        <div className="provider-page">
             <Icon color="black"></Icon>
             <h1 id="title">My object</h1>
             <div className="photo-box">
