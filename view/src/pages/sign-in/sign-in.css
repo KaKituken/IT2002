@@ -1,4 +1,27 @@
-h1 {
+.sign-in-page{
+    position: absolute;
+    height: 1024px;
+    width: 100vw;
+    left: 0;
+    top:0;
+    background-color: #4D5D72;
+}
+
+.sign-in-page button {
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+.sign-in-page button:hover {
+    border-color: #646cff;
+}
+
+.sign-in-page button:focus,
+button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
+.sign-in-page h1 {
     position: absolute;
     width: 514px;
     height: 82px;
@@ -15,17 +38,17 @@ h1 {
     color: #FFFFFF;
 }
 
-#sign-in-form {
+.sign-in-page #sign-in-form {
     position: absolute;
     width: 975px;
-    height: 495px;
+    height: 573px;
     left: calc(50% - 975px/2);
     top: 293px;
 
     display: flex;
     flex-flow: row;
     flex-wrap: wrap;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
 
     gap: 207px;
@@ -34,13 +57,13 @@ h1 {
     background: #3A4656;
 }
 
-.info-box {
+.sign-in-page .info-box {
     display: block;
     width: 276px;
     height: 68px;
 }
 
-.info-box > p {
+.sign-in-page .info-box > p {
     padding-left: 10px;
 
     font-family: 'Inter';
@@ -52,7 +75,7 @@ h1 {
     color: #FFFFFF;
 }
 
-.info-box > input {
+.sign-in-page .info-box > input {
     margin-top: -10px;
 
     width: 276px;
@@ -62,7 +85,7 @@ h1 {
     border-radius: 20px;
 }
 
-.form-side{
+.sign-in-page .form-side{
     display: flex;
     flex-flow: column;
 
@@ -73,7 +96,7 @@ h1 {
     gap: 32px;
 }
 
-.submit-button {
+.sign-in-page .submit-button {
     position: relative;
     width: 108px;
     height: 29px;
@@ -92,6 +115,6 @@ h1 {
     color: #FFFFFF;
 }
 
-.submit-button:hover {
+.sign-in-page .submit-button:hover{
     cursor: pointer;
 }

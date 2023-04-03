@@ -1,9 +1,27 @@
-.app {
-    height: 100%;
-    width: 100%;
+.welcome-page {
+    position: absolute;
+    height: 1024px;
+    width: 100vw;
+    left: 0;
+    top:0;
+    background-color: #4D5D72;
 }
 
-#title {
+.welcome-page button {
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+.welcome-page button:hover {
+    border-color: #646cff;
+}
+
+.welcome-page button:focus,
+button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
+.welcome-page #title {
     position: absolute;
     width: 514px;
     height: 82px;
@@ -20,7 +38,7 @@
     color: #FFFFFF;
 }
 
-#button-group {
+.welcome-page #button-group {
     position: absolute;
     width: 511px;
     height: 586px;
@@ -36,7 +54,7 @@
     border-radius: 20px;
 }
 
-#button-group > button {
+.welcome-page #button-group > button {
     width: 440px;
     height: 98px;
 
@@ -51,4 +69,8 @@
     text-align: center;
 
     color: #000000;
+}
+
+.welcome-page u {
+    color:goldenrod;
 }
