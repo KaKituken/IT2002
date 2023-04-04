@@ -358,16 +358,21 @@ def generate_create_table_statement(table: Dict):
     table_name = table["name"]
     # ? Table body itself is a JSON object mapping field/column names to their values
     table_body = table["body"]
+    # ? reference table
+    if "reference" in table.keys():
+        table_reference = table["reference"]
     # ? Default table creation template query is extended below. Note that we drop the existing one each time. You might improve this behavior if you will
     # ! ID is the case of simplicity
     statement = f"DROP TABLE IF EXISTS {table_name}; CREATE TABLE {table_name} ("
     # ? As stated above, column names and types are appended to the creation query from the mapped JSON object
     for key, value in table_body.items():
         statement += (f"{key}"+" "+f"{value}")
-        # insert the primary key
-        if key == table["primary_key"]:
-            statement += " PRIMARY KEY NOT NULL"
-        statement += ","
+    # ? Add primary key
+    statement += (f"table[primary_key]"+ " "+"PRIMARY KEY NOT NULL")
+    # ? Add references
+    if "reference" in table.keys():
+        for key,value in table_reference.items():
+            statement += ("FOREIGN KEY"+ " " +f"{key}"+ " "+"REFERENCES"+ f"{value}")
     # ? closing the final statement (by removing the last ',' and adding ');' termination and returning it
     statement = statement[:-1] + ");"
     print(statement)
@@ -425,23 +430,108 @@ if __name__ == "__main__":
     db.commit()
     print(generate_table_return_result(res))
 
-    # table_housing = {
-    # "name": "housing",
-    # "body": {
-    #     "size": "NUMERIC",
-    #     "type_of_housing": "TEXT",
-    #     "location":"TEXT",
-    #     "size_type": "TEXT",
-    #     "age_of_housing":"NUMERIC",
-    #     "start_time": "Date",
-    #     "end_time": "Date",
-    #     "max_price": "NUMERIC",
-    #     "min_price": "NUMERIC",
-    #     "bidding_period": "NUMERIC"},
-    # "primary_key": "housing_id"}
-    # table = generate_create_table_statement(table_housing)
-    # db.execute(statement)
-    # db.commit()
+    table_provider = {
+        "name": "provider",
+        "body": {
+            "provider_id": "NUMERIC",
+            "first_name": "TEXT",
+            "last_name": "TEXT",
+            "email": "TEXT",
+            "age": "NUMERIC",
+            "nationality": "TEXT",
+            "salary": "NUMERIC",
+            "sex": "TEXT",
+            "ethnicity": "TEXT"},
+        "primary_key": "provider_id"
+    }
+    table = generate_create_table_statement(table_provider)
+    db.execute(statement)
+    db.commit()
+
+    table_housing = {
+        "name": "housing",
+        "body": {
+            "housing_id": "NUMERIC",
+            "provider_id": "NUMERIC",
+            "size": "NUMERIC",
+            "type_of_housing": "TEXT",
+            "location":"TEXT",
+            "size_type": "TEXT",
+            "age_of_housing":"NUMERIC",
+            "start_time": "Date",
+            "end_time": "Date",
+            "min_price": "NUMERIC",
+            "bidding_period": "NUMERIC",
+            "rented": "TEXT"},
+        "primary_key": "housing_id",
+        "reference": {
+            "provider_id": "provider(provider_id)"}}
+    table = generate_create_table_statement(table_housing)
+    db.execute(statement)
+    db.commit()
+
+    table_housing_maxprice = {
+        "name": "housing",
+        "body": {
+            "size": "NUMERIC",
+            "type_of_housing": "TEXT",
+            "location": "TEXT",
+            "age_of_housing": "NUMERIC",
+            "max_price": "NUMERIC"
+        },
+        "primary_key": "(size,type_of_housing,location,age_of_housing)",
+        "reference": {
+            "size": "housing(size)",
+            "type_of_housing": "housing(type_of_housing)",
+            "location": "housing(location)",
+            "age_of_housing": "housing(age_of_housing)"
+        }
+    }
+    table = generate_create_table_statement(table_housing_maxprice)
+    db.execute(statement)
+    db.commit()
+
+    table_renter = {
+        "name": "renter",
+        "body": {
+            "renter_id": "NUMERIC",
+            "first_name": "TEXT",
+            "last_name": "TEXT",
+            "email": "TEXT",
+            "age": "NUMERIC",
+            "nationality": "TEXT",
+            "salary": "NUMERIC",
+            "sex": "TEXT",
+            "ethnicity": "TEXT"
+        },
+        "primary_key": "renter_id"
+    }
+    table = generate_create_table_statement(table_renter)
+    db.execute(statement)
+    db.commit()
+
+    table_bids = {
+        "name": "bids",
+        "body": {
+            "housing_id": "NUMERIC",
+            "renter_id": "NUMERIC",
+            "start_time": "DATE",
+            "end_time": "DATE",
+            "price": "NUMERIC",
+            "bid_date": "DATE"
+        },
+        "primary_key": "(housing_id,renter_id)",
+        "reference": {
+            "housing_id": "housing(housing_id)",
+            "renter_id": "renter(renter_id)"
+        }
+    }
+    table = generate_create_table_statement(table_bids)
+    db.execute(statement)
+    db.commit()
+
+
+
 
 
 
