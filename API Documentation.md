@@ -124,7 +124,7 @@ No api request.
       "houseInfoList": [
           {
               "houseid": "", //string
-              "name": "", 		// string
+              "providerName": "", // string
               "location": "", 	//  string
               "price": 0, 		// number
               "size": 0, 			// number
@@ -189,6 +189,9 @@ No api request.
        } 
     "token": ""				// string
     }
+
+  ```
+
 - Response:
   ```json
   {
@@ -196,9 +199,8 @@ No api request.
     "details": "...",
   }
 
-  ```
-
  ### Filter for houses
+
  - Route: '/filter-for-houses'
  - Request: 'GET'
  - Param:
@@ -229,12 +231,17 @@ No api request.
       }
     "token": ""				// string
     }
+
+ ```
+
 - Response:
+  
+  ```json
   {
     "status": true/false,
     "details": "...",
   }
- ```
+  ```
 
 ## Admin
 
@@ -274,21 +281,33 @@ No api request.
         "tableName1":[
             "att1": {
                 "type": "TEXT/INT/NUM",
-        		"count": "if can"
+        		"count": [
+        			{"value1": 9},
+					{"value2": 20},
+    			],
             },
 			"att2": {
                 "type": "TEXT/INT/NUM",
-        		"count": "if can"
+        		"count": [
+        			{"value1": 9},
+					{"value2": 20},
+    			],
             }
         ],
         "tableName2":[
             "att1": {
                 "type": "TEXT/INT/NUM",
-        		"count": "if can"
+        		"count": [
+        			{"value1": 9},
+					{"value2": 20},
+    			],
             },
 			"att2": {
                 "type": "TEXT/INT/NUM",
-        		"count": "if can"
+        		"count": [
+        			{"value1": 9},
+					{"value2": 20},
+    			],
             }
         ],
     ],
