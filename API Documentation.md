@@ -267,7 +267,7 @@ No api request.
 
 ```json
 {
-    "tableNameList": []
+    "tableNameList": ["tableName1"]
 }
 ```
 
