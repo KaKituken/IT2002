@@ -21,7 +21,7 @@ CORS(app)
 
 # ? building our `engine` object from a custom configuration string
 # ? for this project, we'll use the default postgres user, on a database called `postgres` deployed on the same machine
-YOUR_POSTGRES_PASSWORD = "Hai28449H%"
+YOUR_POSTGRES_PASSWORD = "JUNjun11"
 # connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost/postgres"
 connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost:5432"
 engine = sqlalchemy.create_engine(
@@ -366,13 +366,13 @@ def generate_create_table_statement(table: Dict):
     statement = f"DROP TABLE IF EXISTS {table_name}; CREATE TABLE {table_name} ("
     # ? As stated above, column names and types are appended to the creation query from the mapped JSON object
     for key, value in table_body.items():
-        statement += (f"{key}"+" "+f"{value}")
+        statement += (f"{key}"+" "+f"{value}"+ ",")
     # ? Add primary key
-    statement += (f"table[primary_key]"+ " "+"PRIMARY KEY NOT NULL")
+    statement += "PRIMARY KEY"+ " "+f"{table['primary_key']}"+ ","
     # ? Add references
     if "reference" in table.keys():
         for key,value in table_reference.items():
-            statement += ("FOREIGN KEY"+ " " +f"{key}"+ " "+"REFERENCES"+ f"{value}")
+            statement += ("FOREIGN KEY"+ " " +f"{key}"+ " "+"REFERENCES"+ " "+f"{value}" + ",")
     # ? closing the final statement (by removing the last ',' and adding ');' termination and returning it
     statement = statement[:-1] + ");"
     print(statement)
@@ -395,10 +395,11 @@ def create_schema():
     table['body']["password"] = "TEXT"
     table['body']["type"] = "TEXT"
     table['body']['token'] = "TEXT"
-    table['primary_key'] = 'token'
+    table['primary_key'] = '(token)'
     state = generate_create_table_statement(table)
     db.execute(state)
     db.commit()
+
 
 def fill_data():
     # fill fake data into database
@@ -433,39 +434,40 @@ if __name__ == "__main__":
     table_provider = {
         "name": "provider",
         "body": {
-            "provider_id": "NUMERIC",
-            "first_name": "TEXT",
-            "last_name": "TEXT",
-            "email": "TEXT",
-            "age": "NUMERIC",
-            "nationality": "TEXT",
-            "salary": "NUMERIC",
-            "sex": "TEXT",
-            "ethnicity": "TEXT"},
-        "primary_key": "provider_id"
+            "provider_id": "NUMERIC NOT NULL",
+            "first_name": "TEXT NOT NULL",
+            "last_name": "TEXT NOT NULL",
+            "email": "TEXT NOT NULL",
+            "age": "NUMERIC NOT NULL",
+            "nationality": "TEXT NOT NULL",
+            "salary": "NUMERIC NOT NULL",
+            "sex": "TEXT NOT NULL",
+            "ethnicity": "TEXT NOT NULL"},
+        "primary_key": "(provider_id)"
     }
     table = generate_create_table_statement(table_provider)
     db.execute(statement)
     db.commit()
+    
 
     table_housing = {
         "name": "housing",
         "body": {
-            "housing_id": "NUMERIC",
-            "provider_id": "NUMERIC",
-            "size": "NUMERIC",
-            "type_of_housing": "TEXT",
-            "location":"TEXT",
-            "size_type": "TEXT",
-            "age_of_housing":"NUMERIC",
-            "start_time": "Date",
-            "end_time": "Date",
-            "min_price": "NUMERIC",
-            "bidding_period": "NUMERIC",
-            "rented": "TEXT"},
-        "primary_key": "housing_id",
+            "housing_id": "NUMERIC NOT NULL",
+            "provider_id": "NUMERIC NOT NULL",
+            "size": "NUMERIC NOT NULL",
+            "type_of_housing": "TEXT NOT NULL",
+            "location":"TEXT NOT NULL",
+            "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small'))",
+            "age_of_housing":"NUMERIC NOT NULL",
+            "start_time": "Date NOT NULL",
+            "end_time": "Date NOT NULL",
+            "min_price": "NUMERIC NOT NULL",
+            "bidding_period": "NUMERIC NOT NULL",
+            "rented": "TEXT NOT NULL"},
+        "primary_key": "(housing_id)",
         "reference": {
-            "provider_id": "provider(provider_id)"}}
+            "(provider_id)": "provider(provider_id)"}}
     table = generate_create_table_statement(table_housing)
     db.execute(statement)
     db.commit()
@@ -473,18 +475,18 @@ if __name__ == "__main__":
     table_housing_maxprice = {
         "name": "housing",
         "body": {
-            "size": "NUMERIC",
-            "type_of_housing": "TEXT",
-            "location": "TEXT",
-            "age_of_housing": "NUMERIC",
-            "max_price": "NUMERIC"
+            "size": "NUMERIC NOT NULL",
+            "type_of_housing": "TEXT NOT NULL",
+            "location": "TEXT NOT NULL",
+            "age_of_housing": "NUMERIC NOT NULL",
+            "max_price": "NUMERIC NOT NULL"
         },
         "primary_key": "(size,type_of_housing,location,age_of_housing)",
         "reference": {
-            "size": "housing(size)",
-            "type_of_housing": "housing(type_of_housing)",
-            "location": "housing(location)",
-            "age_of_housing": "housing(age_of_housing)"
+            "(size)": "housing(size)",
+            "(type_of_housing)": "housing(type_of_housing)",
+            "(location)": "housing(location)",
+            "(age_of_housing)": "housing(age_of_housing)"
         }
     }
     table = generate_create_table_statement(table_housing_maxprice)
@@ -494,17 +496,17 @@ if __name__ == "__main__":
     table_renter = {
         "name": "renter",
         "body": {
-            "renter_id": "NUMERIC",
-            "first_name": "TEXT",
-            "last_name": "TEXT",
-            "email": "TEXT",
-            "age": "NUMERIC",
-            "nationality": "TEXT",
-            "salary": "NUMERIC",
-            "sex": "TEXT",
-            "ethnicity": "TEXT"
+            "renter_id": "NUMERIC NOT NULL",
+            "first_name": "TEXT NOT NULL",
+            "last_name": "TEXT NOT NULL",
+            "email": "TEXT NOT NULL",
+            "age": "NUMERIC NOT NULL",
+            "nationality": "TEXT NOT NULL",
+            "salary": "NUMERIC NOT NULL",
+            "sex": "TEXT NOT NULL",
+            "ethnicity": "TEXT NOT NULL"
         },
-        "primary_key": "renter_id"
+        "primary_key": "(renter_id)"
     }
     table = generate_create_table_statement(table_renter)
     db.execute(statement)
@@ -513,17 +515,17 @@ if __name__ == "__main__":
     table_bids = {
         "name": "bids",
         "body": {
-            "housing_id": "NUMERIC",
-            "renter_id": "NUMERIC",
-            "start_time": "DATE",
-            "end_time": "DATE",
-            "price": "NUMERIC",
-            "bid_date": "DATE"
+            "housing_id": "NUMERIC NOT NULL",
+            "renter_id": "NUMERIC NOT NULL",
+            "start_time": "DATE NOT NULL",
+            "end_time": "DATE NOT NULL",
+            "price": "NUMERIC NOT NULL",
+            "bid_date": "DATE NOT NULL"
         },
         "primary_key": "(housing_id,renter_id)",
         "reference": {
-            "housing_id": "housing(housing_id)",
-            "renter_id": "renter(renter_id)"
+            "(housing_id)": "housing(housing_id)",
+            "(renter_id)": "renter(renter_id)"
         }
     }
     table = generate_create_table_statement(table_bids)
