@@ -18,7 +18,7 @@ function App(){
                 <button onClick={() => handelOnClick('Provider')}>Provider</button>
                 <button onClick={() => handelOnClick('Renter')}>Renter</button>
                 <button onClick={() => handelOnClick('Guest')}>Browse As Guest</button>
-                <a href='login.html'><u>I have account, log in</u></a>
+                <u onClick={handleLogIn}>I have account, log in</u>
             </div>
             <BottomNav></BottomNav>
         </div>
@@ -35,9 +35,14 @@ function App(){
             console.log(userType)
             navigate("/sign-in");
         }
-        else
+        else{
             console.log(userType)
             navigate("/display");
+        }
+    }
+
+    function handleLogIn(){
+        navigate("/login");
     }
 }
 

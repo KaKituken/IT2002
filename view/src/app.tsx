@@ -8,6 +8,7 @@ import Search from './pages/search/search'
 import Bid from './pages/bid/bid'
 import Display from './pages/display/display'
 import Provider from './pages/provider/provider'
+import Admin from './pages/admin/admin';
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/bid" element={<Bid />} />
         <Route path="/display" element={<Display />} />
         <Route path="/provider" element={<Provider />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   );
