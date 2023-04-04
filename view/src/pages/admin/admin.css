@@ -65,7 +65,7 @@
 
 .white-box > #table-join{
     width: 660px;
-    height: 71px;
+    height: auto;
     margin-left: 63px;
     margin-top: 30px;
 }

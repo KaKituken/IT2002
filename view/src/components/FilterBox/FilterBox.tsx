@@ -3,7 +3,7 @@ import './FilterBox.css'
 
 interface FilterBoxProps{
     tableName: string
-    attList: Array<string>
+    attList: Record<string, number | string>[]
     onIsClickedChange: (tableName:string, updatedIsClicked: boolean[]) => void
 }
 
@@ -30,7 +30,7 @@ function FilterBox(props: FilterBoxProps){
                         newIsClicked[index] = !newIsClicked[index]
                         setClicked(newIsClicked)
                         props.onIsClickedChange(props.tableName, newIsClicked)
-                    }}>{att}</div>
+                    }}>{Object.keys(att)[0] + ' (' + Object.values(att)[0] + ')'}</div>
                 ))}
             </div>
         )

@@ -9,8 +9,55 @@ import * as api from '../../service/api'
 function Admin(){
 
     const [currentTable, setCurrentTable] = useState([{ value: 'house', label: 'House' },])
-    const [allTables, setChoosenTable] = useState(Array<string>())   // current tables (right one)
+    const [allTableNames, setChoosenTable] = useState<Array<string>>(Array<string>())   // current tables (right one)
     const [tableChoosenIndicator, setTableChoosenIndicator] = useState(Array<boolean>()) 
+    // whole table info
+    const [attributeInfo, setTableInfo] = useState<api.TableAttributes[]>([
+        {
+            name: "tableName1",
+            attribute:[
+                {
+                     attributeName: "att1",
+                     type: "TEXT",
+                     count: [
+                         {"value1": 9},
+                         {"value2": 20},
+                     ],
+                },
+                {
+                     attributeName: "att2",
+                     "type": "TEXT",
+                     "count": [
+                         {"value1": 9},
+                         {"value2": 20},
+                     ],
+                }
+             ], 
+         },
+        {
+            "name": "tableName2",
+            "attribute":[
+               {
+                    "attributeName": "att1",
+                    "type": "TEXT/INT/NUM",
+                    "count": [
+                        {"value1": 9},
+                        {"value2": 20},
+                    ],
+               },
+               {
+                    "attributeName": "att2",
+                    "type": "NUMERIC",
+                    "count": [
+                        {"minValue": 9},
+                        {"maxValue": 20},
+                    ],
+               }
+            ],
+        }
+    ])
+
+    // 记录filter中点了哪些
     const clickedIndicator:Record<string, boolean[]> = {}
     
 
@@ -23,6 +70,17 @@ function Admin(){
     const handleSliderChange = (value: number) => {
         console.log('Selected value:', value);
     };
+
+    async function handelTableClickedChange(param:string[]){
+        let success = await api.getAttributeInfo(param)
+        if(success.status){
+            setTableInfo(success.tableAttributes)
+            // const newCurrentTable = success.tableAttributes.map()
+        }
+        else{
+            window.alert(success.details)
+        }
+    }
 
     useEffect(() => {
         // async () => {
@@ -44,7 +102,7 @@ function Admin(){
                 <div id='table-selected'>
                     <div id='from-table'>From table</div>
                     <div id='from-table-display'>
-                        {allTables.map((tableName, index)=>(
+                        {allTableNames.map((tableName, index)=>(
                             tableChoosenIndicator[index] ? 
                             <span>{tableName}, </span> : 
                             <span></span>
@@ -53,96 +111,106 @@ function Admin(){
                 </div>
                 <div id='table-join'>
                     <div id='join-on'>Join on</div>
-                    <div id='join-on-condition'>
-                        <Select id='table-left' options={currentTable}
-                        styles={{
-                            control: (baseStyles, state) => ({
-                                ...baseStyles,
-                                borderRadius: 5,
-                                backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                                border: '1px solid #4D5D72',
-                                width: 133,
-                                height: 42,
-                            }),
-                        }} />
-                        <div className='dot'></div>
-                        <Select id='att-left' options={currentTable}
-                        styles={{
-                            control: (baseStyles, state) => ({
-                                ...baseStyles,
-                                borderRadius: 5,
-                                backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                                border: '1px solid #4D5D72',
-                                width: 170,
-                                height: 42,
-                            }),
-                        }} />
-                        <div className='equal'>
-                            <div className='equal-half'></div>
-                            <div className='equal-half'></div>
+                        {Array(3).fill(0).map((ele, index) => (
+                            <div id='join-on-condition'>
+                            <Select id='table-left' options={currentTable}
+                            styles={{
+                                control: (baseStyles, state) => ({
+                                    ...baseStyles,
+                                    borderRadius: 5,
+                                    backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                                    border: '1px solid #4D5D72',
+                                    width: 133,
+                                    height: 42,
+                                }),
+                            }} />
+                            <div className='dot'></div>
+                            <Select id='att-left' options={currentTable}
+                            styles={{
+                                control: (baseStyles, state) => ({
+                                    ...baseStyles,
+                                    borderRadius: 5,
+                                    backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                                    border: '1px solid #4D5D72',
+                                    width: 170,
+                                    height: 42,
+                                }),
+                            }} />
+                            <div className='equal'>
+                                <div className='equal-half'></div>
+                                <div className='equal-half'></div>
+                            </div>
+                            <Select id='table-right' options={currentTable}
+                            styles={{
+                                control: (baseStyles, state) => ({
+                                    ...baseStyles,
+                                    borderRadius: 5,
+                                    backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                                    border: '1px solid #4D5D72',
+                                    width: 133,
+                                    height: 42,
+                                }),
+                            }} />
+                            <div className='dot'></div>
+                            <Select id='att-right' options={currentTable}
+                            styles={{
+                                control: (baseStyles, state) => ({
+                                    ...baseStyles,
+                                    borderRadius: 5,
+                                    backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                                    border: '1px solid #4D5D72',
+                                    width: 170,
+                                    height: 42,
+                                }),
+                            }} />
                         </div>
-                        <Select id='table-right' options={currentTable}
-                        styles={{
-                            control: (baseStyles, state) => ({
-                                ...baseStyles,
-                                borderRadius: 5,
-                                backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                                border: '1px solid #4D5D72',
-                                width: 133,
-                                height: 42,
-                            }),
-                        }} />
-                        <div className='dot'></div>
-                        <Select id='att-right' options={currentTable}
-                        styles={{
-                            control: (baseStyles, state) => ({
-                                ...baseStyles,
-                                borderRadius: 5,
-                                backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                                border: '1px solid #4D5D72',
-                                width: 170,
-                                height: 42,
-                            }),
-                        }} />
-                    </div>
+                    ))}
                 </div>
                 <div id='filter-condition'>
                     <div id='filter-by'>Filter by</div>
                     <div id='filter-boxes'>
-                        <FilterBox attList={['firstName', 'LastName', 'firstName', 'LastName', 'firstName', 'LastName', 'firstName', 'LastName', 'firstName', 'LastName']}
-                            onIsClickedChange={handleIsClickedChange}
-                            tableName='Houses'></FilterBox>
-                        <FilterBox 
-                            onIsClickedChange={handleIsClickedChange}attList={['firstName']}
-                            tableName='Bids'></FilterBox>
-                        <FilterBox onIsClickedChange={handleIsClickedChange} attList={['firstName']}
-                            tableName='Provider'></FilterBox>
-                        <FilterBox onIsClickedChange={handleIsClickedChange} attList={['firstName']}
-                            tableName='Renter'></FilterBox>
-                        <FilterBox onIsClickedChange={handleIsClickedChange} attList={['firstName']}
-                            tableName='Visit'></FilterBox>
-                        <FilterBox onIsClickedChange={handleIsClickedChange} attList={['firstName']}
-                            tableName='Holder'></FilterBox>
+                        {attributeInfo?.map((tableInfo, index) => (
+                            tableInfo['attribute'].map((att, attIndex)=>(
+                                att['type'] !== 'NUMERIC' ? 
+                                <FilterBox 
+                                onIsClickedChange={handleIsClickedChange}attList={att['count']}
+                                tableName={tableInfo['name'] + '.' + att['attributeName']}></FilterBox> 
+                                : <span></span>
+                            ))
+                        ))}
                     </div>
-                    <div className='number-bar' id='price-bar'>
-                        <div className='bar-title'>Price</div>
-                        <FilterBar min={0} max={100} onChange={handleSliderChange}></FilterBar>
-                    </div>
-                    <div className='number-bar' id='size-bar'>
-                        <div className='bar-title'>Size</div>
-                        <FilterBar min={0} max={100} onChange={handleSliderChange}></FilterBar>
+                    <div>
+                        {attributeInfo?.map((tableInfo, index) => (
+                            tableInfo['attribute'].map((att, attIndex)=>(
+                                att['type'] === 'NUMERIC' ? 
+                                <div className='number-bar' id='size-bar'>
+                                    <div className='bar-title'>{tableInfo.name + '.' + att.attributeName}</div>
+                                    <FilterBar min={att.count[0]['minValue']} max={att.count[1]['maxValue']} onChange={handleSliderChange}></FilterBar>
+                                </div>
+                                : <span></span>
+                            ))
+                        ))}
                     </div>
                 </div>
                 <button id='display-result'>Display Result</button>
             </div>
             <div id='current-table'>
                 <div id='current-table-head'>Current Tables</div>
-                {allTables.map((tableName, index)=>(
+                {allTableNames.map((tableName, index)=>(
                     <div className={'table-item' + (tableChoosenIndicator[index]? ' activate' : '')} 
                     onClick={()=>{
                         const newTableChoosen = [...tableChoosenIndicator]
                         newTableChoosen[index] = !newTableChoosen[index]
                         setTableChoosenIndicator(newTableChoosen)
+                        const selectedTables = allTableNames.map((tableName, index) => ({tableName, bool: newTableChoosen[index]}))
+                        .filter(({bool}) => bool)
+                        .map(({ tableName }) => tableName)
+                        const selectedTablesConfig = selectedTables.map((tableName, index)=>(
+                            {value: tableName, label: tableName}
+                        ))
+                        console.log(tableChoosenIndicator)
+                        setCurrentTable(selectedTablesConfig)
+                        handelTableClickedChange(selectedTables)
                     }}>{tableName}</div>
                 ))}
             </div>
