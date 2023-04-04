@@ -350,6 +350,7 @@ table: {
         "v1": "type1",
         "v2": "type2"
     }
+    "primary_key" : "vp"
 }
 """
 def generate_create_table_statement(table: Dict):
@@ -359,12 +360,17 @@ def generate_create_table_statement(table: Dict):
     table_body = table["body"]
     # ? Default table creation template query is extended below. Note that we drop the existing one each time. You might improve this behavior if you will
     # ! ID is the case of simplicity
-    statement = f"DROP TABLE IF EXISTS {table_name}; CREATE TABLE {table_name} (id serial NOT NULL PRIMARY KEY,"
+    statement = f"DROP TABLE IF EXISTS {table_name}; CREATE TABLE {table_name} ("
     # ? As stated above, column names and types are appended to the creation query from the mapped JSON object
     for key, value in table_body.items():
-        statement += (f"{key}"+" "+f"{value}"+",")
+        statement += (f"{key}"+" "+f"{value}")
+        # insert the primary key
+        if key == table["primary_key"]:
+            statement += " PRIMARY KEY NOT NULL"
+        statement += ","
     # ? closing the final statement (by removing the last ',' and adding ');' termination and returning it
     statement = statement[:-1] + ");"
+    print(statement)
     return sqlalchemy.text(statement)
 
 # ? This method can be used by waitress-serve CLI 
@@ -384,6 +390,7 @@ def create_schema():
     table['body']["password"] = "TEXT"
     table['body']["type"] = "TEXT"
     table['body']['token'] = "TEXT"
+    table['primary_key'] = 'token'
     state = generate_create_table_statement(table)
     db.execute(state)
     db.commit()
@@ -417,6 +424,27 @@ if __name__ == "__main__":
     res = db.execute(statement)
     db.commit()
     print(generate_table_return_result(res))
+
+    # table_housing = {
+    # "name": "housing",
+    # "body": {
+    #     "size": "NUMERIC",
+    #     "type_of_housing": "TEXT",
+    #     "location":"TEXT",
+    #     "size_type": "TEXT",
+    #     "age_of_housing":"NUMERIC",
+    #     "start_time": "Date",
+    #     "end_time": "Date",
+    #     "max_price": "NUMERIC",
+    #     "min_price": "NUMERIC",
+    #     "bidding_period": "NUMERIC"},
+    # "primary_key": "housing_id"}
+    # table = generate_create_table_statement(table_housing)
+    # db.execute(statement)
+    # db.commit()
+
+
+
     # server run
     app.run("127.0.0.1", PORT)
     # ? Uncomment the below lines and comment the above lines below `if __name__ == "__main__":` in order to run on the production server
@@ -424,3 +452,7 @@ if __name__ == "__main__":
     # ? If you are willing to use waitress-serve command, please add `/home/sadm/.local/bin` to your ~/.bashrc
     # from waitress import serve
     # serve(app, host="0.0.0.0", port=PORT)
+
+
+
+
