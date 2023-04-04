@@ -1,0 +1,66 @@
+.filter-box-component{
+    position: relative;
+    width: 127px;
+    height: 173px;
+}
+
+.filter-box-component #box-header{
+    position: relative;
+    width: 127px;
+    height: 35px;
+
+    background: #4D5D72;
+    border-radius: 10px 10px 0px 0px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 35px;
+    text-align: center;
+
+    color: #FFFFFF;
+
+    z-index: 2;
+}
+
+.filter-box-component #box-body{
+    position: relative;
+    box-sizing: border-box;
+    display: block;
+
+    width: 128px;
+    height: 173px;
+
+    background: #FFFFFF;
+    border: 1px solid #4D5D72;
+    border-radius: 10px;
+    z-index: 0;
+}
+
+.filter-box-component #att-box {
+    height: 138px;
+    overflow-y: scroll;
+}
+
+#att-box .att-item{
+    width: 80px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 10px;
+    line-height: 12px;
+
+    margin-top: 10px;
+    margin-bottom: 5px;
+
+    color: black;
+}
+
+#att-box .att-item:hover{
+    cursor: pointer;
+}
+
+#att-box .activate{
+    background-color: rgba(3, 144, 188, 0.4);
+}
