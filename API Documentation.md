@@ -278,14 +278,15 @@ No api request.
 {
     "status": true/false,
     "tableAttributes":[
+      {
         "tableName1":[
-            "att1": {
+            {"att1": {
                 "type": "TEXT/INT/NUM",
         		"count": [
         			{"value1": 9},
 					{"value2": 20},
     			],
-            },
+            }},
 			"att2": {
                 "type": "TEXT/INT/NUM",
         		"count": [
@@ -293,7 +294,9 @@ No api request.
 					{"value2": 20},
     			],
             }
-        ],
+        ]
+      },
+      {
         "tableName2":[
             "att1": {
                 "type": "TEXT/INT/NUM",
@@ -310,7 +313,8 @@ No api request.
     			],
             }
         ],
-    ],
+    ]
+},
 	"details": "...",
 }
 ```
