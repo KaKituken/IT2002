@@ -1,0 +1,22 @@
+/* MySlideBar.css */
+.slider-container {
+    display: flex;
+    align-items: center;
+    width: 258px;
+}
+
+.slider-label {
+    margin: 0 8px;
+}
+
+.slider {
+    flex-grow: 1;
+}
+
+.slider-value {
+    margin-left: 16px;
+}
+
+.slider-container input {
+    width: 50px;
+}

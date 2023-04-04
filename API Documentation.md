@@ -128,7 +128,7 @@ No api request.
       "houseInfoList": [
           {
               "houseid": "", //string
-              "name": "", 		// string
+              "providerName": "", // string
               "location": "", 	//  string
               "price": 0, 		// number
               "size": 0, 			// number
@@ -147,7 +147,7 @@ No api request.
   }
   ```
 ### Make Bid
- 
+
 - Route: '/make-bid'
 - Request: 'POST'
 - Param:
@@ -167,7 +167,7 @@ No api request.
     "currentBid": "",	// 
   }
   
-  ```    
+  ```
  ### Bid for rental provider
  - Route: '/bid-for-rental-provider'
  - Request: 'POST'
@@ -195,6 +195,9 @@ No api request.
        } 
     "token": ""				// string
     }
+
+  ```
+
 - Response:
   ```json
   {
@@ -202,9 +205,8 @@ No api request.
     "details": "...",
   }
 
-  ```   
-
  ### Filter for houses
+
  - Route: '/filter-for-houses'
  - Request: 'GET'
  - Param:
@@ -218,7 +220,7 @@ No api request.
     "details": "...",
     "typeofhousing":{}
   }
- ```   
+  ```
 
 - Request: 'POST'
 - Param: 
@@ -235,14 +237,93 @@ No api request.
       }
     "token": ""				// string
     }
+
+ ```
+
 - Response:
+  
+  ```json
   {
     "status": true/false,
     "details": "...",
   }
-  ```    
-    
+  ```
+
+## Admin
+
+### Get all tables name
+
+- Route: `/admin/table-name`
+- Request: `GET`
+- Param:
+- Response:
+
+```json
+{
+    "status": true/false,
+    "tableNameList": [],
+    "details": "..."
+}
+```
+
+### Get all attributes
+
+- Router: `admin/attributes`
+- Request: `POST`
+- Param:
+
+```json
+{
+    "tableNameList": []
+}
+```
+
+- Response:
+
+```json
+{
+    "status": true/false,
+    "tableAttributes":[
+        "tableName1":[
+            "att1": {
+                "type": "TEXT/INT/NUM",
+        		"count": [
+        			{"value1": 9},
+					{"value2": 20},
+    			],
+            },
+			"att2": {
+                "type": "TEXT/INT/NUM",
+        		"count": [
+        			{"value1": 9},
+					{"value2": 20},
+    			],
+            }
+        ],
+        "tableName2":[
+            "att1": {
+                "type": "TEXT/INT/NUM",
+        		"count": [
+        			{"value1": 9},
+					{"value2": 20},
+    			],
+            },
+			"att2": {
+                "type": "TEXT/INT/NUM",
+        		"count": [
+        			{"value1": 9},
+					{"value2": 20},
+    			],
+            }
+        ],
+    ],
+	"details": "...",
+}
+```
 
 
 
-  
+
+
+
+
