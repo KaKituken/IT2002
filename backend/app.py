@@ -533,10 +533,6 @@ if __name__ == "__main__":
     db.commit()
 
 
-
-
-
-
     # server run
     app.run("127.0.0.1", PORT)
     # ? Uncomment the below lines and comment the above lines below `if __name__ == "__main__":` in order to run on the production server

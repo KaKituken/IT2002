@@ -78,14 +78,13 @@ No api request.
   ```json
   {
       "houseInfo":{
-          "name": "", 		// string
           "location": "", 	//  string
           "price": 0, 		// number
           "size": 0, 			// number
           "rooms": 0, 		// number
           "startDate": "",	// Date
           "endDate": "",		// Date
-          "currentBid": "",	// number
+          "MaxBid": "",		// number
           "description": "",	// string
           "images": [
               "url1",
@@ -96,7 +95,7 @@ No api request.
   }
   
   ```
-
+  
 - Response:
 
   ```json
@@ -221,14 +220,14 @@ No api request.
  ```json
     {
       "houseinfo": {
-        "location": "" //string
-        "type": "" //string
-        "size": "" //string
-        "maxprice": 0 //number
-        "rooms": 0 //number
-        "startdate": "" //date
-        "enddate": "" //date
-      }
+        "location": "", //string
+        "type": "", //string
+        "size": "", //string
+        "maxprice": 0, //number
+        "rooms": 0, //number
+        "startdate": "", //date
+        "enddate": "", //date
+      },
     "token": ""				// string
     }
 
@@ -278,38 +277,49 @@ No api request.
 {
     "status": true/false,
     "tableAttributes":[
-        "tableName1":[
-            "att1": {
-                "type": "TEXT/INT/NUM",
-        		"count": [
-        			{"value1": 9},
-					{"value2": 20},
-    			],
-            },
-			"att2": {
-                "type": "TEXT/INT/NUM",
-        		"count": [
-        			{"value1": 9},
-					{"value2": 20},
-    			],
+        {
+           "name": "tableName1",
+           "attribute":[
+               {
+                    "attName": "att1",
+                    "type": "TEXT",
+                    "count": [
+                        {"value1": 9},
+                        {"value2": 20},
+                    ],
+               },
+               {
+                    "attName": "att2",
+                    "type": "TEXT",
+                    "count": [
+                        {"value1": 9},
+                        {"value2": 20},
+                    ],
+               }
+            ], 
+        },
+        {
+            "name": "tableName2",
+            "attribute":[
+               {
+                    "attName": "att1",
+                    "type": "TEXT",
+                    "count": [
+                        {"value1": 9},
+                        {"value2": 20},
+                    ],
+               },
+               {
+                    "attName": "att2",
+                    "type": "NUMERIC",
+                    "count": [
+                        {"minValue": 9},
+                        {"maxValue": 20},	// pay attention to the order
+                    ],
+               }
+            ], 
             }
-        ],
-        "tableName2":[
-            "att1": {
-                "type": "TEXT/INT/NUM",
-        		"count": [
-        			{"value1": 9},
-					{"value2": 20},
-    			],
-            },
-			"att2": {
-                "type": "TEXT/INT/NUM",
-        		"count": [
-        			{"value1": 9},
-					{"value2": 20},
-    			],
-            }
-        ],
+        }
     ],
 	"details": "...",
 }
