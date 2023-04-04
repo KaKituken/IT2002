@@ -92,6 +92,13 @@ def log_in():
         response['details'] = ''
     return jsonify(response)
 
+@app.route("/admin/table-name", methods=["GET"])
+
+
+
+@app.route("admin/attributes", methods=["POST"])
+
+
 
 @app.get("/table")
 def get_relation():
@@ -186,6 +193,8 @@ def delete_row():
     except Exception as e:
         db.rollback()
         return Response(str(e), 403)
+
+
 
 
 def generate_table_return_result(res) -> Dict:
@@ -448,7 +457,7 @@ if __name__ == "__main__":
     table = generate_create_table_statement(table_provider)
     db.execute(statement)
     db.commit()
-    
+
 
     table_housing = {
         "name": "housing",
