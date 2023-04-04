@@ -41,7 +41,61 @@ data_types = {
 }
 
 # ? @app.get is called a decorator, from the Flask class, converting a simple python function to a REST API endpoint (function)
-
+# TODO: create a dictionary of tables
+table_name_list = {
+    "provider": {
+        "provider_id": "NUMERIC",
+        "first_name": "TEXT",
+        "last_name": "TEXT",
+        "email": "TEXT",
+        "age": "NUMERIC",
+        "nationality": "TEXT",
+        "salary": "NUMERIC",
+        "sex": "TEXT",
+        "ethnicity": "TEXT"
+    },
+    "housing": {
+        "housing_id": "NUMERIC",
+        "provider_id": "NUMERIC",
+        "size": "NUMERIC",
+        "type_of_housing": "TEXT",
+        "location":"TEXT",
+        "size_type": "TEXT",
+        "age_of_housing":"NUMERIC",
+        "start_time": "Date",
+        "end_time": "Date",
+        "min_price": "NUMERIC",
+        "bidding_period": "NUMERIC",
+        "rented": "TEXT",
+        "description": "TEXT"
+    },
+    "housing_maxprice": {
+        "size": "NUMERIC",
+        "type_of_housing": "TEXT",
+        "location": "TEXT",
+        "age_of_housing": "NUMERIC",
+        "max_price": "NUMERIC"
+    },
+    "renter": {
+        "renter_id": "NUMERIC",
+        "first_name": "TEXT",
+        "last_name": "TEXT",
+        "email": "TEXT",
+        "age": "NUMERIC",
+        "nationality": "TEXT",
+        "salary": "NUMERIC",
+        "sex": "TEXT",
+        "ethnicity": "TEXT"
+    },
+    "bids": {
+        "housing_id": "NUMERIC",
+        "renter_id": "NUMERIC",
+        "start_time": "DATE",
+        "end_time": "DATE",
+        "price": "NUMERIC",
+        "bid_date": "DATE"
+    }
+}
 
 @app.route("/hello", methods=["GET"])
 def hello():
@@ -93,8 +147,17 @@ def log_in():
     return jsonify(response)
 
 @app.route("/admin/table-name", methods=["GET"])
-
-
+def return_table():
+    response = {}
+    response['status'] = True
+    # fill names of tables into a list
+    table_name_list = []
+    for keys in table_name_list:
+        table_name_list.append(keys)
+    
+    response['tableNameList'] = table_name_list
+    response['details'] = ''
+    return jsonify(response)
 
 @app.route("admin/attributes", methods=["POST"])
 
@@ -473,7 +536,8 @@ if __name__ == "__main__":
             "end_time": "Date NOT NULL",
             "min_price": "NUMERIC NOT NULL",
             "bidding_period": "NUMERIC NOT NULL",
-            "rented": "TEXT NOT NULL"},
+            "rented": "TEXT NOT NULL",
+            "description": "TEXT NOT NULL"},
         "primary_key": "(housing_id)",
         "reference": {
             "(provider_id)": "provider(provider_id)"}}
@@ -482,7 +546,7 @@ if __name__ == "__main__":
     db.commit()
 
     table_housing_maxprice = {
-        "name": "housing",
+        "name": "housing_maxprice",
         "body": {
             "size": "NUMERIC NOT NULL",
             "type_of_housing": "TEXT NOT NULL",
