@@ -160,7 +160,8 @@ def return_table():
     return jsonify(response)
 
 @app.route("admin/attributes", methods=["POST"])
-
+def return_table_detail():
+    param = request.json
 
 
 @app.get("/table")
@@ -530,7 +531,6 @@ if __name__ == "__main__":
             "size": "NUMERIC NOT NULL",
             "type_of_housing": "TEXT NOT NULL",
             "location":"TEXT NOT NULL",
-            "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small'))",
             "age_of_housing":"NUMERIC NOT NULL",
             "start_time": "Date NOT NULL",
             "end_time": "Date NOT NULL",
@@ -542,6 +542,20 @@ if __name__ == "__main__":
         "reference": {
             "(provider_id)": "provider(provider_id)"}}
     table = generate_create_table_statement(table_housing)
+    db.execute(statement)
+    db.commit()
+
+    table_housing_size_type = {
+        "name": "housing_size_type",
+        "body": {
+            "size": "NUMERIC NOT NULL",
+            "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small'))"},
+        "primary_key": "(size)",
+        "reference": {
+            "(size)": "housing(size)"
+        }
+    }
+    table = generate_create_table_statement(table_housing_size_type)
     db.execute(statement)
     db.commit()
 
