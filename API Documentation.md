@@ -143,7 +143,7 @@ No api request.
   }
   ```
 ### Make Bid
- 
+
 - Route: '/make-bid'
 - Request: 'POST'
 - Param:
@@ -161,7 +161,7 @@ No api request.
     "currentBid": "",	// 
   }
   
-  ```    
+  ```
  ### Bid for rental provider
  - Route: '/bid-for-rental-provider'
  - Request: 'POST'
@@ -196,7 +196,7 @@ No api request.
     "details": "...",
   }
 
-  ```   
+  ```
 
  ### Filter for houses
  - Route: '/filter-for-houses'
@@ -212,7 +212,7 @@ No api request.
     "details": "...",
     "typeofhousing":{}
   }
- ```   
+  ```
 
 - Request: 'POST'
 - Param: 
@@ -234,9 +234,71 @@ No api request.
     "status": true/false,
     "details": "...",
   }
-  ```    
-    
+ ```
+
+## Admin
+
+### Get all tables name
+
+- Route: `/admin/table-name`
+- Request: `GET`
+- Param:
+- Response:
+
+```json
+{
+    "status": true/false,
+    "tableNameList": [],
+    "details": "..."
+}
+```
+
+### Get all attributes
+
+- Router: `admin/attributes`
+- Request: `POST`
+- Param:
+
+```json
+{
+    "tableNameList": []
+}
+```
+
+- Response:
+
+```json
+{
+    "status": true/false,
+    "tableAttributes":[
+        "tableName1":[
+            "att1": {
+                "type": "TEXT/INT/NUM",
+        		"count": "if can"
+            },
+			"att2": {
+                "type": "TEXT/INT/NUM",
+        		"count": "if can"
+            }
+        ],
+        "tableName2":[
+            "att1": {
+                "type": "TEXT/INT/NUM",
+        		"count": "if can"
+            },
+			"att2": {
+                "type": "TEXT/INT/NUM",
+        		"count": "if can"
+            }
+        ],
+    ],
+	"details": "...",
+}
+```
 
 
 
-  
+
+
+
+
