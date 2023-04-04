@@ -4,6 +4,7 @@ import FilterBox from '../../components/FilterBox/FilterBox'
 import FilterBar from '../../components/FilterBar/FilterBar'
 import Select from 'react-select'
 import { useState, useEffect } from 'react'
+import * as api from '../../service/api'
 
 function Admin(){
 
@@ -24,6 +25,13 @@ function Admin(){
     };
 
     useEffect(() => {
+        // async () => {
+        //     let success = await api.getTableName()
+        //     if(success.status === true) {
+        //         setChoosenTable(success.tableNameList)
+        //         setTableChoosenIndicator(Array<boolean>(success.tableNameList.length).fill(false))
+        //     }
+        // }
         setChoosenTable(['houses', 'bids', 'providers'])
         setTableChoosenIndicator(Array<boolean>(3).fill(false))
       }, []); // 空数组使得 useEffect 仅在组件挂载后运行一次

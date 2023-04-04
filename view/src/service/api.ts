@@ -40,6 +40,12 @@ export interface LogInReturn {
     token: string
 }
 
+export interface GetTableNameReturn {
+    status: boolean
+    details: string
+    tableNameList: string[]
+}
+
 export async function signIn(params:SignInForm) {
     let res = await api.post('/sign-in', params)
     if (res.ok){
@@ -89,5 +95,17 @@ export async function getHouseList() {
     else {
         alert("Failed to get current house list")
         console.log(res.data)
+    }
+}
+
+export async function getTableName() {
+    let res = await api.get('/admin/table-name')
+    if (res.ok){
+        return res.data as Promise<GetTableNameReturn>
+    }
+    else {
+        alert("Failed to get table name")
+        console.log(res.data)
+        return res.data as Promise<GetTableNameReturn>
     }
 }
