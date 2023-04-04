@@ -115,6 +115,10 @@ No api request.
 - Request: `GET`
 
 - Param: 
+  ```json
+  {
+    "token": ""				// string
+  }
 
 - Response:
 
@@ -153,6 +157,8 @@ No api request.
         "houseid": "", //string
     "token": ""				// string
     }
+```   
+
 - Response:
   ```json
   {

@@ -74,7 +74,7 @@ def getname():
     
 @app.route("/log-in", methods=["POST"])
 def log_in():
-    param = request.json
+    param:Dict = request.json
     att_list = ["token"]
     selection = {"table": "TestRegisterTable", "att": att_list, "condition": param}
     statement = generate_conditional_select_statement(selection)
@@ -92,6 +92,56 @@ def log_in():
         response['details'] = ''
     return jsonify(response)
 
+
+@app.route("/provide-house", methods = ["POST"])
+def provide_house():
+    param = request.json
+    
+    # house_info=param['name':, 'location', 'price', 'size', 'rooms', 'sortDate', 'endDate', 'currentBid', 'description', 'images']   
+    # house_info.location = table_housing.location
+    # house_info.price = table_housing.min_price
+    # house_info.size = table_housing.size
+    # house_info.rooms = table_housing.
+    # house_info.startDate = table_housing.start_time
+    # house_info.endDate = table_housing.end_time
+    # house_info.Maxprice = table_housing.min_price
+    # house_info.description = table_housing.description
+    # att_list = ["token"]
+    #  = {"table": "table_housing", "att": att_list, "condition":param }
+    # statement = generate_conditional_select_statement(selection)
+    # res = db.execute(statement)
+    # db.commit()
+    # response = {}
+    # res = generate_table_return_result(res)
+    # if len(res["rows"]) == 0:
+    #     response['status'] = False
+    #     response['token'] = ''
+    #     response['details'] = 'Wrong User Name or Password'
+    # else:
+    #     response['status'] = True
+    #     response['token'] = res["rows"][0]['token']
+    #     response['details'] = ''
+    # return jsonify(response)
+
+@app.route("/house-list", methods = ['GET'])
+def house_list():
+    param = request.json
+    att_list = ['token']
+    selection = {"table": "table_housing", "att": att_list, "condition": param}
+    statement = generate_conditional_select_statement(selection)
+    res = db.execute(statement)
+    db.commit()
+    response = {}
+    res = generate_table_return_result(res)
+    if len(res["rows"]) == 0:
+        response['status'] = False
+        response['token'] = ''
+        response['details'] = 'Wrong User Name or Password'
+    else:
+        response['status'] = True
+        response['token'] = res["rows"][0]['token']
+        response['details'] = ''
+    return jsonify(response)
 
 @app.get("/table")
 def get_relation():
@@ -267,7 +317,7 @@ def generate_simple_select_statement(selection: Dict):
 
 
 """
-SELECT att1, att2,... FROM table_name WHERE att3=value1 AND att4=value2,...
+retern: SELECT att1, att2,... FROM table_name WHERE att3=value1 AND att4=value2,...
 param: selection: Dict
 selection: {
     "table" : "table_name",
