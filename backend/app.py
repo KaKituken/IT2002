@@ -60,7 +60,6 @@ table_name_list = {
         "size": "NUMERIC",
         "type_of_housing": "TEXT",
         "location":"TEXT",
-        "size_type": "TEXT",
         "age_of_housing":"NUMERIC",
         "start_time": "Date",
         "end_time": "Date",
@@ -68,6 +67,10 @@ table_name_list = {
         "bidding_period": "NUMERIC",
         "rented": "TEXT",
         "description": "TEXT"
+    },
+    "housing_size_type": {
+        "size": "NUMERIC",
+        "size_type": "TEXT"
     },
     "housing_maxprice": {
         "size": "NUMERIC",
@@ -148,20 +151,63 @@ def log_in():
 
 @app.route("/admin/table-name", methods=["GET"])
 def return_table():
+    global table_name_list
     response = {}
     response['status'] = True
     # fill names of tables into a list
-    table_name_list = []
+    return_table_name_list = []
     for keys in table_name_list:
-        table_name_list.append(keys)
+        return_table_name_list.append(keys)
     
-    response['tableNameList'] = table_name_list
+    response['tableNameList'] = return_table_name_list
     response['details'] = ''
     return jsonify(response)
 
-@app.route("admin/attributes", methods=["POST"])
+@app.route("/admin/attributes", methods=["POST"])
 def return_table_detail():
-    param = request.json
+    needed_table_name_list = request.json
+    response = {}
+    response['status'] = True
+    response['tableAttributes'] = []
+    # append table names as keys into the dictionary as value of the key 'tableAttributes'
+    for table_name in needed_table_name_list['tableNameList']:
+        response['tableAttributes'].append({'name': table_name, 'attribute': []})
+        # append attribute names as keys into the dictionary as value of the key table_name
+        for attribute_name in table_name_list[table_name]:
+            response['tableAttributes'][-1]['attribute'].append({"attributeName": attribute_name})
+            response['tableAttributes'][-1]['attribute'][-1]["type"] = table_name_list[table_name][attribute_name]
+            response['tableAttributes'][-1]['attribute'][-1]["count"] = []
+
+            selection = {}
+            selection['att'] = attribute_name
+            selection['table'] = table_name
+            if table_name_list[table_name][attribute_name] != "NUMERIC":
+                statement = generate_group_by_statement(selection)
+                res = db.execute(statement)
+                db.commit()
+                returned_result_in_dict = generate_table_return_result(res)
+                for dict in returned_result_in_dict['rows']:
+                    for key1 in dict:
+                        if key1 != 'count':
+                            response['tableAttributes'][-1]['attribute'][-1]['count'].append({f"{dict[key1]}":0})
+                            for key2 in dict:
+                                if key2 == 'count':
+                                    response['tableAttributes'][-1]['attribute'][-1]['count'][-1][f"{dict[key1]}"] = dict[key2]
+                                    break
+                        break
+            else:
+                statement = generate_max_min_statement(selection)
+                res = db.execute(statement)
+                db.commit()
+                returned_result_in_dict = generate_table_return_result(res)
+                for key, value in returned_result_in_dict['rows'][0].items():
+                    if key == 'min':
+                        response['tableAttributes'][-1]['attribute'][-1]['count'].append({'minValue':value})
+                    else:
+                        response['tableAttributes'][-1]['attribute'][-1]['count'].append({'maxValue':value})
+            
+    response['detail'] = ''
+    return response
 
 
 @app.get("/table")
@@ -370,6 +416,25 @@ def generate_conditional_select_statement(selection: Dict):
 
 
 """
+SELECT att,COUNT(*)
+FROM table_name
+GROUP BY table_name.att;
+"""
+def generate_group_by_statement(selection: Dict):
+    statement = 'SELECT '
+    statement += f"{selection['att']}" + "," + "COUNT(*)"
+    statement += f" FROM {selection['table']}"
+    statement += f" GROUP BY {selection['table']}.{selection['att']};"
+    return sqlalchemy.text(statement)
+
+def generate_max_min_statement(selection: Dict):
+    statement = 'SELECT'
+    statement += f" MIN ({selection['att']}), MAX ({selection['att']})"
+    statement += f" FROM {selection['table']}"
+    return sqlalchemy.text(statement)
+
+
+"""
 INSERT INTO table_name VALUES(att1 type1, att2 type2, ...);
 param: table: Dict
 insertion: {
@@ -398,7 +463,7 @@ def generate_insert_table_statement(insertion: Dict):
     column_values = "("
     for key, value in body.items():
         column_names += (key+",")
-        if valueTypes[key] == "TEXT" or valueTypes[key] == "TIME":
+        if valueTypes[key] == "TEXT" or valueTypes[key] == "TIME" or valueTypes[key] == "DATE":
             column_values += (f"\'{value}\',")
         else:
             column_values += (f"{value},")
@@ -497,12 +562,32 @@ PORT = 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
     # app.run("0.0.0.0", PORT)
-    create_schema()
-    fill_data()
-    statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
-    res = db.execute(statement)
+    # create_schema()
+    # fill_data()
+    # statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
+    # res = db.execute(statement)
+    # db.commit()
+    # print(generate_table_return_result(res))
+
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS bids;')
+    db.execute(statement)
     db.commit()
-    print(generate_table_return_result(res))
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS renter;')
+    db.execute(statement)
+    db.commit()
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS housing;')
+    db.execute(statement)
+    db.commit()
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS housing_size_type;')
+    db.execute(statement)
+    db.commit()
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS housing_maxprice;')
+    db.execute(statement)
+    db.commit()
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS provider;')
+    db.execute(statement)
+    db.commit()
+    print('line 564')
 
     table_provider = {
         "name": "provider",
@@ -519,9 +604,34 @@ if __name__ == "__main__":
         "primary_key": "(provider_id)"
     }
     table = generate_create_table_statement(table_provider)
-    db.execute(statement)
+    db.execute(table)
     db.commit()
 
+    table_housing_size_type = {
+        "name": "housing_size_type",
+        "body": {
+            "size": "NUMERIC NOT NULL",
+            "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small'))"},
+        "primary_key": "(size)",
+        }
+    table = generate_create_table_statement(table_housing_size_type)
+    db.execute(table)
+    db.commit()
+
+    table_housing_maxprice = {
+        "name": "housing_maxprice",
+        "body": {
+            "size": "NUMERIC NOT NULL",
+            "type_of_housing": "TEXT NOT NULL",
+            "location": "TEXT NOT NULL",
+            "age_of_housing": "NUMERIC NOT NULL",
+            "max_price": "NUMERIC NOT NULL"
+        },
+        "primary_key": "(size,type_of_housing,location,age_of_housing)"
+        }
+    table = generate_create_table_statement(table_housing_maxprice)
+    db.execute(table)
+    db.commit()
 
     table_housing = {
         "name": "housing",
@@ -540,44 +650,11 @@ if __name__ == "__main__":
             "description": "TEXT NOT NULL"},
         "primary_key": "(housing_id)",
         "reference": {
+            "(size)": "housing_size_type(size)",
+            "(size,type_of_housing,location,age_of_housing)": "housing_maxprice(size,type_of_housing,location,age_of_housing)",
             "(provider_id)": "provider(provider_id)"}}
     table = generate_create_table_statement(table_housing)
-    db.execute(statement)
-    db.commit()
-
-    table_housing_size_type = {
-        "name": "housing_size_type",
-        "body": {
-            "size": "NUMERIC NOT NULL",
-            "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small'))"},
-        "primary_key": "(size)",
-        "reference": {
-            "(size)": "housing(size)"
-        }
-    }
-    table = generate_create_table_statement(table_housing_size_type)
-    db.execute(statement)
-    db.commit()
-
-    table_housing_maxprice = {
-        "name": "housing_maxprice",
-        "body": {
-            "size": "NUMERIC NOT NULL",
-            "type_of_housing": "TEXT NOT NULL",
-            "location": "TEXT NOT NULL",
-            "age_of_housing": "NUMERIC NOT NULL",
-            "max_price": "NUMERIC NOT NULL"
-        },
-        "primary_key": "(size,type_of_housing,location,age_of_housing)",
-        "reference": {
-            "(size)": "housing(size)",
-            "(type_of_housing)": "housing(type_of_housing)",
-            "(location)": "housing(location)",
-            "(age_of_housing)": "housing(age_of_housing)"
-        }
-    }
-    table = generate_create_table_statement(table_housing_maxprice)
-    db.execute(statement)
+    db.execute(table)
     db.commit()
 
     table_renter = {
@@ -596,7 +673,7 @@ if __name__ == "__main__":
         "primary_key": "(renter_id)"
     }
     table = generate_create_table_statement(table_renter)
-    db.execute(statement)
+    db.execute(table)
     db.commit()
 
     table_bids = {
@@ -616,7 +693,7 @@ if __name__ == "__main__":
         }
     }
     table = generate_create_table_statement(table_bids)
-    db.execute(statement)
+    db.execute(table)
     db.commit()
 
 
