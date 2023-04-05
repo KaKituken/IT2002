@@ -1,0 +1,15 @@
+import MyChart from "../../components/MyChart/MyChart";
+
+function Test(){
+    return (
+        <MyChart tableData={{
+            "columns": ["a","b","c"],
+            "rows": [
+                {"a":1,"b":2,"c":3},
+                {"a":4,"b":5,"c":6}
+            ]
+        }}></MyChart>
+    )
+}
+
+export default Test
