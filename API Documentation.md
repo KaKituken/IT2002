@@ -281,7 +281,7 @@ No api request.
            "name": "tableName1",
            "attribute":[
                {
-                    "attName": "att1",
+                    "attributeName": "att1",
                     "type": "TEXT",
                     "count": [
                         {"value1": 9},
@@ -289,7 +289,7 @@ No api request.
                     ],
                },
                {
-                    "attName": "att2",
+                    "attributeName": "att2",
                     "type": "TEXT",
                     "count": [
                         {"value1": 9},
@@ -302,7 +302,7 @@ No api request.
             "name": "tableName2",
             "attribute":[
                {
-                    "attName": "att1",
+                    "attributeName": "att1",
                     "type": "TEXT",
                     "count": [
                         {"value1": 9},
@@ -310,7 +310,7 @@ No api request.
                     ],
                },
                {
-                    "attName": "att2",
+                    "attributeName": "att2",
                     "type": "NUMERIC",
                     "count": [
                         {"minValue": 9},

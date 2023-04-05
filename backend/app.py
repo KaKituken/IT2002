@@ -170,23 +170,42 @@ def return_table_detail():
     response['status'] = True
     response['tableAttributes'] = []
     # append table names as keys into the dictionary as value of the key 'tableAttributes'
-    for table_name in needed_table_name_list:
-        response['tableAttributes'].append({table_name: []})
+    for table_name in needed_table_name_list['tableNameList']:
+        response['tableAttributes'].append({'name': table_name, 'attribute': []})
         # append attribute names as keys into the dictionary as value of the key table_name
-        for attribute_name in needed_table_name_list[table_name]:
-            response['tableAttributes'][-1][table_name].append({attribute_name: {}})
-            response['tableAttributes'][-1][table_name][-1][attribute_name]['type'] = table_name_list[table_name][attribute_name]
-            response['tableAttributes'][-1][table_name][-1][attribute_name]['count'] = []
+        for attribute_name in table_name_list[table_name]:
+            response['tableAttributes'][-1]['attribute'].append({"attributeName": attribute_name})
+            response['tableAttributes'][-1]['attribute'][-1]["type"] = table_name_list[table_name][attribute_name]
+            response['tableAttributes'][-1]['attribute'][-1]["count"] = []
 
             selection = {}
             selection['att'] = attribute_name
             selection['table'] = table_name
-            statement = generate_group_by_statement(selection)
-            res = db.execute(statement)
-            db.commit()
-            returned_result_in_dict = generate_table_return_result(res)
-            for key, value in returned_result_in_dict.items():
-                response['tableAttributes'][-1][table_name][-1][attribute_name]['count'].append({key:value})
+            if table_name_list[table_name][attribute_name] != "NUMERIC":
+                statement = generate_group_by_statement(selection)
+                res = db.execute(statement)
+                db.commit()
+                returned_result_in_dict = generate_table_return_result(res)
+                for dict in returned_result_in_dict['rows']:
+                    for key1 in dict:
+                        if key1 != 'count':
+                            response['tableAttributes'][-1]['attribute'][-1]['count'].append({f"{dict[key1]}":0})
+                            for key2 in dict:
+                                if key2 == 'count':
+                                    response['tableAttributes'][-1]['attribute'][-1]['count'][-1][f"{dict[key1]}"] = dict[key2]
+                                    break
+                        break
+            else:
+                statement = generate_max_min_statement(selection)
+                res = db.execute(statement)
+                db.commit()
+                returned_result_in_dict = generate_table_return_result(res)
+                for key, value in returned_result_in_dict['rows'][0].items():
+                    if key == 'min':
+                        response['tableAttributes'][-1]['attribute'][-1]['count'].append({'minValue':value})
+                    else:
+                        response['tableAttributes'][-1]['attribute'][-1]['count'].append({'maxValue':value})
+            
     response['detail'] = ''
     return response
 
@@ -402,10 +421,16 @@ FROM table_name
 GROUP BY table_name.att;
 """
 def generate_group_by_statement(selection: Dict):
-    statement = 'SELECT'
+    statement = 'SELECT '
     statement += f"{selection['att']}" + "," + "COUNT(*)"
     statement += f" FROM {selection['table']}"
     statement += f" GROUP BY {selection['table']}.{selection['att']};"
+    return sqlalchemy.text(statement)
+
+def generate_max_min_statement(selection: Dict):
+    statement = 'SELECT'
+    statement += f" MIN ({selection['att']}), MAX ({selection['att']})"
+    statement += f" FROM {selection['table']}"
     return sqlalchemy.text(statement)
 
 
@@ -582,21 +607,6 @@ if __name__ == "__main__":
     db.execute(table)
     db.commit()
 
-    insertion = {}
-    insertion['name'] = "provider"
-    insertion['body'] = {}
-    insertion["valueTypes"] = {}
-    att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
-    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
-    value_list = ['12345','Junjie','Tian','123@qq.com','19','Chinese','0','Male','Chinese']
-    for att, v in zip(att_list, value_list):
-        insertion['body'][att] = v
-    for att, t in zip(att_list, type_list):
-        insertion['valueTypes'][att] = t
-    state = generate_insert_table_statement(insertion)
-    db.execute(state)
-    db.commit()
-
     table_housing_size_type = {
         "name": "housing_size_type",
         "body": {
@@ -606,21 +616,6 @@ if __name__ == "__main__":
         }
     table = generate_create_table_statement(table_housing_size_type)
     db.execute(table)
-    db.commit()
-
-    insertion = {}
-    insertion['name'] = "housing_size_type"
-    insertion['body'] = {}
-    insertion["valueTypes"] = {}
-    att_list = ['size','size_type']
-    type_list = ['NUMERIC','TEXT']
-    value_list = ['80','middle']
-    for att, v in zip(att_list, value_list):
-        insertion['body'][att] = v
-    for att, t in zip(att_list, type_list):
-        insertion['valueTypes'][att] = t
-    state = generate_insert_table_statement(insertion)
-    db.execute(state)
     db.commit()
 
     table_housing_maxprice = {
@@ -636,21 +631,6 @@ if __name__ == "__main__":
         }
     table = generate_create_table_statement(table_housing_maxprice)
     db.execute(table)
-    db.commit()
-
-    insertion = {}
-    insertion['name'] = "housing_maxprice"
-    insertion['body'] = {}
-    insertion["valueTypes"] = {}
-    att_list = ['size','type_of_housing','location','age_of_housing','max_price']
-    type_list = ['NUMERIC','TEXT','TEXT','NUMERIC','NUMERIC']
-    value_list = ['80','condo','Sentosa','3','5000']
-    for att, v in zip(att_list, value_list):
-        insertion['body'][att] = v
-    for att, t in zip(att_list, type_list):
-        insertion['valueTypes'][att] = t
-    state = generate_insert_table_statement(insertion)
-    db.execute(state)
     db.commit()
 
     table_housing = {
@@ -677,21 +657,6 @@ if __name__ == "__main__":
     db.execute(table)
     db.commit()
 
-    insertion = {}
-    insertion['name'] = "housing"
-    insertion['body'] = {}
-    insertion["valueTypes"] = {}
-    att_list = ['housing_id','provider_id','size','type_of_housing','location','age_of_housing','start_time','end_time','min_price','bidding_period','rented','description']
-    type_list = ['NUMERIC','NUMERIC','NUMERIC','TEXT','TEXT','NUMERIC','DATE','DATE','NUMERIC','NUMERIC','TEXT','TEXT']
-    value_list = ['54321','12345','80','condo','Sentosa','3','2022-09-01','2023-09-01','1000','365','No','Good house near sea']
-    for att, v in zip(att_list, value_list):
-        insertion['body'][att] = v
-    for att, t in zip(att_list, type_list):
-        insertion['valueTypes'][att] = t
-    state = generate_insert_table_statement(insertion)
-    db.execute(state)
-    db.commit()
-
     table_renter = {
         "name": "renter",
         "body": {
@@ -709,21 +674,6 @@ if __name__ == "__main__":
     }
     table = generate_create_table_statement(table_renter)
     db.execute(table)
-    db.commit()
-
-    insertion = {}
-    insertion['name'] = "renter"
-    insertion['body'] = {}
-    insertion["valueTypes"] = {}
-    att_list = ['renter_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
-    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
-    value_list = ['88888','Tian','Junjie','321@qq.com','20','Chinese','0','Male','Chinese']
-    for att, v in zip(att_list, value_list):
-        insertion['body'][att] = v
-    for att, t in zip(att_list, type_list):
-        insertion['valueTypes'][att] = t
-    state = generate_insert_table_statement(insertion)
-    db.execute(state)
     db.commit()
 
     table_bids = {
@@ -744,21 +694,6 @@ if __name__ == "__main__":
     }
     table = generate_create_table_statement(table_bids)
     db.execute(table)
-    db.commit()
-
-    insertion = {}
-    insertion['name'] = "bids"
-    insertion['body'] = {}
-    insertion["valueTypes"] = {}
-    att_list = ['housing_id','renter_id','start_time','end_time','price','bid_date']
-    type_list = ['NUMERIC','NUMERIC','DATE','DATE','NUMERIC','DATE']
-    value_list = ['54321','88888','2022-10-01','2023-01-01','2000','2022-05-01']
-    for att, v in zip(att_list, value_list):
-        insertion['body'][att] = v
-    for att, t in zip(att_list, type_list):
-        insertion['valueTypes'][att] = t
-    state = generate_insert_table_statement(insertion)
-    db.execute(state)
     db.commit()
 
 
