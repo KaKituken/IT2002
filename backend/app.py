@@ -541,6 +541,7 @@ def create_schema():
 
 def fill_data():
     # fill fake data into database
+    '''
     insertion = {}
     insertion['name'] = "TestRegisterTable"
     insertion['body'] = {}
@@ -555,20 +556,99 @@ def fill_data():
     state = generate_insert_table_statement(insertion)
     db.execute(state)
     db.commit()
+    '''
 
-# ? The port where the debuggable DB management API is served
-PORT = 2222
-# ? Running the flask app on the localhost/0.0.0.0, port 2222
-# ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
-if __name__ == "__main__":
-    # app.run("0.0.0.0", PORT)
-    # create_schema()
-    # fill_data()
-    # statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
-    # res = db.execute(statement)
-    # db.commit()
-    # print(generate_table_return_result(res))
+    insertion = {}
+    insertion['name'] = "provider"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
+    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
+    value_list = [54321,'Junjie','Tian','123@qq.com',19,'Chinese',0,'Male','Chinese']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
 
+    insertion = {}
+    insertion['name'] = "housing_size_type"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['size','size_type']
+    type_list = ['NUMERIC','TEXT']
+    value_list = [80,'middle']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
+    insertion['name'] = "housing_maxprice"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['size','type_of_housing','location','age_of_housing','max_price']
+    type_list = ['NUMERIC','TEXT','TEXT','NUMERIC','NUMERIC']
+    value_list = [80,'condo','Sentosa',3,10000]
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
+    insertion['name'] = "housing"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['housing_id','provider_id','size','type_of_housing','location','age_of_housing','start_time','end_time','min_price','bidding_period','rented','description']
+    type_list = ['NUMERIC','NUMERIC','NUMERIC','TEXT','TEXT','NUMERIC','DATE','DATE','NUMERIC','NUMERIC','TEXT','TEXT']
+    value_list = [12345,54321,80,'condo','Sentosa',3,'2022-09-01','2023-09-01',1000,100,'No','good house near sea']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
+    insertion['name'] = "renter"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['renter_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
+    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
+    value_list = [88888,'Junjie','Tian','123@qq.com',19,'Chinese',0,'Male','Chinese']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
+    insertion['name'] = "bids"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['housing_id','renter_id','start_time','end_time','price','bid_date']
+    type_list = ['NUMERIC','NUMERIC','DATE','DATE','NUMERIC','DATE']
+    value_list = [12345,88888,'2023-04-01','2023-05-01',8000,'2023-03-25']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+def delete_data():
     statement = sqlalchemy.text('DROP TABLE IF EXISTS bids;')
     db.execute(statement)
     db.commit()
@@ -587,7 +667,24 @@ if __name__ == "__main__":
     statement = sqlalchemy.text('DROP TABLE IF EXISTS provider;')
     db.execute(statement)
     db.commit()
-    print('line 564')
+
+
+
+# ? The port where the debuggable DB management API is served
+PORT = 2222
+# ? Running the flask app on the localhost/0.0.0.0, port 2222
+# ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
+if __name__ == "__main__":
+    # app.run("0.0.0.0", PORT)
+    # create_schema()
+    # fill_data()
+    # statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
+    # res = db.execute(statement)
+    # db.commit()
+    # print(generate_table_return_result(res))
+
+    delete_data()
+
 
     table_provider = {
         "name": "provider",
@@ -696,6 +793,7 @@ if __name__ == "__main__":
     db.execute(table)
     db.commit()
 
+    fill_data()
 
     # server run
     app.run("127.0.0.1", PORT)
