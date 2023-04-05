@@ -66,6 +66,13 @@ interface Attribute {
 interface ValueCount {
     [value: string]: number;
 }
+
+export interface ConplexQueryCondition {
+    fromTable: string[]
+    joinOn: Record<string, string>[]
+    filterEqual: Record<string, Record<string, string>>
+    filterLess: Record<string, Record<string, string>>
+}
   
 
 export async function signIn(params:SignInForm) {

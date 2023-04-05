@@ -325,9 +325,57 @@ No api request.
 }
 ```
 
+### Complex query
 
+- Router: `admin/complex-query`
+- Request: `POST`
+- Param:
 
+```json
+{
+    "fromTable": ["table1", "table2", "..."],
+    "joinOn":[
+        {
+            "table1": "att1",
+            "table2": "att2",
+        },
+        {
+            "table2": "att3",
+            "table3": "att1"
+        }
+    ],
+    "filterEqual": {
+        "table1": {
+            "att1": "value1",
+            "att2": "value2"
+        },
+        "table2": {
+            "att1": "value1",
+            "att2": "value2"
+        },
+    },
+    "filterLess": {
+        "table1": {
+            "att1": "value1",
+            "att2": "value2"
+        },
+        "table2": {
+            "att1": "value1",
+            "att2": "value2"
+        },
+    }
+}
+```
 
+- Response
 
-
+```json
+{
+    "columns": ["a","b","c"],
+    "rows": [
+        {"a":1,"b":2,"c":3},
+        {"a":4,"b":5,"c":6}
+    ]
+}
+```
 
