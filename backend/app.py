@@ -209,6 +209,83 @@ def return_table_detail():
     response['detail'] = ''
     return response
 
+@app.route("/admin/complex-query", methods=["POST"])
+def complex_query():
+    param = request.json
+    tables = param["fromTable"]
+    join_on = param["joinOn"]
+    filter_equal = param["filterEqual"]
+    filter_less = param["filterLess"]
+    
+    statement = "SELECT * FROM "
+    for table in tables:
+        statement += f"{table}, "
+    statement = statement[:-2]
+    where_statement = False
+    if join_on:
+        statement += " WHERE "
+        where_statement = True
+        for join_on_condition in join_on:
+            for key,value in join_on_condition.items():
+                statement += f"{key}.{value}="
+            statement = statement[:-1] + " AND "
+        statement = statement[:-5]
+    
+    if filter_equal:
+        if not where_statement:
+            statement += " WHERE "
+            where_statement = True
+        else:
+            statement += " AND "
+
+        for table_name, table_attribute_list in filter_equal.items():
+            item_list = map(lambda x: (list(x.keys())[0], list(x.values())[0]),table_attribute_list)
+            sorted_list = sorted(item_list, key = lambda x: x[0])
+            for index in range(len(sorted_list)):
+                if index == 0:
+                    if type(sorted_list[index][1]) == int or type(sorted_list[index][1]) == float:
+                        statement += f"({table_name}.{sorted_list[index][0]} = {sorted_list[index][1]} "
+                    else:
+                        statement += f"({table_name}.{sorted_list[index][0]} = '{sorted_list[index][1]}' "
+                else:
+                    if sorted_list[index][0] == sorted_list[index-1][0]:
+                        if type(sorted_list[index][1]) == int or type(sorted_list[index][1]) == float:
+                            statement += f" OR {table_name}.{sorted_list[index][0]} = {sorted_list[index][1]} "
+                        else:
+                            statement += f" OR {table_name}.{sorted_list[index][0]} = '{sorted_list[index][1]}' "
+                    else:
+                        if type(sorted_list[index][1]) == int or type(sorted_list[index][1]) == float:
+                            statement += f") AND ({table_name}.{sorted_list[index][0]} = {sorted_list[index][1]} "
+                        else:
+                            statement += f") AND ({table_name}.{sorted_list[index][0]} = '{sorted_list[index][1]}' "
+            statement += ") AND "
+        statement = statement[:-5] 
+
+    if filter_less:
+        if not where_statement:
+            statement += " WHERE "
+            where_statement = True
+        else:
+            statement += " AND "
+        for table_name, table_attribute_list in filter_less.items():
+            for attribute,value in table_attribute_list.items():
+                statement += f"{table_name}.{attribute} < {value} AND "
+        statement = statement[:-5]
+    statement += ";"
+    print(statement)
+    statement = sqlalchemy.text(statement)
+    #try:
+    res = db.execute(statement)
+    db.commit()
+    res = generate_table_return_result(res)
+    print(res)
+    #except:
+    #    db.rollback()
+
+
+    
+        
+
 
 @app.get("/table")
 def get_relation():
@@ -574,6 +651,21 @@ def fill_data():
     db.commit()
 
     insertion = {}
+    insertion['name'] = "provider"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
+    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
+    value_list = [55555,'Junjie','Tian','123@qq.com',19,'Chinese',0,'Male','Chinese']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
     insertion['name'] = "housing_size_type"
     insertion['body'] = {}
     insertion["valueTypes"] = {}
@@ -671,7 +763,7 @@ def delete_data():
 
 
 # ? The port where the debuggable DB management API is served
-PORT = 2222
+PORT = 2223
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":

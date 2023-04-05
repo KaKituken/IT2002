@@ -345,14 +345,14 @@ No api request.
         }
     ],
     "filterEqual": {
-        "table1": {
-            "att1": "value1",
-            "att2": "value2"
-        },
-        "table2": {
-            "att1": "value1",
-            "att2": "value2"
-        },
+        "table1": [
+            {"att1": "value1"},
+            {"att2": "value2"}
+        ],
+        "table2": [
+            {"att1": "value1"},
+            {"att2": "value2"}
+        ],
     },
     "filterLess": {
         "table1": {
@@ -371,6 +371,7 @@ No api request.
 
 ```json
 {
+    "status": 
     "columns": ["a","b","c"],
     "rows": [
         {"a":1,"b":2,"c":3},
