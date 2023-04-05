@@ -71,7 +71,18 @@ export interface ConplexQueryCondition {
     fromTable: string[]
     joinOn: Record<string, string>[]
     filterEqual: Record<string, Record<string, string>>
-    filterLess: Record<string, Record<string, string>>
+    filterLess: Record<string, Record<string, number>>
+}
+
+interface TableData {
+    columns: string[]
+    rows: Record<string, any>[]
+}
+
+export interface ConplexQueryReturn{
+    status: boolean
+    tableData: TableData
+    details: string
 }
   
 
@@ -146,4 +157,13 @@ export async function getAttributeInfo(params:string[]) {
         console.log(res.data)
     }
     return res.data as Promise<GetAttributeReturn>
+}
+
+export async function postComplexQery(params:ConplexQueryCondition) {
+    let res = await api.post('/complex-query', params)
+    if(!res.ok){
+        alert("Failed to post complex query info")
+        console.log(res.data)
+    }
+    return res.data as Promise<ConplexQueryReturn>
 }

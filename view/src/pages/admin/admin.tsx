@@ -70,7 +70,7 @@ function Admin(){
     const clickedIndicator:Record<string, boolean[]> = {}   // tableName: isClicked[]
 
     // 记录 range filter 的 attribute 和 value
-    const [rangeFilterAttributes, setRangeFilterAttributes] = useState<Record<string, Record<string, number>>>({})
+    const [rangeFilterAttributes, setRangeFilterAttributes] = useState<Record<string, Record<string, number>>>({})  // tableName: {att: val}
     
 
     const handleIsClickedChange = (tableName:string, updatedIsClicked: boolean[]) => {
@@ -90,14 +90,14 @@ function Admin(){
     };
 
     async function getAllTableInfo(param:string[]){
-        // let success = await api.getAttributeInfo(param)
-        // if(success.status){
-        //     setTableInfo(success.tableAttributes)
-        //     // const newCurrentTable = success.tableAttributes.map()
-        // }
-        // else{
-        //     window.alert(success.details)
-        // }
+        let success = await api.getAttributeInfo(param)
+        if(success.status){
+            setTableInfo(success.tableAttributes)
+            // const newCurrentTable = success.tableAttributes.map()
+        }
+        else{
+            window.alert(success.details)
+        }
     }
 
     function handleTableClickedChange(index: number){
@@ -143,7 +143,7 @@ function Admin(){
         setJoinOnTableAttributes(newJoinOnTableAttributes)
     }
 
-    function handleDisplayClick(){
+    async function handleDisplayClick(){
         const param:api.ConplexQueryCondition = {
             fromTable: [],
             joinOn: [],
@@ -191,32 +191,32 @@ function Admin(){
                 }
             }
         })
+        // construct filter less
+        Object.entries(rangeFilterAttributes).forEach(([tableName, attList]) => {
+            param.filterLess[tableName] = {}
+            Object.entries(attList).forEach(([key, val])=>{
+                param.filterLess[tableName][key] = val
+            })
+        })
         console.log(param)
-
-        // attributeInfo.forEach((singleTableInfo, index) => {
-        //     param.filterEqual[singleTableInfo.name] = {}
-        //     const singleTableIndicator = [...clickedIndicator[singleTableInfo.name]]
-        //     let boolIndicatorIndex = 0
-        //     if(!singleTableIndicator.every(ele => ele === false)){
-        //         // 有被选中的
-        //         singleTableInfo.attribute.forEach((singleAttributeInfo, attIndex) => {
-        //             if()
-        //         })
-        //     }
-        // })
+        let success = await api.postComplexQery(param)
+        if(success.status === true) {
+            console.log(success.tableData)
+        }
     }
 
 
     useEffect(() => {
-        // async () => {
-        //     let success = await api.getTableName()
-        //     if(success.status === true) {
-        //         setChoosenTable(success.tableNameList)
-        //         setTableChoosenIndicator(Array<boolean>(success.tableNameList.length).fill(false))
-        //     }
-        // }
-        setChoosenTable(['houses', 'bids', 'providers'])
-        setTableChoosenIndicator(Array<boolean>(3).fill(false))
+        (async () => {
+            let success = await api.getTableName()
+            if(success.status === true) {
+                setChoosenTable(success.tableNameList)
+                console.log(success.tableNameList)
+                setTableChoosenIndicator(Array<boolean>(success.tableNameList.length).fill(false))
+            }
+        })();
+        // setChoosenTable(['houses', 'bids', 'providers'])
+        // setTableChoosenIndicator(Array<boolean>(3).fill(false))
       }, []); // 空数组使得 useEffect 仅在组件挂载后运行一次
 
     return (
