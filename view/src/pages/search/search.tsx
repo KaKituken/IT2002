@@ -6,12 +6,12 @@ import * as api from '../../service/api'
 
 function App(){
 
-    const [firstName, setFirstName] = useState('')
-    const [lastName, setLastName] = useState('')
-    const [email, setEmail] = useState('')
-    const [age, setAge] = useState(0)
-    const [nationality, setNationality] = useState('')
-    const [sex, setSex] = useState('')
+    const [location, setLocation] = useState('')
+    const [houseTypeList, setHouseTypeList] = useState<string[]>([])
+    const [houseSize, setHouseSize] = useState<number>()
+    const [maxPrice, setMaxPrice] = useState<number>()
+    const [fromDate, setNationality] = useState('')
+    const [toDate, setSex] = useState('')
     
 
     return(
@@ -25,9 +25,9 @@ function App(){
                     </div>
                     <div className='type-tag-box'>
                         <div className='type-tag'>All</div>
-                        <div className='type-tag'>Apartment</div>
-                        <div className='type-tag'>Villa</div>
-                        <div className='type-tag'>Penthouse</div>
+                        <div className='type-tag'>condo</div>
+                        <div className='type-tag'>HDB</div>
+                        <div className='type-tag'>private house</div>
                     </div>
                     <div className='detail-info-box'>
                         <div className='input-box' id='size'>

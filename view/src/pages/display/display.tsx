@@ -50,10 +50,19 @@ function App(){
         })
     }
 
+    function handleSerchClicked(){
+        if(userType === 'Guest'){
+            // window.alert('Please log in first')
+            // return
+        }
+        navigate('/search')
+    }
+
     return (
         <div className="App">
             <Icon color="black"></Icon>
             <SignUpIcon color='black'></SignUpIcon>
+            <button id='search-btn' onClick={handleSerchClicked}>search for houses</button>
             <div id="display-box">
                 {houseInfoList.map((singleHouseInfo, index) => (
                     <InfoCard id={singleHouseInfo.houseid} 
