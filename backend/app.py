@@ -539,7 +539,44 @@ def update():
         response["details"] = "Database update failed"
     return jsonify(response)
 
+@app.route("/admin/add",methods = ["POST"])
+def add():
+    param = request.json
+    response = {}
+    attribute_dict = param["entryInfo"]
+    target_attribute_dict = {}
+    table_name = ''
+    for key,value in attribute_dict.items():
+        parts = key.split("__")
+        part1 = parts[0]
+        table_name = part1
+        part2 = key[len(part1)+2:]
+        target_attribute_dict[part2] = value
 
+    statement = f"INSERT INTO {table_name} "
+    attribute_name = "("
+    attribute_values = "("
+    for attribute, value in target_attribute_dict.items():
+        attribute_name += f"{attribute},"
+        if table_name_list[table_name][attribute] in ["INT","FLOAT"]:
+            attribute_values += f"{value},"
+        else:
+            attribute_values += f"'{value}',"
+    attribute_name = attribute_name[:-1] + ")"
+    attribute_values = attribute_values[:-1] + ")"
+
+    statement += f"{attribute_name} VALUES {attribute_values};"
+    statement = sqlalchemy.text(statement)
+    try:
+        db.execute(statement)
+        db.commit()
+        response["status"] = True
+        response["details"] = ""
+    except:
+        db.rollback()
+        response["status"] = False
+        response["details"] = "Database insertion failed"
+    return jsonify(response)
 
 
 
@@ -1068,8 +1105,8 @@ def delete_data():
 
 
 # ? The port where the debuggable DB management API is served
-# PORT = 2223
-PORT = 2222
+PORT = 2223
+#PORT = 2222
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
