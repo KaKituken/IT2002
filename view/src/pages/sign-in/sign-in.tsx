@@ -92,8 +92,10 @@ function App(){
             nationality: nationality,
             sex: sex,
             password: password,
-            type: userType
+            type: userType,
+            salary: salary
         }
+        console.log(formData)
         let success = await api.signIn(formData)
         if(success.status === true) {
             window.location.href = 'login'

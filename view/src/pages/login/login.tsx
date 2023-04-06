@@ -2,7 +2,7 @@ import './login.css'
 import Icon from '../../components/Icon/Icon'
 import BottomNav from '../../components/BottomNav/BottomNav'
 import { useAppSelector, useAppDispatch } from '../../hooks';
-import { setUserToken } from '../../feature/userInfo/userInfoSlice';
+import { setUserToken, setUserType } from '../../feature/userInfo/userInfoSlice';
 import { useState } from 'react'
 import * as api from '../../service/api'
 import { useNavigate } from 'react-router-dom';
@@ -50,6 +50,7 @@ function App(){
         if(success.status === true) {
             window.alert('success')
             dispatch(setUserToken(success.token))
+            dispatch(setUserType(success.userType))
             navigate('/display')
         }   
         else{

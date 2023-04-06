@@ -125,7 +125,7 @@ def getname():
     sex = param['sex']
     salary = param['salary']
     user_type = param['type']
-    if user_type == "provider":
+    if user_type == "Provider":
         att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
         type_list = ['INT','TEXT','TEXT','TEXT','INT','TEXT','INT','TEXT','TEXT']
         ethnicity = nationality
@@ -159,7 +159,7 @@ def getname():
         new_user_id = res["rows"][0]['max']+1
         value_list = [new_user_id, first_name, last_name, email, age, nationality, salary, sex, ethnicity]
         insertion = {}
-        insertion['name'] = 'renter'
+        insertion['name'] = 'Renter'
         insertion['body'] = {}
         insertion["valueTypes"] = {}
         for att, v in zip(att_list, value_list):

@@ -175,27 +175,27 @@ No api request.
  - Request: 'POST'
  - Param:
   ```json
-    {
-      "houseInfo":{
-        "asking price": 0, //string
-        "location": "", 	//  string
-        "type": "", 		// string
-        "size": 0, 			// number
-        "location": "", 	// string
-        "startDate": "",	// Date
-        "endDate": "",		// Date
-        "maxbid": "", 		// number
-        "bidding period": 0,// number
-        "description": "",	// string
-        "images": [
-                  "url1",
-                  "url2"
-                  "url3"
-                  "url4"
-              ]
-       },
-    "token": ""				// string
-    }
+{
+  "houseInfo":{
+    "asking price": 0, //string
+    "location": "", 	//  string
+    "type": "", 		// string
+    "size": 0, 			// number
+    "location": "", 	// string
+    "startDate": "",	// Date
+    "endDate": "",		// Date
+    "maxbid": "", 		// number
+    "bidding period": 0,// number
+    "description": "",	// string
+    "images": [
+              "url1",
+              "url2"
+              "url3"
+              "url4"
+          ]
+   },
+"token": ""				// string
+}
 
   ```
 
@@ -209,31 +209,17 @@ No api request.
  ### Filter for houses
 
  - Route: `/filter-for-houses`
- - Request: `GET`
- - Param:
-  ```json
-    {
-    "token": ""				// string
-    }
-- Response:
-  {
-    "status": true/false,
-    "details": "...",
-    "typeofhousing":{}
-  }
-  ```
-
-- Request: 'POST'
+- Request: `POST`
 - Param: 
  ```json
 {
     "houseinfo": {
         "location": "", 	// string
-        "type": "", 		// string
-        "size": "", 		// string
-        "maxprice": 0, 		// number
-        "startdate": "", 	// date
-        "enddate": "" 		// date
+        "type": [""], 		// string
+        "size": 1, 			// number
+        "maxPrice": 0, 		// number
+        "startDate": "", 	// date
+        "endDate": "" 		// date
     },
     "token": ""				// string
 }
@@ -241,15 +227,33 @@ No api request.
  ```
 
 - Response:
-  
-  ```json
-  {
-    "status": true/false,
-    "details": "...",
-  }
-  ```
 
-## Admin
+```json
+{
+    "status": true/false,
+    "houseInfoList": [
+        {
+            "houseid": "", 		// string, housing
+            "providerName": "", // string, to select
+            "location": "", 	// string, housing
+            "minPrice": 0, 		// number, housing
+            "size": 0, 			// number, housing
+            "sizeType": "", 	// number, to select
+            "startDate": "",	// Date, housing
+            "endDate": "",		// Date, housing
+            "currentBid": "",	// number, to select
+            "description": "",	// string, housing
+            "type": "",			// string
+            "images": [
+                "url1",
+                "url2"
+            ],					// Array<string>, not in  db
+        },
+        // ...
+    ],
+    "details": "..."
+}
+```
 
 ### Get all tables name
 

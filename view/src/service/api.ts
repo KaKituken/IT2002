@@ -27,6 +27,7 @@ export interface SignInForm {
     sex: string,
     password: string,
     type: string
+    salary: number
 }
 
 export interface ProviderForm {
@@ -43,6 +44,7 @@ export interface LogInReturn {
     status: boolean
     details: string
     token: string
+    userType: string
 }
 
 export interface GetTableNameReturn {
