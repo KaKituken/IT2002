@@ -286,31 +286,25 @@ def provide_house():
         return jsonify({'status': False, 'details': 'database insertion failed'})
 
 
-@app.route("/house-list", methods = ['GET'])
+@app.route("/house-list", methods = ['POST'])
 def house_list():
     param = request.json
-    att_list = ['token']
-    selection = {"table": "table_housing", "att": att_list, "condition": param}
-    statement = generate_conditional_select_statement(selection)
+    response = {}
+    # get all house info
+    statement = "SELECT housing_id, provider_id, location, min_price, size, start_time, end_time, description FROM housing;"
+    statement = sqlalchemy(statement)
     res = db.execute(statement)
     db.commit()
-    response = {}
-    res = generate_table_return_result1(res)
-    if len(res["rows"]) == 0:
-        response['status'] = False
-        response['token'] = ''
-        response['details'] = 'Wrong User Name or Password'
-    else:
-        response['status'] = True
-        response['token'] = res["rows"][0]['token']
-        response['details'] = ''
-    return jsonify(response)
+    res = generate_table_return_result1
 
 @app.route("/make-bid", methods = ['POST'])
 def make_bid():
     param = request.json
     #parse
     token = param['token']
+    houseID = param['houseInfo']['houseid']
+
+
 
     #calculation of attributes
     # houseID = hashlib.md5((location + description + token)).encode().hexdigest()
