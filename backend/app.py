@@ -294,7 +294,7 @@ def house_list():
     res = db.execute(statement)
     db.commit()
     response = {}
-    res = generate_table_return_result1(res)
+    res = generate_table_return_resulte_no_rename(res)
     if len(res["rows"]) == 0:
         response['status'] = False
         response['token'] = ''
@@ -648,12 +648,13 @@ def generate_conditional_select_statement(selection: Dict):
     print(statement[:-4])
     return sqlalchemy.text(statement[:-4])
 
-
+'''
 statement = 'SELECT ...'
 statement = sqlalchemy.text(statement)
 res = db.execute(statement)
 if res is not None:
     ...
+'''
 
 
 """
@@ -820,7 +821,7 @@ def fill_data():
     insertion["valueTypes"] = {}
     att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
     type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
-    value_list = [55555,'Junjie','Tian','123@qq.com',19,'Chinese',0,'Male','Chinese']
+    value_list = [55555,'Junjie','Tian','123@outlook.com',19,'Chinese',0,'Male','Chinese']
     for att, v in zip(att_list, value_list):
         insertion['body'][att] = v
     for att, t in zip(att_list, type_list):
@@ -865,7 +866,7 @@ def fill_data():
     insertion["valueTypes"] = {}
     att_list = ['housing_id','provider_id','size','type_of_housing','location','age_of_housing','start_time','end_time','min_price','bidding_period','rented','description']
     type_list = ['NUMERIC','NUMERIC','NUMERIC','TEXT','TEXT','NUMERIC','DATE','DATE','NUMERIC','NUMERIC','TEXT','TEXT']
-    value_list = [12345,54321,80,'condo','Sentosa',3,'2022-09-01','2023-09-01',1000,100,'No','good house near sea']
+    value_list = [12345,54321,80,'condo','Sentosa',3,'2022-09-01','2023-09-01',1000,100,'no','good house near sea']
     for att, v in zip(att_list, value_list):
         insertion['body'][att] = v
     for att, t in zip(att_list, type_list):
@@ -978,7 +979,7 @@ if __name__ == "__main__":
             "type_of_housing": "TEXT NOT NULL",
             "location": "TEXT NOT NULL",
             "age_of_housing": "NUMERIC NOT NULL CHECK(age_of_housing > 0)",
-            "max_price": "NUMERIC NOT NULL CHECK(max_price >= 0)"
+            "max_price": "NUMERIC NOT NULL CHECK(max_price > 0)"
         },
         "primary_key": "(size,type_of_housing,location,age_of_housing)"
         }
@@ -1017,9 +1018,9 @@ if __name__ == "__main__":
             "first_name": "TEXT NOT NULL",
             "last_name": "TEXT NOT NULL",
             "email": "TEXT NOT NULL",
-            "age": "NUMERIC NOT NULL",
+            "age": "NUMERIC NOT NULL CHECK (age>=18)",
             "nationality": "TEXT NOT NULL",
-            "salary": "NUMERIC NOT NULL",
+            "salary": "NUMERIC NOT NULL CHECK (salary>=0)",
             "sex": "TEXT NOT NULL",
             "ethnicity": "TEXT NOT NULL"
         },
@@ -1035,8 +1036,8 @@ if __name__ == "__main__":
             "housing_id": "NUMERIC NOT NULL",
             "renter_id": "NUMERIC NOT NULL",
             "start_time": "DATE NOT NULL",
-            "end_time": "DATE NOT NULL",
-            "price": "NUMERIC NOT NULL",
+            "end_time": "DATE NOT NULL CHECK (end_time >= start_time)",
+            "price": "NUMERIC NOT NULL CHECK (price > 0)",
             "bid_date": "DATE NOT NULL"
         },
         "primary_key": "(housing_id,renter_id)",
