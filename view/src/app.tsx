@@ -9,7 +9,7 @@ import Bid from './pages/bid/bid'
 import Display from './pages/display/display'
 import Provider from './pages/provider/provider'
 import Admin from './pages/admin/admin';
-import Test from './pages/testChart/testChart';
+import TableDisplay from './pages/testChart/testChart';
 
 
 function App() {
@@ -24,7 +24,7 @@ function App() {
         <Route path="/display" element={<Display />} />
         <Route path="/provider" element={<Provider />} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="/test" element={<Test />} />
+        <Route path="/table" element={<TableDisplay />} />
       </Routes>
     </BrowserRouter>
   );

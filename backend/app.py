@@ -296,6 +296,7 @@ def house_list():
     db.commit()
     res = generate_table_return_resulte_no_rename(res)
     response['houseInfoList'] = []
+    # try:
     for house in res['rows']:
         house_info = {}
         house_info['houseid'] = house['housing_id']
@@ -304,7 +305,7 @@ def house_list():
         house_info['size'] = house['size']
         house_info['startDate'] = house['start_time']
         house_info['endDate'] = house['end_time']
-        house_info['description'] = house['discription']
+        house_info['description'] = house['description']
         provider_id = house['provider_id']
         # select provider name
         provider_name_selection = f"SELECT first_name, last_name FROM provider WHERE provider_id = '{provider_id}';"
@@ -316,19 +317,24 @@ def house_list():
         # select size type
         size = house['size']
         size_type_selection = f"SELECT size_type FROM housing_size_type WHERE size = {size};"
-        size_type_res = sqlalchemy.text(size_type_res)
+        size_type_selection = sqlalchemy.text(size_type_selection)
         size_type_res = db.execute(size_type_selection)
         db.commit()
+        size_type_res = generate_table_return_resulte_no_rename(size_type_res)
         house_info['sizeType'] = size_type_res['rows'][0]['size_type']
         # select current bid, which is the max value
-        current_bid_selection = f"SELECT max(price) FROM bids WHERE house_id = '{house['housing_id']}';"
+        current_bid_selection = f"SELECT max(price) FROM bids WHERE housing_id = '{house['housing_id']}';"
         current_bid_selection = sqlalchemy.text(current_bid_selection)
         current_bid_res = db.execute(current_bid_selection)
         db.commit()
+        current_bid_res = generate_table_return_resulte_rename(current_bid_res)
         house_info['currentBid'] = current_bid_res['rows'][0]['max']
         response['houseInfoList'].append(house_info)
     response['status'] = True
     response['details'] = ''
+    # except:
+    #     response['status'] = False
+    #     response['details'] = 'get list info error'
     return jsonify(response)
         
 
@@ -967,7 +973,7 @@ def delete_data():
 
 
 # ? The port where the debuggable DB management API is served
-PORT = 2223
+PORT = 2222
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":

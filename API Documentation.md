@@ -439,3 +439,28 @@ No api request.
 }
 ```
 
+### Delete entry
+
+- Router: `admin/delete`
+- Request: `POST`
+- Param:
+
+```json
+{
+    "entryInfo":{
+        "att1": "value1",
+        "att2": "value2",
+        ...
+    }
+}
+```
+
+- Response:
+
+```json
+{
+    "status": true,
+    "details": "..."
+}
+```
+

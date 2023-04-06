@@ -3,60 +3,19 @@ import Icon from '../../components/Icon/Icon'
 import FilterBox from '../../components/FilterBox/FilterBox'
 import FilterBar from '../../components/FilterBar/FilterBar'
 import Select from 'react-select'
-import MyChart from '../../components/MyChart/MyChart'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import * as api from '../../service/api'
 
 function Admin(){
+
+    const navigate = useNavigate()
 
     const [currentTable, setCurrentTable] = useState<{ value: string; label: string; }[]>()
     const [allTableNames, setChoosenTable] = useState<string[]>(Array<string>())   // current tables (right one)
     const [tableChoosenIndicator, setTableChoosenIndicator] = useState(Array<boolean>()) 
     // whole table info
-    const [attributeInfo, setTableInfo] = useState<api.TableAttributes[]>([
-        {
-            name: "houses",
-            attribute:[
-                {
-                     attributeName: "att1",
-                     type: "TEXT",
-                     count: [
-                         {"value1": 9},
-                         {"value2": 20},
-                     ],
-                },
-                {
-                     attributeName: "att2",
-                     "type": "TEXT",
-                     "count": [
-                         {"value1": 9},
-                         {"value2": 20},
-                     ],
-                }
-             ], 
-         },
-        {
-            name: "bids",
-            "attribute":[
-               {
-                    "attributeName": "att1",
-                    "type": "INT",
-                    "count": [
-                        {"value1": 9},
-                        {"value2": 20},
-                    ],
-               },
-               {
-                    "attributeName": "att2",
-                    "type": "NUMERIC",
-                    "count": [
-                        {"minValue": 9},
-                        {"maxValue": 20},
-                    ],
-               }
-            ],
-        }
-    ])
+    const [attributeInfo, setTableInfo] = useState<api.TableAttributes[]>([])
 
 
     // 记录join on的六个框各选了哪个table
@@ -155,12 +114,13 @@ function Admin(){
         param.fromTable = allTableNames.map((tableName, index) => ({tableName, bool: tableChoosenIndicator[index]}))
         .filter(({bool}) => bool)
         .map(({ tableName }) => tableName)
+        // construct join on
         for (let index = 0; index < 6; index+=2) {
             const leftTableName = joinOnTables[index]
             const leftAttName = joinOnTableAttributes[index]
             const rightTableName = joinOnTables[index+1]
             const rightAttName = joinOnTableAttributes[index+1]
-            if(leftTableName != null && rightTableName != null && leftAttName != null && rightAttName != null){
+            if(leftTableName && rightTableName && leftAttName && rightAttName){
                 param.joinOn.push({[leftAttName]: leftAttName, [rightTableName]: rightAttName})
             }
         }
@@ -202,10 +162,11 @@ function Admin(){
             })
         })
         console.log(param)
-        let success = await api.postComplexQery(param)
-        if(success.status === true) {
-            console.log(success.tableData)
-        }
+        navigate('/table', {state: {param}})
+        // let success = await api.postComplexQery(param)
+        // if(success.status === true) {
+        //     console.log(success.tableData)
+        // }
     }
 
 

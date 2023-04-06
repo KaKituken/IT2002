@@ -156,11 +156,11 @@
 }
 
 .admin-page #display-result{
-    position: absolute;
+    position: relative;
     width: 72px;
     height: 29px;
     left: 390px;
-    top: 779px;
+    top: 50px;
 
     background: #0390BC;
     border: 0;

@@ -1,0 +1,9 @@
+.chart-page #back-btn{
+    background-color: #4D5D72;
+    color: white;
+    border: 0;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left: 5px;
+}
