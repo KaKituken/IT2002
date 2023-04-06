@@ -83,27 +83,19 @@ No api request.
           "size": 0, 			// number
           "startDate": "",	// Date
           "endDate": "",		// Date
-<<<<<<< HEAD
-=======
-  <<<<<<< HEAD
-  =======
           "MaxBid": "",		// number
->>>>>>> a5a93a3c69c9bab19437ad027e1b3d1d89a38889
->>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
           "description": "",	// string
           "typeOfHouse": "",  //string
           "age": 1233,
           "minPrice": 123,
           "images": [
-              "url1",
-              "url2"
-          ],					// Array<string>
-      },
+          "url1",
+          "url2"
+      ],					// Array<string>
+  },
       "token": ""				// string
   }
 
-  ```
-  
 - Response:
 
   ```json
@@ -111,7 +103,6 @@ No api request.
       "status": true/false,
       "details": "...",
   }
-  ```
 
 ## Display Page
 
@@ -154,21 +145,13 @@ No api request.
 - Request: `POST`
 - Param:
   ```json
-<<<<<<< HEAD
     {
       "houseInfo":{
         "houseid": "", //string
         "location": "", //string
         "description": "", //string
-    "token": ""				// string
+    	"token": ""				// string
     }
-```   
-=======
-  {
-      "houseid": "", 			// string
-    	"token": ""				// user token
-  }
->>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
 - Response:
 
   ```json
@@ -179,15 +162,10 @@ No api request.
     },
     "details": "...",
     "currentBid": "",	// 
-<<<<<<< HEAD
-  }
+}
 
-  ```
-=======
-  }  
-
->>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
  ### Bid for rental provider
+
  - Route: '/bid-for-rental-provider'
  - Request: 'POST'
  - Param:
@@ -243,17 +221,6 @@ No api request.
 - Request: 'POST'
 - Param: 
  ```json
-<<<<<<< HEAD
-    {
-      "houseinfo": {
-        "location": "", //string
-        "type": "", //string
-        "size": "", //string
-        "maxprice": 0, //number
-        "startdate": "", //date
-        "enddate": "", //date
-      },
-=======
 {
     "houseinfo": {
         "location": "", 	// string
@@ -263,7 +230,6 @@ No api request.
         "startdate": "", 	// date
         "enddate": "" 		// date
     },
->>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
     "token": ""				// string
 }
 
@@ -381,16 +347,6 @@ No api request.
         }
     ],
     "filterEqual": {
-<<<<<<< HEAD
-        "table1": {
-            "att1": "value1",
-            "att2": "value2"
-        },
-        "table2": {
-            "att1": "value1",
-            "att2": "value2"
-        },
-=======
         "table1": [
             {"att1": "value1"},
             {"att1": "value3"},
@@ -400,7 +356,6 @@ No api request.
             {"att1": "value1"},
             {"att2": "value2"}
         ],
->>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
     },
     "filterLess": {
         "table1": {
@@ -419,13 +374,6 @@ No api request.
 
 ```json
 {
-<<<<<<< HEAD
-    "columns": ["a","b","c"],
-    "rows": [
-        {"a":1,"b":2,"c":3},
-        {"a":4,"b":5,"c":6}
-    ]
-=======
     "status": true,
     "tableData": {
       "columns": ["a","b","c"],
@@ -435,7 +383,6 @@ No api request.
       ]
     },
     "details": "..."
->>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
 }
 ```
 

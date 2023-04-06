@@ -13,6 +13,11 @@ export interface LogInForm {
     password: string
 }
 
+export interface BasicReturn {
+    status: boolean
+    details: string
+}
+
 export interface SignInForm {
     firstName: string,
     lastName: string,
@@ -83,6 +88,11 @@ export interface ConplexQueryReturn{
     status: boolean
     tableData: TableData
     details: string
+}
+
+
+export interface DeleteEntryInfo{
+    entryInfo: Record<string, string|number>
 }
   
 
@@ -166,4 +176,13 @@ export async function postComplexQery(params:ConplexQueryCondition) {
         console.log(res.data)
     }
     return res.data as Promise<ConplexQueryReturn>
+}
+
+export async function postDeleteEntry(params:DeleteEntryInfo) {
+    let res = await api.post('/admin/delete', params)
+    if(!res.ok){
+        alert("Failed to delete the entry")
+        console.log(res.data)
+    }
+    return res.data as Promise<BasicReturn>
 }

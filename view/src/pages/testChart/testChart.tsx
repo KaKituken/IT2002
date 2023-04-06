@@ -10,32 +10,8 @@ function TableDisplay() {
     const location = useLocation()
 
     const [tableData, setTableData] = useState<api.TableData>({ columns: [], rows: [] })
-    let a: api.TableData = { columns: [], rows: [] }
-
-    const handleDeleteClick = (rowIndex: number) => {
-        console.log('Delete button clicked for row:', rowIndex)
-        // Implement your delete functionality here
-    }
 
     const navigate = useNavigate()
-
-    useEffect(() => {
-        const requestParam = location.state.param
-        console.log(requestParam)
-        console.log('hello');
-        (async () => {
-            console.log('arrow')
-            let success = await api.postComplexQery(requestParam)
-            if (success.status) {
-                setTableData(success.tableData)
-                a = success.tableData
-                console.log(success.tableData)
-            }
-            else {
-                console.log(success.tableData)
-            }
-        })()
-    }, [])
 
     const columns = React.useMemo(() => {
         return tableData.columns.map((columnName) => ({
@@ -47,6 +23,58 @@ function TableDisplay() {
     const data = React.useMemo(() => tableData.rows, [tableData.rows])
 
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({ columns, data })
+
+    async function handleDeleteClick(rowIndex: number){
+        if(location.state.isJoin){
+            window.alert("Can't delete entries from a joined table")
+            return
+        }
+        const param:api.DeleteEntryInfo = {entryInfo: {}}
+        tableData.rows.forEach((ele, index) => {
+            param.entryInfo[Object.keys(ele)[0]] = param.entryInfo[Object.values(ele)[0]]
+        })
+        let success = await api.postDeleteEntry(param)
+        if(success.status){
+            // remove rowIndex
+            const newTableData = {...tableData}
+            newTableData.rows.splice(rowIndex, 1)
+            setTableData(newTableData)
+        }
+        else{
+            window.alert(success.details)
+        }
+    }
+
+    async function handleCellChange(e: React.ChangeEvent<HTMLInputElement>, cellInfo: any){
+        if(location.state.isJoin){
+            window.alert("Can't modify entries in a joined table")
+            return
+        }
+        const newData = [...tableData.rows];
+        newData[cellInfo.row.index][cellInfo.column.id] = e.target.value;
+        // setTableData(newData)
+        const newTableData = {...tableData}
+        newTableData.rows = newData
+        setTableData(newTableData)
+        console.log(newData);
+    };
+
+    useEffect(() => {
+        const requestParam = location.state.param
+        console.log(requestParam)
+        console.log('hello');
+        (async () => {
+            console.log('arrow')
+            let success = await api.postComplexQery(requestParam)
+            if (success.status) {
+                setTableData(success.tableData)
+                console.log(success.tableData)
+            }
+            else {
+                console.log(success.tableData)
+            }
+        })()
+    }, [])
 
     return (
         <div className="chart-page">
@@ -86,8 +114,15 @@ function TableDisplay() {
                                             border: 'solid 1px #E1E1E1',
                                         }}
                                     >
-                                        {cell.render('Cell')}
+                                        <input
+                                        type="text"
+                                        value={cell.value}
+                                        onChange={e => handleCellChange(e, cell)}
+                                        style={{ border: 'none', background: 'transparent' }}
+                                        ></input>
+                                        {/* {cell.render('Cell')} */}
                                     </td>
+                                    
                                 ))}
                                 <td style={{ padding: '8px' }}>
                                     <button
