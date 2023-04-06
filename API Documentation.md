@@ -443,3 +443,30 @@ No api request.
     "details": "..."
 }
 ```
+
+### Add entry
+
+- Router: `admin/add`
+- Request: `POST`
+- Param:
+
+```json
+{
+    "entryInfo":{
+        "att1": "value1",
+        "att2": "value2",
+        ...
+    }
+}
+```
+
+- Response:
+
+```json
+{
+    "status": true,
+    "details": "..."
+}
+```
+
+### 

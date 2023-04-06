@@ -67,15 +67,22 @@ function TableDisplay() {
         }
     }
 
+    function deepCopy<T>(obj: T): T {
+        return JSON.parse(JSON.stringify(obj));
+    }
+
     async function handleCellChange(e: React.ChangeEvent<HTMLInputElement>, cellInfo: any) {
         if (location.state.isJoin) {
             window.alert("Can't modify entries in a joined table")
             return
         }
+        const orgRowData = deepCopy(tableData.rows)
         const newRowData = [...tableData.rows];
         newRowData[cellInfo.row.index][cellInfo.column.id] = e.target.value;
+        console.log('old:', orgRowData[cellInfo.row.index])
+        console.log('new:', newRowData[cellInfo.row.index])
         let success = await api.postUpdateEntry({
-            orgRow: tableData.rows[cellInfo.row.index],
+            orgRow: orgRowData[cellInfo.row.index],
             newRow: newRowData[cellInfo.row.index]
         })
         if (success.status) {
