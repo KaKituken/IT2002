@@ -85,8 +85,11 @@ No api request.
           "endDate": "",		// Date
 <<<<<<< HEAD
 =======
+  <<<<<<< HEAD
+  =======
           "MaxBid": "",		// number
 >>>>>>> a5a93a3c69c9bab19437ad027e1b3d1d89a38889
+>>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
           "description": "",	// string
           "typeOfHouse": "",  //string
           "age": 1233,
@@ -98,7 +101,7 @@ No api request.
       },
       "token": ""				// string
   }
-  
+
   ```
   
 - Response:
@@ -118,12 +121,6 @@ No api request.
 
 - Request: `GET`
 
-- Param: 
-  ```json
-  {
-    "token": ""				// string
-  }
-
 - Response:
 
   ```json
@@ -131,47 +128,65 @@ No api request.
       "status": true/false,
       "houseInfoList": [
           {
-              "houseid": "", //string
-              "providerName": "", // string
-              "location": "", 	//  string
-              "price": 0, 		// number
-              "size": 0, 			// number
-              "size_type": "", 		// number
-              "startDate": "",	// Date
-              "endDate": "",		// Date
-              "currentBid": "",	// number
-              "description": "",	// string
+              "houseid": "", 		// string, housing
+              "providerName": "", // string, to select
+              "location": "", 	// string, housing
+              "minPrice": 0, 		// number, housing
+              "size": 0, 			// number, housing
+              "sizeType": "", 	// number, to select
+              "startDate": "",	// Date, housing
+              "endDate": "",		// Date, housing
+              "currentBid": "",	// number, to select
+              "description": "",	// string, housing
               "images": [
                   "url1",
                   "url2"
-              ],					// Array<string>
+              ],					// Array<string>, not in  db
           },
           // ...
       ]
   }
   ```
+
 ### Make Bid
 
-- Route: '/make-bid'
-- Request: 'POST'
+- Route: `/make-bid`
+- Request: `POST`
 - Param:
   ```json
+<<<<<<< HEAD
     {
       "houseInfo":{
         "houseid": "", //string
+        "location": "", //string
+        "description": "", //string
     "token": ""				// string
     }
 ```   
-
+=======
+  {
+      "houseid": "", 			// string
+    	"token": ""				// user token
+  }
+>>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
 - Response:
+
   ```json
   {
     "status": true/false,
+    "houseInfo": {
+        
+    },
     "details": "...",
     "currentBid": "",	// 
+<<<<<<< HEAD
   }
-  
+
   ```
+=======
+  }  
+
+>>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
  ### Bid for rental provider
  - Route: '/bid-for-rental-provider'
  - Request: 'POST'
@@ -183,11 +198,11 @@ No api request.
         "location": "", 	//  string
         "type": "", 		// string
         "size": 0, 			// number
-        "location": "" //string
+        "location": "", 	// string
         "startDate": "",	// Date
         "endDate": "",		// Date
-        "maxbid": "", //number
-        "bidding period": 0, //number
+        "maxbid": "", 		// number
+        "bidding period": 0,// number
         "description": "",	// string
         "images": [
                   "url1",
@@ -195,7 +210,7 @@ No api request.
                   "url3"
                   "url4"
               ]
-       } 
+       },
     "token": ""				// string
     }
 
@@ -210,8 +225,8 @@ No api request.
 
  ### Filter for houses
 
- - Route: '/filter-for-houses'
- - Request: 'GET'
+ - Route: `/filter-for-houses`
+ - Request: `GET`
  - Param:
   ```json
     {
@@ -228,28 +243,29 @@ No api request.
 - Request: 'POST'
 - Param: 
  ```json
+<<<<<<< HEAD
     {
       "houseinfo": {
-<<<<<<< HEAD
-        "location": "" //string
-        "type": "" //string
-        "size": "" //string
-        "maxprice": 0 //number
-        "startdate": "" //date
-        "enddate": "" //date
-      }
-=======
         "location": "", //string
         "type": "", //string
         "size": "", //string
         "maxprice": 0, //number
-        "rooms": 0, //number
         "startdate": "", //date
         "enddate": "", //date
       },
->>>>>>> a5a93a3c69c9bab19437ad027e1b3d1d89a38889
+=======
+{
+    "houseinfo": {
+        "location": "", 	// string
+        "type": "", 		// string
+        "size": "", 		// string
+        "maxprice": 0, 		// number
+        "startdate": "", 	// date
+        "enddate": "" 		// date
+    },
+>>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
     "token": ""				// string
-    }
+}
 
  ```
 
@@ -365,14 +381,26 @@ No api request.
         }
     ],
     "filterEqual": {
+<<<<<<< HEAD
+        "table1": {
+            "att1": "value1",
+            "att2": "value2"
+        },
+        "table2": {
+            "att1": "value1",
+            "att2": "value2"
+        },
+=======
         "table1": [
             {"att1": "value1"},
+            {"att1": "value3"},
             {"att2": "value2"}
         ],
         "table2": [
             {"att1": "value1"},
             {"att2": "value2"}
         ],
+>>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
     },
     "filterLess": {
         "table1": {
@@ -391,7 +419,14 @@ No api request.
 
 ```json
 {
-    "status": true
+<<<<<<< HEAD
+    "columns": ["a","b","c"],
+    "rows": [
+        {"a":1,"b":2,"c":3},
+        {"a":4,"b":5,"c":6}
+    ]
+=======
+    "status": true,
     "tableData": {
       "columns": ["a","b","c"],
       "rows": [
@@ -400,6 +435,7 @@ No api request.
       ]
     },
     "details": "..."
+>>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
 }
 ```
 

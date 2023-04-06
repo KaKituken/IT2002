@@ -21,7 +21,8 @@ CORS(app)
 
 # ? building our `engine` object from a custom configuration string
 # ? for this project, we'll use the default postgres user, on a database called `postgres` deployed on the same machine
-YOUR_POSTGRES_PASSWORD = "JUNjun11"
+# YOUR_POSTGRES_PASSWORD = "JUNjun11"
+YOUR_POSTGRES_PASSWORD = "Jishuhou524"
 # connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost/postgres"
 connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost:5432"
 engine = sqlalchemy.create_engine(
@@ -287,32 +288,69 @@ def provide_house():
 
 @app.route("/house-list", methods = ['GET'])
 def house_list():
-    param = request.json
-    att_list = ['token']
-    selection = {"table": "table_housing", "att": att_list, "condition": param}
-    statement = generate_conditional_select_statement(selection)
+    response = {}
+    # get all house info
+    statement = "SELECT housing_id, provider_id, location, min_price, size, start_time, end_time, description FROM housing;"
+    statement = sqlalchemy.text(statement)
     res = db.execute(statement)
     db.commit()
-    response = {}
     res = generate_table_return_resulte_no_rename(res)
-    if len(res["rows"]) == 0:
-        response['status'] = False
-        response['token'] = ''
-        response['details'] = 'Wrong User Name or Password'
-    else:
-        response['status'] = True
-        response['token'] = res["rows"][0]['token']
-        response['details'] = ''
+    response['houseInfoList'] = []
+    for house in res['rows']:
+        house_info = {}
+        house_info['houseid'] = house['housing_id']
+        house_info['location'] = house['location']
+        house_info['minPrice'] = house['min_price']
+        house_info['size'] = house['size']
+        house_info['startDate'] = house['start_time']
+        house_info['endDate'] = house['end_time']
+        house_info['description'] = house['discription']
+        provider_id = house['provider_id']
+        # select provider name
+        provider_name_selection = f"SELECT first_name, last_name FROM provider WHERE provider_id = '{provider_id}';"
+        provider_name_selection = sqlalchemy.text(provider_name_selection)
+        provider_res = db.execute(provider_name_selection)
+        db.commit()
+        provider_res = generate_table_return_resulte_no_rename(provider_res)
+        house_info['providerName'] = provider_res['rows'][0]['first_name'] + provider_res['rows'][0]['last_name']
+        # select size type
+        size = house['size']
+        size_type_selection = f"SELECT size_type FROM housing_size_type WHERE size = {size};"
+        size_type_res = sqlalchemy.text(size_type_res)
+        size_type_res = db.execute(size_type_selection)
+        db.commit()
+        house_info['sizeType'] = size_type_res['rows'][0]['size_type']
+        # select current bid, which is the max value
+        current_bid_selection = f"SELECT max(price) FROM bids WHERE house_id = '{house['housing_id']}';"
+        current_bid_selection = sqlalchemy.text(current_bid_selection)
+        current_bid_res = db.execute(current_bid_selection)
+        db.commit()
+        house_info['currentBid'] = current_bid_res['rows'][0]['max']
+        response['houseInfoList'].append(house_info)
+    response['status'] = True
+    response['details'] = ''
     return jsonify(response)
+        
+
 
 @app.route("/make-bid", methods = ['POST'])
 def make_bid():
     param = request.json
     #parse
+    location = param['houseInfo']['location']
+    description = param['houseInfo']['description']
     token = param['token']
+<<<<<<< HEAD
+=======
+    houseID = param['houseInfo']['houseid']
 
+
+
+>>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
     #calculation of attributes
-    # houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+    houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+    
+
 
     
 
