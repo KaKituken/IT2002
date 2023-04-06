@@ -50,8 +50,8 @@ function Admin(){
                     "attributeName": "att2",
                     "type": "NUMERIC",
                     "count": [
-                        {"min": 9},
-                        {"max": 20},
+                        {"minValue": 9},
+                        {"maxValue": 20},
                     ],
                }
             ],
@@ -70,7 +70,7 @@ function Admin(){
     const clickedIndicator:Record<string, boolean[]> = {}   // tableName: isClicked[]
 
     // 记录 range filter 的 attribute 和 value
-    const [rangeFilterAttributes, setRangeFilterAttributes] = useState<Record<string, Record<string, number>>>({})
+    const [rangeFilterAttributes, setRangeFilterAttributes] = useState<Record<string, Record<string, number>>>({})  // tableName: {att: val}
     
 
     const handleIsClickedChange = (tableName:string, updatedIsClicked: boolean[]) => {
@@ -89,15 +89,17 @@ function Admin(){
         console.log('Selected value:', value)
     };
 
-    async function getAllTableInfo(param:string[]){
-        // let success = await api.getAttributeInfo(param)
-        // if(success.status){
-        //     setTableInfo(success.tableAttributes)
-        //     // const newCurrentTable = success.tableAttributes.map()
-        // }
-        // else{
-        //     window.alert(success.details)
-        // }
+    async function getAllTableInfo(tableList:string[]){
+        console.log(tableList)
+        const param = {"tableNameList": tableList}
+        let success = await api.getAttributeInfo(param)
+        if(success.status){
+            setTableInfo(success.tableAttributes)
+            // const newCurrentTable = success.tableAttributes.map()
+        }
+        else{
+            window.alert(success.details)
+        }
     }
 
     function handleTableClickedChange(index: number){
@@ -143,7 +145,7 @@ function Admin(){
         setJoinOnTableAttributes(newJoinOnTableAttributes)
     }
 
-    function handleDisplayClick(){
+    async function handleDisplayClick(){
         const param:api.ConplexQueryCondition = {
             fromTable: [],
             joinOn: [],
@@ -162,6 +164,7 @@ function Admin(){
                 param.joinOn.push({[leftAttName]: leftAttName, [rightTableName]: rightAttName})
             }
         }
+        // construct filter Equal
         Object.entries(clickedIndicator).forEach(([tableAttributeName, valueChoosed]) => {
             const parts = tableAttributeName.split('.')
             const tableName = parts[0]
@@ -171,7 +174,7 @@ function Admin(){
             }
             // 遍历 attributeInfo 拿到这个tableName对应的信息
             if(!param.filterEqual[tableName]){
-                param.filterEqual[tableName] = {}
+                param.filterEqual[tableName] = []
             }
             for (let index = 0; index < attributeInfo.length; index++) {
                 const singleTableInfo = attributeInfo[index];
@@ -182,7 +185,7 @@ function Admin(){
                             // use valueChoosed to filter
                             for (let i = 0; i < singleAttributeInfo.count.length; i++) {
                                 if(valueChoosed[i]){
-                                    param.filterEqual[tableName][attName] = Object.keys(singleAttributeInfo.count[i])[0]
+                                    param.filterEqual[tableName].push({[attName]: Object.keys(singleAttributeInfo.count[i])[0]})
                                 }
                             }
                         }
@@ -191,32 +194,32 @@ function Admin(){
                 }
             }
         })
+        // construct filter less
+        Object.entries(rangeFilterAttributes).forEach(([tableName, attList]) => {
+            param.filterLess[tableName] = {}
+            Object.entries(attList).forEach(([key, val])=>{
+                param.filterLess[tableName][key] = val
+            })
+        })
         console.log(param)
-
-        // attributeInfo.forEach((singleTableInfo, index) => {
-        //     param.filterEqual[singleTableInfo.name] = {}
-        //     const singleTableIndicator = [...clickedIndicator[singleTableInfo.name]]
-        //     let boolIndicatorIndex = 0
-        //     if(!singleTableIndicator.every(ele => ele === false)){
-        //         // 有被选中的
-        //         singleTableInfo.attribute.forEach((singleAttributeInfo, attIndex) => {
-        //             if()
-        //         })
-        //     }
-        // })
+        let success = await api.postComplexQery(param)
+        if(success.status === true) {
+            console.log(success.tableData)
+        }
     }
 
 
     useEffect(() => {
-        // async () => {
-        //     let success = await api.getTableName()
-        //     if(success.status === true) {
-        //         setChoosenTable(success.tableNameList)
-        //         setTableChoosenIndicator(Array<boolean>(success.tableNameList.length).fill(false))
-        //     }
-        // }
-        setChoosenTable(['houses', 'bids', 'providers'])
-        setTableChoosenIndicator(Array<boolean>(3).fill(false))
+        (async () => {
+            let success = await api.getTableName()
+            if(success.status === true) {
+                setChoosenTable(success.tableNameList)
+                console.log(success.tableNameList)
+                setTableChoosenIndicator(Array<boolean>(success.tableNameList.length).fill(false))
+            }
+        })();
+        // setChoosenTable(['houses', 'bids', 'providers'])
+        // setTableChoosenIndicator(Array<boolean>(3).fill(false))
       }, []); // 空数组使得 useEffect 仅在组件挂载后运行一次
 
     return (
@@ -228,9 +231,10 @@ function Admin(){
                     <div id='from-table'>From table</div>
                     <div id='from-table-display'>
                         {allTableNames.map((tableName, index)=>(
-                            tableChoosenIndicator[index] ? 
-                            <span>{tableName}, </span> : 
-                            <span></span>
+                            tableChoosenIndicator[index] && <span>{tableName}, </span> 
+                            // tableChoosenIndicator[index] ? 
+                            // <span>{tableName}, </span> : 
+                            // <span></span>
                         ))}
                     </div>
                 </div>
@@ -304,11 +308,10 @@ function Admin(){
                     <div id='filter-boxes'>
                         {attributeInfo?.map((tableInfo, index) => (
                             tableInfo['attribute'].map((att, attIndex)=>(
-                                att['type'] !== 'NUMERIC' ? 
+                                att['type'] !== 'NUMERIC' &&
                                 <FilterBox 
                                 onIsClickedChange={handleIsClickedChange}attList={att['count']}
                                 tableName={tableInfo['name'] + '.' + att['attributeName']}></FilterBox> 
-                                : <span></span>
                             ))
                         ))}
                     </div>
@@ -318,7 +321,7 @@ function Admin(){
                                 att['type'] === 'NUMERIC' ? 
                                 <div className='number-bar' id='size-bar'>
                                     <div className='bar-title'>{tableInfo.name + '.' + att.attributeName}</div>
-                                    <FilterBar min={att.count[0]['min']} max={att.count[1]['max']} 
+                                    <FilterBar min={att.count[0]['minValue']} max={att.count[1]['maxValue']} 
                                     onChange={(value) => handleSliderChange(value, tableInfo['name'], att['attributeName'])}></FilterBar>
                                 </div>
                                 : <span></span>

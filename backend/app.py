@@ -21,7 +21,8 @@ CORS(app)
 
 # ? building our `engine` object from a custom configuration string
 # ? for this project, we'll use the default postgres user, on a database called `postgres` deployed on the same machine
-YOUR_POSTGRES_PASSWORD = "JUNjun11"
+# YOUR_POSTGRES_PASSWORD = "JUNjun11"
+YOUR_POSTGRES_PASSWORD = "Jishuhou524"
 # connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost/postgres"
 connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost:5432"
 engine = sqlalchemy.create_engine(
@@ -138,7 +139,7 @@ def log_in():
     res = db.execute(statement)
     db.commit()
     response = {}
-    res = generate_table_return_result1(res)
+    res = generate_table_return_resulte_no_rename(res)
     if len(res["rows"]) == 0:
         response['status'] = False
         response['token'] = ''
@@ -185,7 +186,7 @@ def return_table_detail():
                 statement = generate_group_by_statement(selection)
                 res = db.execute(statement)
                 db.commit()
-                returned_result_in_dict = generate_table_return_result1(res)
+                returned_result_in_dict = generate_table_return_resulte_no_rename(res)
                 for dict in returned_result_in_dict['rows']:
                     for key1 in dict:
                         if key1 != 'count':
@@ -199,7 +200,7 @@ def return_table_detail():
                 statement = generate_max_min_statement(selection)
                 res = db.execute(statement)
                 db.commit()
-                returned_result_in_dict = generate_table_return_result1(res)
+                returned_result_in_dict = generate_table_return_resulte_no_rename(res)
                 for key, value in returned_result_in_dict['rows'][0].items():
                     if key == 'min':
                         response['tableAttributes'][-1]['attribute'][-1]['count'].append({'minValue':value})
@@ -287,23 +288,50 @@ def provide_house():
 
 @app.route("/house-list", methods = ['GET'])
 def house_list():
-    param = request.json
-    att_list = ['token']
-    selection = {"table": "table_housing", "att": att_list, "condition": param}
-    statement = generate_conditional_select_statement(selection)
+    response = {}
+    # get all house info
+    statement = "SELECT housing_id, provider_id, location, min_price, size, start_time, end_time, description FROM housing;"
+    statement = sqlalchemy.text(statement)
     res = db.execute(statement)
     db.commit()
-    response = {}
-    res = generate_table_return_result1(res)
-    if len(res["rows"]) == 0:
-        response['status'] = False
-        response['token'] = ''
-        response['details'] = 'Wrong User Name or Password'
-    else:
-        response['status'] = True
-        response['token'] = res["rows"][0]['token']
-        response['details'] = ''
+    res = generate_table_return_resulte_no_rename(res)
+    response['houseInfoList'] = []
+    for house in res['rows']:
+        house_info = {}
+        house_info['houseid'] = house['housing_id']
+        house_info['location'] = house['location']
+        house_info['minPrice'] = house['min_price']
+        house_info['size'] = house['size']
+        house_info['startDate'] = house['start_time']
+        house_info['endDate'] = house['end_time']
+        house_info['description'] = house['discription']
+        provider_id = house['provider_id']
+        # select provider name
+        provider_name_selection = f"SELECT first_name, last_name FROM provider WHERE provider_id = '{provider_id}';"
+        provider_name_selection = sqlalchemy.text(provider_name_selection)
+        provider_res = db.execute(provider_name_selection)
+        db.commit()
+        provider_res = generate_table_return_resulte_no_rename(provider_res)
+        house_info['providerName'] = provider_res['rows'][0]['first_name'] + provider_res['rows'][0]['last_name']
+        # select size type
+        size = house['size']
+        size_type_selection = f"SELECT size_type FROM housing_size_type WHERE size = {size};"
+        size_type_res = sqlalchemy.text(size_type_res)
+        size_type_res = db.execute(size_type_selection)
+        db.commit()
+        house_info['sizeType'] = size_type_res['rows'][0]['size_type']
+        # select current bid, which is the max value
+        current_bid_selection = f"SELECT max(price) FROM bids WHERE house_id = '{house['housing_id']}';"
+        current_bid_selection = sqlalchemy.text(current_bid_selection)
+        current_bid_res = db.execute(current_bid_selection)
+        db.commit()
+        house_info['currentBid'] = current_bid_res['rows'][0]['max']
+        response['houseInfoList'].append(house_info)
+    response['status'] = True
+    response['details'] = ''
     return jsonify(response)
+        
+
 
 @app.route("/make-bid", methods = ['POST'])
 def make_bid():
@@ -312,6 +340,13 @@ def make_bid():
     location = param['houseInfo']['location']
     description = param['houseInfo']['description']
     token = param['token']
+<<<<<<< HEAD
+=======
+    houseID = param['houseInfo']['houseid']
+
+
+
+>>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
     #calculation of attributes
     houseID = hashlib.md5((location + description + token)).encode().hexdigest()
     
@@ -394,7 +429,7 @@ def complex_query():
     try:
         res = db.execute(statement)
         db.commit()
-        res = generate_table_return_result2(res)
+        res = generate_table_return_resulte_rename(res)
         print(res)
         response["status"] = True
         response["tableData"] = res
@@ -427,7 +462,7 @@ def get_relation():
         db.commit()
         # ? Data is extracted from the res objects by the custom function for each query case
         # ! Note that you'll have to write custom handling methods for your custom queries
-        data = generate_table_return_result1(res)
+        data = generate_table_return_resulte_no_rename(res)
         # ? Response object is instantiated with the formatted data and returned with the success code 200
         return Response(data, 200)
     except Exception as e:
@@ -508,7 +543,7 @@ def delete_row():
 
 
 
-def generate_table_return_result1(res) -> Dict:
+def generate_table_return_resulte_no_rename(res) -> Dict:
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
 
@@ -539,7 +574,7 @@ def generate_table_return_result1(res) -> Dict:
     # ? Returns the Dict
     return output
 
-def generate_table_return_result2(res) -> Dict:
+def generate_table_return_resulte_rename(res) -> Dict:
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
 
@@ -651,12 +686,13 @@ def generate_conditional_select_statement(selection: Dict):
     print(statement[:-4])
     return sqlalchemy.text(statement[:-4])
 
-
+'''
 statement = 'SELECT ...'
 statement = sqlalchemy.text(statement)
 res = db.execute(statement)
 if res is not None:
     ...
+'''
 
 
 """
@@ -823,7 +859,7 @@ def fill_data():
     insertion["valueTypes"] = {}
     att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
     type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
-    value_list = [55555,'Junjie','Tian','123@qq.com',19,'Chinese',0,'Male','Chinese']
+    value_list = [55555,'Junjie','Tian','123@outlook.com',19,'Chinese',0,'Male','Chinese']
     for att, v in zip(att_list, value_list):
         insertion['body'][att] = v
     for att, t in zip(att_list, type_list):
@@ -868,7 +904,7 @@ def fill_data():
     insertion["valueTypes"] = {}
     att_list = ['housing_id','provider_id','size','type_of_housing','location','age_of_housing','start_time','end_time','min_price','bidding_period','rented','description']
     type_list = ['NUMERIC','NUMERIC','NUMERIC','TEXT','TEXT','NUMERIC','DATE','DATE','NUMERIC','NUMERIC','TEXT','TEXT']
-    value_list = [12345,54321,80,'condo','Sentosa',3,'2022-09-01','2023-09-01',1000,100,'No','good house near sea']
+    value_list = [12345,54321,80,'condo','Sentosa',3,'2022-09-01','2023-09-01',1000,100,'no','good house near sea']
     for att, v in zip(att_list, value_list):
         insertion['body'][att] = v
     for att, t in zip(att_list, type_list):
@@ -940,7 +976,7 @@ if __name__ == "__main__":
     # statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
     # res = db.execute(statement)
     # db.commit()
-    # print(generate_table_return_result1(res))
+    # print(generate_table_return_resulte_no_rename(res))
 
     delete_data()
 
@@ -951,10 +987,10 @@ if __name__ == "__main__":
             "provider_id": "NUMERIC NOT NULL",
             "first_name": "TEXT NOT NULL",
             "last_name": "TEXT NOT NULL",
-            "email": "TEXT NOT NULL",
-            "age": "NUMERIC NOT NULL",
+            "email": "TEXT UNIQUE NOT NULL",
+            "age": "NUMERIC NOT NULL CHECK(age>=18)",
             "nationality": "TEXT NOT NULL",
-            "salary": "NUMERIC NOT NULL",
+            "salary": "NUMERIC NOT NULL CHECK(salary>=0)",
             "sex": "TEXT NOT NULL",
             "ethnicity": "TEXT NOT NULL"},
         "primary_key": "(provider_id)"
@@ -966,7 +1002,7 @@ if __name__ == "__main__":
     table_housing_size_type = {
         "name": "housing_size_type",
         "body": {
-            "size": "NUMERIC NOT NULL",
+            "size": "NUMERIC NOT NULL CHECK (size>0)",
             "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small'))"},
         "primary_key": "(size)",
         }
@@ -980,8 +1016,8 @@ if __name__ == "__main__":
             "size": "NUMERIC NOT NULL",
             "type_of_housing": "TEXT NOT NULL",
             "location": "TEXT NOT NULL",
-            "age_of_housing": "NUMERIC NOT NULL",
-            "max_price": "NUMERIC NOT NULL"
+            "age_of_housing": "NUMERIC NOT NULL CHECK(age_of_housing > 0)",
+            "max_price": "NUMERIC NOT NULL CHECK(max_price > 0)"
         },
         "primary_key": "(size,type_of_housing,location,age_of_housing)"
         }
@@ -994,15 +1030,15 @@ if __name__ == "__main__":
         "body": {
             "housing_id": "NUMERIC NOT NULL",
             "provider_id": "NUMERIC NOT NULL",
-            "size": "NUMERIC NOT NULL",
+            "size": "NUMERIC NOT NULL CHECK (size>0)",
             "type_of_housing": "TEXT NOT NULL",
             "location":"TEXT NOT NULL",
-            "age_of_housing":"NUMERIC NOT NULL",
+            "age_of_housing":"NUMERIC NOT NULL CHECK (age_of_housing>0)",
             "start_time": "Date NOT NULL",
-            "end_time": "Date NOT NULL",
-            "min_price": "NUMERIC NOT NULL",
-            "bidding_period": "NUMERIC NOT NULL",
-            "rented": "TEXT NOT NULL",
+            "end_time": "Date NOT NULL CHECK (end_time > start_time)",
+            "min_price": "NUMERIC NOT NULL CHECK (min_price > 0)",
+            "bidding_period": "NUMERIC NOT NULL CHECK (bidding_period > 0)",
+            "rented": "TEXT NOT NULL CHECK (rented IN ('yes', 'no'))",
             "description": "TEXT NOT NULL"},
         "primary_key": "(housing_id)",
         "reference": {
@@ -1020,9 +1056,9 @@ if __name__ == "__main__":
             "first_name": "TEXT NOT NULL",
             "last_name": "TEXT NOT NULL",
             "email": "TEXT NOT NULL",
-            "age": "NUMERIC NOT NULL",
+            "age": "NUMERIC NOT NULL CHECK (age>=18)",
             "nationality": "TEXT NOT NULL",
-            "salary": "NUMERIC NOT NULL",
+            "salary": "NUMERIC NOT NULL CHECK (salary>=0)",
             "sex": "TEXT NOT NULL",
             "ethnicity": "TEXT NOT NULL"
         },
@@ -1038,8 +1074,8 @@ if __name__ == "__main__":
             "housing_id": "NUMERIC NOT NULL",
             "renter_id": "NUMERIC NOT NULL",
             "start_time": "DATE NOT NULL",
-            "end_time": "DATE NOT NULL",
-            "price": "NUMERIC NOT NULL",
+            "end_time": "DATE NOT NULL CHECK (end_time >= start_time)",
+            "price": "NUMERIC NOT NULL CHECK (price > 0)",
             "bid_date": "DATE NOT NULL"
         },
         "primary_key": "(housing_id,renter_id)",
