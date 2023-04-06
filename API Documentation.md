@@ -116,13 +116,7 @@ No api request.
 
 - Route: `/house-list`
 
-- Request: `POST`
-
-- Param: 
-  ```json
-  {
-    "token": ""				// string
-  }
+- Request: `GET`
 
 - Response:
 
@@ -132,11 +126,11 @@ No api request.
       "houseInfoList": [
           {
               "houseid": "", 		// string, housing
-              "providerName": "", // string, housing
+              "providerName": "", // string, to select
               "location": "", 	// string, housing
-              "min_price": 0, 	// number, housing
+              "minPrice": 0, 		// number, housing
               "size": 0, 			// number, housing
-              "size_type": "", 	// number, to select
+              "sizeType": "", 	// number, to select
               "startDate": "",	// Date, housing
               "endDate": "",		// Date, housing
               "currentBid": "",	// number, to select
