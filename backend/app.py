@@ -132,7 +132,7 @@ def getname():
     
 @app.route("/log-in", methods=["POST"])
 def log_in():
-    param = request.json
+    param:Dict = request.json
     att_list = ["token"]
     selection = {"table": "TestRegisterTable", "att": att_list, "condition": param}
     statement = generate_conditional_select_statement(selection)
@@ -209,6 +209,113 @@ def return_table_detail():
             
     response['detail'] = ''
     return response
+
+
+
+
+@app.route("/provide-house", methods = ["POST"])
+def provide_house():
+    param = request.json
+    # parse
+    name = param['houseInfo']['name']
+    location = param['houseInfo']['location']
+    price = param['houseInfo']['price']
+    size = param['houseInfo']['size']
+    start_time = param['houseInfo']['startDate']
+    end_time = param['houseInfo']['endDate']
+    description = param['houseInfo']['description']
+    type_of_house = param['houseInfo']['typeOfHouse']
+    age = param['houseInfo']['age']
+    min_price = param['HouseInfo']['minPrice']
+    token = param['token']
+
+    # calculate attributes
+    houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+    providerID = token
+
+    if size < 60:
+         size_type = 'small', 
+    elif 60 < size and size < 100 :
+        size_type = 'medium'
+    else:
+        size_type = 'large'   
+    period = end_time - start_time
+    rented = False
+
+    
+    # insertion
+    insertion = {}
+    insertion['name'] = 'housing'
+    insertion['body'] = {}
+    insertion['body']['house_id'] = houseID
+    insertion['body']['provider_id'] = providerID
+    insertion['body']['size'] = size
+    insertion['body']['type_of_housing'] = type_of_house
+    insertion['body']['location'] = location
+    insertion['body']['size_type'] = size_type
+    insertion['body']['age_of_housing'] = age
+    insertion['body']['start_time'] = start_time
+    insertion['body']['end_time'] = end_time
+    insertion['body']['min_price'] = min_price
+    insertion['body']['bidding_period'] = period
+    insertion['body']['rented'] = rented
+    
+    insertion['valueTypes'] = {}
+    insertion['valueTypes']['house_id'] = "TEXT"
+    insertion['valueTypes']['provider_id'] = "TEXT"
+    insertion['valueTypes']['size'] = "NUMERIC"
+    insertion['valueTypes']['type_of_housing'] = "TEXT"
+    insertion['valueTypes']['location'] = "TEXT"
+    insertion['valueTypes']['size_type'] = "TEXT"
+    insertion['valueTypes']['age_of_housing'] = "NUMERIC"
+    insertion['valueTypes']['start_time'] = "DATE"
+    insertion['valueTypes']['end_time'] = "DATE"
+    insertion['valueTypes']['min_price'] = "NUMERIC"
+    insertion['valueTypes']['bidding_period'] = "NUMERIC"
+    insertion['valueTypes']['rented'] = "TEXT"
+    
+
+    # return response
+    try:
+        statement = generate_insert_table_statement(insertion)
+        db.execute(statement)
+        db.commit()
+        return jsonify({'status': True, 'details': ''})
+    except Exception as e:
+        db.rollback()
+        return jsonify({'status': False, 'details': 'database insertion failed'})
+
+
+@app.route("/house-list", methods = ['GET'])
+def house_list():
+    param = request.json
+    att_list = ['token']
+    selection = {"table": "table_housing", "att": att_list, "condition": param}
+    statement = generate_conditional_select_statement(selection)
+    res = db.execute(statement)
+    db.commit()
+    response = {}
+    res = generate_table_return_result1(res)
+    if len(res["rows"]) == 0:
+        response['status'] = False
+        response['token'] = ''
+        response['details'] = 'Wrong User Name or Password'
+    else:
+        response['status'] = True
+        response['token'] = res["rows"][0]['token']
+        response['details'] = ''
+    return jsonify(response)
+
+@app.route("/make-bid", methods = ['POST'])
+def make_bid():
+    param = request.json
+    #parse
+    token = param['token']
+
+    #calculation of attributes
+    # houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+
+    
 
 @app.route("/admin/complex-query", methods=["POST"])
 def complex_query():
@@ -514,7 +621,7 @@ def generate_simple_select_statement(selection: Dict):
 
 
 """
-SELECT att1, att2,... FROM table_name WHERE att3=value1 AND att4=value2,...
+retern: SELECT att1, att2,... FROM table_name WHERE att3=value1 AND att4=value2,...
 param: selection: Dict
 selection: {
     "table" : "table_name",
@@ -541,6 +648,13 @@ def generate_conditional_select_statement(selection: Dict):
             statement += f" {att}={val} AND"
     print(statement[:-4])
     return sqlalchemy.text(statement[:-4])
+
+
+statement = 'SELECT ...'
+statement = sqlalchemy.text(statement)
+res = db.execute(statement)
+if res is not None:
+    ...
 
 
 """
