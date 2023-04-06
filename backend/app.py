@@ -370,7 +370,7 @@ def complex_query():
     for table_name in tables:
         att_list = table_name_list[table_name]
         for att_name in att_list:
-            statement += f'{table_name}.{att_name} AS {table_name}-{att_name}, '
+            statement += f'{table_name}.{att_name} AS {table_name}__{att_name}, '
     statement = statement[:-2]
     statement += ' FROM '
     for table in tables:
@@ -452,7 +452,7 @@ def delete():
     target_attribute_dict = {}
     table_name = ''
     for key,value in attribute_dict.items():
-        parts = key.split("-")
+        parts = key.split("__")
         part1 = parts[0]
         table_name = part1
         part2 = key[len(part1)+1:]

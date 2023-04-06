@@ -99,6 +99,10 @@ export interface UpdateCondition{
 export interface DeleteEntryInfo{
     entryInfo: Record<string, string|number>
 }
+
+export interface AddEntryInfo{
+    entryInfo: Record<string, string|number>
+}
   
 
 export async function signIn(params:SignInForm) {
@@ -196,6 +200,15 @@ export async function postUpdateEntry(params:UpdateCondition) {
     let res = await api.post('/admin/update', params)
     if(!res.ok){
         alert("Failed to update the entry")
+        console.log(res.data)
+    }
+    return res.data as Promise<BasicReturn>
+}
+
+export async function postAddRow(params:AddEntryInfo) {
+    let res = await api.post('/admin/add', params)
+    if(!res.ok){
+        alert("Failed to add the entry")
         console.log(res.data)
     }
     return res.data as Promise<BasicReturn>
