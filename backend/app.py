@@ -139,7 +139,7 @@ def log_in():
     res = db.execute(statement)
     db.commit()
     response = {}
-    res = generate_table_return_result1(res)
+    res = generate_table_return_resulte_no_rename(res)
     if len(res["rows"]) == 0:
         response['status'] = False
         response['token'] = ''
@@ -186,7 +186,7 @@ def return_table_detail():
                 statement = generate_group_by_statement(selection)
                 res = db.execute(statement)
                 db.commit()
-                returned_result_in_dict = generate_table_return_result1(res)
+                returned_result_in_dict = generate_table_return_resulte_no_rename(res)
                 for dict in returned_result_in_dict['rows']:
                     for key1 in dict:
                         if key1 != 'count':
@@ -200,7 +200,7 @@ def return_table_detail():
                 statement = generate_max_min_statement(selection)
                 res = db.execute(statement)
                 db.commit()
-                returned_result_in_dict = generate_table_return_result1(res)
+                returned_result_in_dict = generate_table_return_resulte_no_rename(res)
                 for key, value in returned_result_in_dict['rows'][0].items():
                     if key == 'min':
                         response['tableAttributes'][-1]['attribute'][-1]['count'].append({'minValue':value})
@@ -386,7 +386,7 @@ def complex_query():
     try:
         res = db.execute(statement)
         db.commit()
-        res = generate_table_return_result2(res)
+        res = generate_table_return_resulte_rename(res)
         print(res)
         response["status"] = True
         response["tableData"] = res
@@ -419,7 +419,7 @@ def get_relation():
         db.commit()
         # ? Data is extracted from the res objects by the custom function for each query case
         # ! Note that you'll have to write custom handling methods for your custom queries
-        data = generate_table_return_result1(res)
+        data = generate_table_return_resulte_no_rename(res)
         # ? Response object is instantiated with the formatted data and returned with the success code 200
         return Response(data, 200)
     except Exception as e:
@@ -500,7 +500,7 @@ def delete_row():
 
 
 
-def generate_table_return_result1(res) -> Dict:
+def generate_table_return_resulte_no_rename(res) -> Dict:
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
 
@@ -531,7 +531,7 @@ def generate_table_return_result1(res) -> Dict:
     # ? Returns the Dict
     return output
 
-def generate_table_return_result2(res) -> Dict:
+def generate_table_return_resulte_rename(res) -> Dict:
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
 
@@ -932,7 +932,7 @@ if __name__ == "__main__":
     # statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
     # res = db.execute(statement)
     # db.commit()
-    # print(generate_table_return_result1(res))
+    # print(generate_table_return_resulte_no_rename(res))
 
     delete_data()
 
@@ -943,10 +943,10 @@ if __name__ == "__main__":
             "provider_id": "NUMERIC NOT NULL",
             "first_name": "TEXT NOT NULL",
             "last_name": "TEXT NOT NULL",
-            "email": "TEXT NOT NULL",
-            "age": "NUMERIC NOT NULL",
+            "email": "TEXT UNIQUE NOT NULL",
+            "age": "NUMERIC NOT NULL CHECK(age>=18)",
             "nationality": "TEXT NOT NULL",
-            "salary": "NUMERIC NOT NULL",
+            "salary": "NUMERIC NOT NULL CHECK(salary>=0)",
             "sex": "TEXT NOT NULL",
             "ethnicity": "TEXT NOT NULL"},
         "primary_key": "(provider_id)"
@@ -958,7 +958,7 @@ if __name__ == "__main__":
     table_housing_size_type = {
         "name": "housing_size_type",
         "body": {
-            "size": "NUMERIC NOT NULL",
+            "size": "NUMERIC NOT NULL CHECK (size>0)",
             "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small'))"},
         "primary_key": "(size)",
         }
@@ -972,8 +972,8 @@ if __name__ == "__main__":
             "size": "NUMERIC NOT NULL",
             "type_of_housing": "TEXT NOT NULL",
             "location": "TEXT NOT NULL",
-            "age_of_housing": "NUMERIC NOT NULL",
-            "max_price": "NUMERIC NOT NULL"
+            "age_of_housing": "NUMERIC NOT NULL CHECK(age_of_housing > 0)",
+            "max_price": "NUMERIC NOT NULL CHECK(max_price >= 0)"
         },
         "primary_key": "(size,type_of_housing,location,age_of_housing)"
         }
@@ -986,15 +986,15 @@ if __name__ == "__main__":
         "body": {
             "housing_id": "NUMERIC NOT NULL",
             "provider_id": "NUMERIC NOT NULL",
-            "size": "NUMERIC NOT NULL",
+            "size": "NUMERIC NOT NULL CHECK (size>0)",
             "type_of_housing": "TEXT NOT NULL",
             "location":"TEXT NOT NULL",
-            "age_of_housing":"NUMERIC NOT NULL",
+            "age_of_housing":"NUMERIC NOT NULL CHECK (age_of_housing>0)",
             "start_time": "Date NOT NULL",
-            "end_time": "Date NOT NULL",
-            "min_price": "NUMERIC NOT NULL",
-            "bidding_period": "NUMERIC NOT NULL",
-            "rented": "TEXT NOT NULL",
+            "end_time": "Date NOT NULL CHECK (end_time > start_time)",
+            "min_price": "NUMERIC NOT NULL CHECK (min_price > 0)",
+            "bidding_period": "NUMERIC NOT NULL CHECK (bidding_period > 0)",
+            "rented": "TEXT NOT NULL CHECK (rented IN ('yes', 'no'))",
             "description": "TEXT NOT NULL"},
         "primary_key": "(housing_id)",
         "reference": {
