@@ -139,7 +139,7 @@ def log_in():
     res = db.execute(statement)
     db.commit()
     response = {}
-    res = generate_table_return_result(res)
+    res = generate_table_return_result1(res)
     if len(res["rows"]) == 0:
         response['status'] = False
         response['token'] = ''
@@ -186,7 +186,7 @@ def return_table_detail():
                 statement = generate_group_by_statement(selection)
                 res = db.execute(statement)
                 db.commit()
-                returned_result_in_dict = generate_table_return_result(res)
+                returned_result_in_dict = generate_table_return_result1(res)
                 for dict in returned_result_in_dict['rows']:
                     for key1 in dict:
                         if key1 != 'count':
@@ -200,7 +200,7 @@ def return_table_detail():
                 statement = generate_max_min_statement(selection)
                 res = db.execute(statement)
                 db.commit()
-                returned_result_in_dict = generate_table_return_result(res)
+                returned_result_in_dict = generate_table_return_result1(res)
                 for key, value in returned_result_in_dict['rows'][0].items():
                     if key == 'min':
                         response['tableAttributes'][-1]['attribute'][-1]['count'].append({'minValue':value})
@@ -209,6 +209,97 @@ def return_table_detail():
             
     response['detail'] = ''
     return response
+
+@app.route("/admin/complex-query", methods=["POST"])
+def complex_query():
+    response = {}
+    param = request.json
+    tables = param["fromTable"]
+    join_on = param["joinOn"]
+    filter_equal = param["filterEqual"]
+    filter_less = param["filterLess"]
+
+    statement = "SELECT "
+    for table_name in tables:
+        att_list = table_name_list[table_name]
+        for att_name in att_list:
+            statement += f'{table_name}.{att_name} AS {table_name}_{att_name}, '
+    statement = statement[:-2]
+    statement += ' FROM '
+    for table in tables:
+        statement += f"{table}, "
+    statement = statement[:-2]
+    where_statement = False
+    if join_on:
+        statement += " WHERE "
+        where_statement = True
+        for join_on_condition in join_on:
+            for key,value in join_on_condition.items():
+                statement += f"{key}.{value}="
+            statement = statement[:-1] + " AND "
+        statement = statement[:-5]
+    
+    if filter_equal:
+        if not where_statement:
+            statement += " WHERE "
+            where_statement = True
+        else:
+            statement += " AND "
+
+        for table_name, table_attribute_list in filter_equal.items():
+            item_list = map(lambda x: (list(x.keys())[0], list(x.values())[0]),table_attribute_list)
+            sorted_list = sorted(item_list, key = lambda x: x[0])
+            for index in range(len(sorted_list)):
+                if index == 0:
+                    if type(sorted_list[index][1]) == int or type(sorted_list[index][1]) == float:
+                        statement += f"({table_name}.{sorted_list[index][0]} = {sorted_list[index][1]} "
+                    else:
+                        statement += f"({table_name}.{sorted_list[index][0]} = '{sorted_list[index][1]}' "
+                else:
+                    if sorted_list[index][0] == sorted_list[index-1][0]:
+                        if type(sorted_list[index][1]) == int or type(sorted_list[index][1]) == float:
+                            statement += f" OR {table_name}.{sorted_list[index][0]} = {sorted_list[index][1]} "
+                        else:
+                            statement += f" OR {table_name}.{sorted_list[index][0]} = '{sorted_list[index][1]}' "
+                    else:
+                        if type(sorted_list[index][1]) == int or type(sorted_list[index][1]) == float:
+                            statement += f") AND ({table_name}.{sorted_list[index][0]} = {sorted_list[index][1]} "
+                        else:
+                            statement += f") AND ({table_name}.{sorted_list[index][0]} = '{sorted_list[index][1]}' "
+            statement += ") AND "
+        statement = statement[:-5] 
+
+    if filter_less:
+        if not where_statement:
+            statement += " WHERE "
+            where_statement = True
+        else:
+            statement += " AND "
+        for table_name, table_attribute_list in filter_less.items():
+            for attribute,value in table_attribute_list.items():
+                statement += f"{table_name}.{attribute} < {value} AND "
+        statement = statement[:-5]
+    statement += ";"
+    print(statement)
+    statement = sqlalchemy.text(statement)
+    try:
+        res = db.execute(statement)
+        db.commit()
+        res = generate_table_return_result2(res)
+        print(res)
+        response["status"] = True
+        response["tableData"] = res
+        response["detail"] = ""
+    except:
+        db.rollback()
+        response["status"] = False
+        response["tableData"] = {}
+        response["detail"] = "Database selection failed"
+    return jsonify(response)
+
+
+    
+        
 
 
 @app.get("/table")
@@ -227,7 +318,7 @@ def get_relation():
         db.commit()
         # ? Data is extracted from the res objects by the custom function for each query case
         # ! Note that you'll have to write custom handling methods for your custom queries
-        data = generate_table_return_result(res)
+        data = generate_table_return_result1(res)
         # ? Response object is instantiated with the formatted data and returned with the success code 200
         return Response(data, 200)
     except Exception as e:
@@ -308,7 +399,7 @@ def delete_row():
 
 
 
-def generate_table_return_result(res) -> Dict:
+def generate_table_return_result1(res) -> Dict:
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
 
@@ -330,6 +421,42 @@ def generate_table_return_result(res) -> Dict:
         The returned object format:
         {
             "columns": ["a","b","c"],
+            "rows": [
+                {"a":1,"b":2,"c":3},
+                {"a":4,"b":5,"c":6}
+            ]
+        }
+    """
+    # ? Returns the Dict
+    return output
+
+def generate_table_return_result2(res) -> Dict:
+    # ? An empty Python list to store the entries/rows/tuples of the relation/table
+    rows = []
+
+    # ? keys of the SELECT query result are the columns/fields of the table/relation
+    columns = list(res.keys())
+    column_output = []
+    for col_name in columns:
+        if col_name not in column_output:
+            column_output.append(col_name)
+
+    # ? Constructing the list of tuples/rows, basically, restructuring the object format
+    for row_number, row in enumerate(res):
+        rows.append({})
+        for column_number, value in enumerate(row):
+            if columns[column_number] not in rows[row_number].keys():
+                rows[row_number][columns[column_number]] = value
+
+    # ? JSON object with the relation data
+    output = {}
+    output["columns"] = column_output  # ? Stores the fields
+    output["rows"] = rows  # ? Stores the tuples
+
+    """
+        The returned object format:
+        {
+            "column": ["a","b","c"],
             "rows": [
                 {"a":1,"b":2,"c":3},
                 {"a":4,"b":5,"c":6}
@@ -575,6 +702,21 @@ def fill_data():
     db.commit()
 
     insertion = {}
+    insertion['name'] = "provider"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
+    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
+    value_list = [55555,'Junjie','Tian','123@qq.com',19,'Chinese',0,'Male','Chinese']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
     insertion['name'] = "housing_size_type"
     insertion['body'] = {}
     insertion["valueTypes"] = {}
@@ -672,7 +814,7 @@ def delete_data():
 
 
 # ? The port where the debuggable DB management API is served
-PORT = 2222
+PORT = 2223
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
@@ -682,7 +824,7 @@ if __name__ == "__main__":
     # statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
     # res = db.execute(statement)
     # db.commit()
-    # print(generate_table_return_result(res))
+    # print(generate_table_return_result1(res))
 
     delete_data()
 

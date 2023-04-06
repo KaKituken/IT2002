@@ -347,7 +347,10 @@ No api request.
     "filterEqual": {
         "table1": [
             {"att1": "value1"},
+<<<<<<< HEAD
             {"att1": "value3"},
+=======
+>>>>>>> a5a93a3c69c9bab19437ad027e1b3d1d89a38889
             {"att2": "value2"}
         ],
         "table2": [
@@ -372,6 +375,7 @@ No api request.
 
 ```json
 {
+<<<<<<< HEAD
     "status": true,
     "tableData": {
         "columns": ["a","b","c"],
@@ -381,6 +385,17 @@ No api request.
         ]
     },
     "detials": "..."
+=======
+    "status": true
+    "tableData": {
+      "columns": ["a","b","c"],
+      "rows": [
+          {"a":1,"b":2,"c":3},
+          {"a":4,"b":5,"c":6}
+      ]
+    },
+    "details": "..."
+>>>>>>> a5a93a3c69c9bab19437ad027e1b3d1d89a38889
 }
 ```
 
