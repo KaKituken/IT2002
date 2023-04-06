@@ -104,6 +104,7 @@ function TableDisplay() {
         if (success.status) {
             const newTableData = { ...tableData };
             newTableData.rows.push(newAddRowData);
+            console.log(newTableData)
             setTableData(newTableData);
             setShowModal(false);
         } else {

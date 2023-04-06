@@ -17,6 +17,7 @@ function App(){
     const [nationality, setNationality] = useState('')
     const [sex, setSex] = useState('')
     const [password, setPassword] = useState('')
+    const [salary, setSalary] = useState(0)
     
 
     return(
@@ -69,7 +70,12 @@ function App(){
                                onChange={e => setSex(e.target.value)}>
                         </input>
                     </div>
-                    <div className="info-box"></div>
+                    <div className="info-box">
+                        <p>Salary</p>
+                        <input type="number"
+                               onChange={e => setSalary(Number(e.target.value))}>
+                        </input>
+                    </div>
                 </div>
                 <div className="submit-button" onClick={handleSignIn}>Sign up</div>
             </div>
