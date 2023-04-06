@@ -83,10 +83,6 @@ No api request.
           "size": 0, 			// number
           "startDate": "",	// Date
           "endDate": "",		// Date
-<<<<<<< HEAD
-=======
-          "MaxBid": "",		// number
->>>>>>> a5a93a3c69c9bab19437ad027e1b3d1d89a38889
           "description": "",	// string
           "typeOfHouse": "",  //string
           "age": 1233,
@@ -150,6 +146,7 @@ No api request.
       ]
   }
   ```
+
 ### Make Bid
 
 - Route: '/make-bid'
@@ -159,18 +156,20 @@ No api request.
     {
       "houseInfo":{
         "houseid": "", //string
+        "location": "", //string
+        "description": "", //string
     "token": ""				// string
     }
 ```   
-
 - Response:
+
   ```json
   {
     "status": true/false,
     "details": "...",
     "currentBid": "",	// 
   }
-  
+
   ```
  ### Bid for rental provider
  - Route: '/bid-for-rental-provider'
@@ -230,24 +229,13 @@ No api request.
  ```json
     {
       "houseinfo": {
-<<<<<<< HEAD
-        "location": "" //string
-        "type": "" //string
-        "size": "" //string
-        "maxprice": 0 //number
-        "startdate": "" //date
-        "enddate": "" //date
-      }
-=======
         "location": "", //string
         "type": "", //string
         "size": "", //string
         "maxprice": 0, //number
-        "rooms": 0, //number
         "startdate": "", //date
         "enddate": "", //date
       },
->>>>>>> a5a93a3c69c9bab19437ad027e1b3d1d89a38889
     "token": ""				// string
     }
 
@@ -365,14 +353,14 @@ No api request.
         }
     ],
     "filterEqual": {
-        "table1": [
-            {"att1": "value1"},
-            {"att2": "value2"}
-        ],
-        "table2": [
-            {"att1": "value1"},
-            {"att2": "value2"}
-        ],
+        "table1": {
+            "att1": "value1",
+            "att2": "value2"
+        },
+        "table2": {
+            "att1": "value1",
+            "att2": "value2"
+        },
     },
     "filterLess": {
         "table1": {
@@ -391,15 +379,11 @@ No api request.
 
 ```json
 {
-    "status": true
-    "tableData": {
-      "columns": ["a","b","c"],
-      "rows": [
-          {"a":1,"b":2,"c":3},
-          {"a":4,"b":5,"c":6}
-      ]
-    },
-    "details": "..."
+    "columns": ["a","b","c"],
+    "rows": [
+        {"a":1,"b":2,"c":3},
+        {"a":4,"b":5,"c":6}
+    ]
 }
 ```
 

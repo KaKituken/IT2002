@@ -309,10 +309,13 @@ def house_list():
 def make_bid():
     param = request.json
     #parse
+    location = param['houseInfo']['location']
+    description = param['houseInfo']['description']
     token = param['token']
-
     #calculation of attributes
-    # houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+    houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+    
+
 
     
 
