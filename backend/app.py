@@ -343,13 +343,20 @@ def house_list():
 def make_bid():
     param = request.json
     #parse
+    location = param['houseInfo']['location']
+    description = param['houseInfo']['description']
     token = param['token']
+<<<<<<< HEAD
+=======
     houseID = param['houseInfo']['houseid']
 
 
 
+>>>>>>> 5b5d68b513c171e0923faa41f2ffb96422d38346
     #calculation of attributes
-    # houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+    houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+    
+
 
     
 
