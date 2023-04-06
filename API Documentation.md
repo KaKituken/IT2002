@@ -81,15 +81,14 @@ No api request.
   {
       "houseInfo":{
           "location": "", 	//  string
-          "price": 0, 		// number
           "size": 0, 			// number
           "startDate": "",	// Date
           "endDate": "",		// Date
-          "MaxBid": "",		// number
           "description": "",	// string
           "typeOfHouse": "",  //string
           "age": 1233,
           "minPrice": 123,
+          "bidPeriod": 111,
           "images": [
           "url1",
           "url2"
@@ -97,7 +96,7 @@ No api request.
   },
       "token": ""				// string
   }
-
+  
 - Response:
 
   ```json
@@ -150,11 +149,8 @@ No api request.
 - Param:
   ```json
     {
-      "houseInfo":{
-        "houseid": "", //string
-        "location": "", //string
-        "description": "", //string
-      }
+      "houseid": "", 			//string
+      "bid": 111,	//number
     	"token": ""				// string
     }
 - Response:
@@ -162,12 +158,9 @@ No api request.
   ```json
   {
     "status": true/false,
-    "houseInfo": {
-        
-    },
     "details": "...",
     "currentBid": "",	// 
-}
+  }
 
  ### Bid for rental provider
 

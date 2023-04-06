@@ -280,8 +280,8 @@ def return_table_detail():
 @app.route("/provide-house", methods = ["POST"])
 def provide_house():
     param = request.json
-    # parse
-    name = param['houseInfo']['name']
+    # parse 
+    # TODO: 对照和文档一不一样
     location = param['houseInfo']['location']
     price = param['houseInfo']['price']
     size = param['houseInfo']['size']
@@ -405,7 +405,7 @@ def house_list():
     return jsonify(response)
         
 
-
+# TODO: 
 @app.route("/make-bid", methods = ['POST'])
 def make_bid():
     param = request.json

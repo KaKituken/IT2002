@@ -30,11 +30,6 @@ export interface SignInForm {
     salary: number
 }
 
-export interface ProviderForm {
-    houseInfo: HouseInfo
-    token: string
-}
-
 export interface SignInReturn {
     status: boolean
     details: string
@@ -205,7 +200,7 @@ export async function postAddRow(params:AddEntryInfo) {
     return res.data as Promise<BasicReturn>
 }
 
-
+// +============================================
 // user page
 export interface GetHouseListReturn{
     status: boolean
@@ -228,6 +223,25 @@ export interface SingleHouseInfo{
     images:string[]
 }
 
+export interface ProviderForm {
+    houseInfo: Record<string, any>
+    token: string
+}
+
+export interface FilterHousesCondition{
+    houseinfo: Record<string, string|number|string[]|Date|undefined>
+    token:string
+}
+
+export async function postFilterHouses(params:FilterHousesCondition) {
+    let res = await api.post('/filter-for-houses', params)
+    if(!res.ok){
+        alert("Failed to get house list")
+        console.log(res.data)
+    }
+    return res.data as Promise<GetHouseListReturn>
+}
+
 export async function getHouseList() {
     let res = await api.get('/house-list')
     if(!res.ok){
@@ -235,4 +249,13 @@ export async function getHouseList() {
         console.log(res.data)
     }
     return res.data as Promise<GetHouseListReturn>
+}
+
+export async function postNewHouse(params:ProviderForm) {
+    let res = await api.post('/provide-house', params)
+    if(!res.ok){
+        alert("Failed to get house list")
+        console.log(res.data)
+    }
+    return res.data as Promise<BasicReturn>
 }
