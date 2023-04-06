@@ -370,7 +370,7 @@ def complex_query():
     for table_name in tables:
         att_list = table_name_list[table_name]
         for att_name in att_list:
-            statement += f'{table_name}.{att_name} AS {table_name}-{att_name}, '
+            statement += f'{table_name}.{att_name} AS {table_name}__{att_name}, '
     statement = statement[:-2]
     statement += ' FROM '
     for table in tables:
@@ -452,7 +452,7 @@ def delete():
     target_attribute_dict = {}
     table_name = ''
     for key,value in attribute_dict.items():
-        parts = key.split("-")
+        parts = key.split("__")
         part1 = parts[0]
         table_name = part1
         part2 = key[len(part1)+1:]
@@ -476,6 +476,13 @@ def delete():
         response["status"] = False
         response["details"] = "Database deletion failed"
     return jsonify(response)
+
+@app.route("/admin/update",methods = ["POST"])
+def update():
+    param = request.json
+    response = {}
+    original_attribute_dict = param["OrgDict"]
+
 
     
         
@@ -825,7 +832,7 @@ def generate_create_table_statement(table: Dict):
     # ? Add references
     if "reference" in table.keys():
         for key,value in table_reference.items():
-            statement += ("FOREIGN KEY"+ " " +f"{key}"+ " "+"REFERENCES"+ " "+f"{value}" + ",")
+            statement += ("FOREIGN KEY"+ " " +f"{key}"+ " "+"REFERENCES"+ " "+f"{value}" + "ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED" + ",")
     # ? closing the final statement (by removing the last ',' and adding ');' termination and returning it
     statement = statement[:-1] + ");"
     print(statement)
@@ -1038,7 +1045,7 @@ if __name__ == "__main__":
         "name": "housing_size_type",
         "body": {
             "size": "NUMERIC NOT NULL CHECK (size>0 AND size<=1000)",
-            "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small'))"},
+            "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small') AND (size_type = 'large' IF size>=100) AND (size_type = 'middle' IF (size>=60 AND size<100)) AND (size_type = 'small' IF (size<60)))"},
         "primary_key": "(size)",
         }
     table = generate_create_table_statement(table_housing_size_type)
