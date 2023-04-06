@@ -13,6 +13,24 @@ function TableDisplay() {
 
     const navigate = useNavigate()
 
+    useEffect(() => {
+        const requestParam = location.state.param
+        console.log(requestParam)
+        console.log('hello');
+        (async () => {
+            console.log('arrow')
+            let success = await api.postComplexQery(requestParam)
+            if (success.status) {
+                setTableData(success.tableData)
+                console.log(success.tableData)
+            }
+            else {
+                window.alert(success.details)
+                console.log(success.tableData)
+            }
+        })()
+    }, [])
+
     const columns = React.useMemo(() => {
         return tableData.columns.map((columnName) => ({
             Header: columnName,
@@ -50,31 +68,23 @@ function TableDisplay() {
             window.alert("Can't modify entries in a joined table")
             return
         }
-        const newData = [...tableData.rows];
-        newData[cellInfo.row.index][cellInfo.column.id] = e.target.value;
+        const newRowData = [...tableData.rows];
+        newRowData[cellInfo.row.index][cellInfo.column.id] = e.target.value;
+        let success = await api.postUpdateEntry({
+            orgRow: tableData.rows[cellInfo.row.index],
+            newRow: newRowData[cellInfo.row.index]
+        })
+        if(success.status){
+            const newTableData = {...tableData}
+            newTableData.rows = newRowData
+            setTableData(newTableData)
+        }
+        else{
+            window.alert(success.details)
+        }
         // setTableData(newData)
-        const newTableData = {...tableData}
-        newTableData.rows = newData
-        setTableData(newTableData)
-        console.log(newData);
+        console.log(newRowData);
     };
-
-    useEffect(() => {
-        const requestParam = location.state.param
-        console.log(requestParam)
-        console.log('hello');
-        (async () => {
-            console.log('arrow')
-            let success = await api.postComplexQery(requestParam)
-            if (success.status) {
-                setTableData(success.tableData)
-                console.log(success.tableData)
-            }
-            else {
-                console.log(success.tableData)
-            }
-        })()
-    }, [])
 
     return (
         <div className="chart-page">

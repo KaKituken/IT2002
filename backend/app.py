@@ -21,8 +21,8 @@ CORS(app)
 
 # ? building our `engine` object from a custom configuration string
 # ? for this project, we'll use the default postgres user, on a database called `postgres` deployed on the same machine
-YOUR_POSTGRES_PASSWORD = "JUNjun11"
-#YOUR_POSTGRES_PASSWORD = "Jishuhou524"
+# YOUR_POSTGRES_PASSWORD = "JUNjun11"
+YOUR_POSTGRES_PASSWORD = "Jishuhou524"
 # connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost/postgres"
 connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost:5432"
 engine = sqlalchemy.create_engine(
@@ -429,19 +429,19 @@ def complex_query():
     statement += ";"
     print(statement)
     statement = sqlalchemy.text(statement)
-    try:
-        res = db.execute(statement)
-        db.commit()
-        res = generate_table_return_resulte_rename(res)
-        print(res)
-        response["status"] = True
-        response["tableData"] = res
-        response["details"] = ""
-    except:
-        db.rollback()
-        response["status"] = False
-        response["tableData"] = {}
-        response["details"] = "Database selection failed"
+    # try:
+    res = db.execute(statement)
+    db.commit()
+    res = generate_table_return_resulte_rename(res)
+    print(res)
+    response["status"] = True
+    response["tableData"] = res
+    response["details"] = ""
+    # except:
+    #     db.rollback()
+    #     response["status"] = False
+    #     response["tableData"] = {}
+    #     response["details"] = "Database selection failed"
     return jsonify(response)
 
 @app.route("/admin/delete", methods= ["POST"])
@@ -1001,7 +1001,7 @@ def delete_data():
 
 
 # ? The port where the debuggable DB management API is served
-PORT = 2223
+PORT = 2222
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":

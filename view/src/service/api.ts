@@ -90,6 +90,11 @@ export interface ConplexQueryReturn{
     details: string
 }
 
+export interface UpdateCondition{
+    orgRow: Record<string, string|number>
+    newRow: Record<string, string|number>
+}
+
 
 export interface DeleteEntryInfo{
     entryInfo: Record<string, string|number>
@@ -182,6 +187,15 @@ export async function postDeleteEntry(params:DeleteEntryInfo) {
     let res = await api.post('/admin/delete', params)
     if(!res.ok){
         alert("Failed to delete the entry")
+        console.log(res.data)
+    }
+    return res.data as Promise<BasicReturn>
+}
+
+export async function postUpdateEntry(params:UpdateCondition) {
+    let res = await api.post('/admin/update', params)
+    if(!res.ok){
+        alert("Failed to update the entry")
         console.log(res.data)
     }
     return res.data as Promise<BasicReturn>

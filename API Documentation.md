@@ -411,3 +411,34 @@ No api request.
 }
 ```
 
+### Update entry
+
+- Router: `admin/update`
+- Request: `POST`
+- Param:
+
+```json
+{
+    "orgRow":{
+        "att1": "value1",
+        "att2": "value2",
+        ...
+    },
+    "newRow":{
+        "att1": "value1",
+        "att2": "value2",
+        ...
+    }
+}
+```
+
+- Response:
+
+```json
+{
+    "status": true,
+    "details": "..."
+}
+```
+
+### 
