@@ -46,6 +46,35 @@ export interface GetTableNameReturn {
     tableNameList: string[]
 }
 
+export interface GetAttributeReturn {
+    status: boolean;
+    tableAttributes: TableAttributes[];
+    details: string;
+}
+
+export interface TableAttributes {
+    name: string;
+    attribute: Attribute[];
+}
+
+interface Attribute {
+    attributeName: string;
+    type: string;
+    count: ValueCount[];
+}
+
+interface ValueCount {
+    [value: string]: number;
+}
+
+export interface ConplexQueryCondition {
+    fromTable: string[]
+    joinOn: Record<string, string>[]
+    filterEqual: Record<string, Record<string, string>>
+    filterLess: Record<string, Record<string, string>>
+}
+  
+
 export async function signIn(params:SignInForm) {
     let res = await api.post('/sign-in', params)
     if (res.ok){
@@ -108,4 +137,13 @@ export async function getTableName() {
         console.log(res.data)
         return res.data as Promise<GetTableNameReturn>
     }
+}
+
+export async function getAttributeInfo(params:string[]) {
+    let res = await api.post('/admin/attributes', params)
+    if(!res.ok){
+        alert("Failed to get attribute info")
+        console.log(res.data)
+    }
+    return res.data as Promise<GetAttributeReturn>
 }

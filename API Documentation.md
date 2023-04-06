@@ -83,6 +83,10 @@ No api request.
           "size": 0, 			// number
           "startDate": "",	// Date
           "endDate": "",		// Date
+<<<<<<< HEAD
+=======
+          "MaxBid": "",		// number
+>>>>>>> a5a93a3c69c9bab19437ad027e1b3d1d89a38889
           "description": "",	// string
           "typeOfHouse": "",  //string
           "age": 1233,
@@ -96,7 +100,7 @@ No api request.
   }
   
   ```
-
+  
 - Response:
 
   ```json
@@ -226,6 +230,7 @@ No api request.
  ```json
     {
       "houseinfo": {
+<<<<<<< HEAD
         "location": "" //string
         "type": "" //string
         "size": "" //string
@@ -233,6 +238,16 @@ No api request.
         "startdate": "" //date
         "enddate": "" //date
       }
+=======
+        "location": "", //string
+        "type": "", //string
+        "size": "", //string
+        "maxprice": 0, //number
+        "rooms": 0, //number
+        "startdate": "", //date
+        "enddate": "", //date
+      },
+>>>>>>> a5a93a3c69c9bab19437ad027e1b3d1d89a38889
     "token": ""				// string
     }
 
@@ -272,7 +287,7 @@ No api request.
 
 ```json
 {
-    "tableNameList": []
+    "tableNameList": ["tableName1"]
 }
 ```
 
@@ -282,46 +297,109 @@ No api request.
 {
     "status": true/false,
     "tableAttributes":[
-        "tableName1":[
-            "att1": {
-                "type": "TEXT/INT/NUM",
-        		"count": [
-        			{"value1": 9},
-					{"value2": 20},
-    			],
-            },
-			"att2": {
-                "type": "TEXT/INT/NUM",
-        		"count": [
-        			{"value1": 9},
-					{"value2": 20},
-    			],
+        {
+           "name": "tableName1",
+           "attribute":[
+               {
+                    "attributeName": "att1",
+                    "type": "TEXT",
+                    "count": [
+                        {"value1": 9},
+                        {"value2": 20},
+                    ],
+               },
+               {
+                    "attributeName": "att2",
+                    "type": "TEXT",
+                    "count": [
+                        {"value1": 9},
+                        {"value2": 20},
+                    ],
+               }
+            ], 
+        },
+        {
+            "name": "tableName2",
+            "attribute":[
+               {
+                    "attributeName": "att1",
+                    "type": "TEXT",
+                    "count": [
+                        {"value1": 9},
+                        {"value2": 20},
+                    ],
+               },
+               {
+                    "attributeName": "att2",
+                    "type": "NUMERIC",
+                    "count": [
+                        {"minValue": 9},
+                        {"maxValue": 20},	// pay attention to the order
+                    ],
+               }
+            ], 
             }
-        ],
-        "tableName2":[
-            "att1": {
-                "type": "TEXT/INT/NUM",
-        		"count": [
-        			{"value1": 9},
-					{"value2": 20},
-    			],
-            },
-			"att2": {
-                "type": "TEXT/INT/NUM",
-        		"count": [
-        			{"value1": 9},
-					{"value2": 20},
-    			],
-            }
-        ],
+        }
     ],
 	"details": "...",
 }
 ```
 
+### Complex query
 
+- Router: `admin/complex-query`
+- Request: `POST`
+- Param:
 
+```json
+{
+    "fromTable": ["table1", "table2", "..."],
+    "joinOn":[
+        {
+            "table1": "att1",
+            "table2": "att2",
+        },
+        {
+            "table2": "att3",
+            "table3": "att1"
+        }
+    ],
+    "filterEqual": {
+        "table1": [
+            {"att1": "value1"},
+            {"att2": "value2"}
+        ],
+        "table2": [
+            {"att1": "value1"},
+            {"att2": "value2"}
+        ],
+    },
+    "filterLess": {
+        "table1": {
+            "att1": "value1",
+            "att2": "value2"
+        },
+        "table2": {
+            "att1": "value1",
+            "att2": "value2"
+        },
+    }
+}
+```
 
+- Response
 
-
+```json
+{
+    "status": true
+    "tableData": {
+      "columns": ["a","b","c"],
+      "rows": [
+          {"a":1,"b":2,"c":3},
+          {"a":4,"b":5,"c":6}
+      ]
+    },
+    "details": "..."
+}
+```
 

@@ -98,7 +98,7 @@ table_name_list = {
         "price": "NUMERIC",
         "bid_date": "DATE"
     }
-
+}
 
 @app.route("/hello", methods=["GET"])
 def hello():
@@ -138,7 +138,7 @@ def log_in():
     res = db.execute(statement)
     db.commit()
     response = {}
-    res = generate_table_return_result(res)
+    res = generate_table_return_result1(res)
     if len(res["rows"]) == 0:
         response['status'] = False
         response['token'] = ''
@@ -185,7 +185,7 @@ def return_table_detail():
                 statement = generate_group_by_statement(selection)
                 res = db.execute(statement)
                 db.commit()
-                returned_result_in_dict = generate_table_return_result(res)
+                returned_result_in_dict = generate_table_return_result1(res)
                 for dict in returned_result_in_dict['rows']:
                     for key1 in dict:
                         if key1 != 'count':
@@ -199,7 +199,7 @@ def return_table_detail():
                 statement = generate_max_min_statement(selection)
                 res = db.execute(statement)
                 db.commit()
-                returned_result_in_dict = generate_table_return_result(res)
+                returned_result_in_dict = generate_table_return_result1(res)
                 for key, value in returned_result_in_dict['rows'][0].items():
                     if key == 'min':
                         response['tableAttributes'][-1]['attribute'][-1]['count'].append({'minValue':value})
@@ -231,11 +231,13 @@ def provide_house():
     # calculate attributes
     houseID = hashlib.md5((location + description + token)).encode().hexdigest()
     providerID = token
-    def size_type():
-        if size < 60, size_type = 'small', 
-        elif 60 < size < 100, size_type = 'medium'
-        else size_type = 'large'
-    return size_type    
+
+    if size < 60:
+         size_type = 'small', 
+    elif 60 < size and size < 100 :
+        size_type = 'medium'
+    else:
+        size_type = 'large'   
     period = end_time - start_time
     rented = False
 
@@ -292,7 +294,7 @@ def house_list():
     res = db.execute(statement)
     db.commit()
     response = {}
-    res = generate_table_return_result(res)
+    res = generate_table_return_result1(res)
     if len(res["rows"]) == 0:
         response['status'] = False
         response['token'] = ''
@@ -310,10 +312,100 @@ def make_bid():
     token = param['token']
 
     #calculation of attributes
-    houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+    # houseID = hashlib.md5((location + description + token)).encode().hexdigest()
 
     
 
+@app.route("/admin/complex-query", methods=["POST"])
+def complex_query():
+    response = {}
+    param = request.json
+    tables = param["fromTable"]
+    join_on = param["joinOn"]
+    filter_equal = param["filterEqual"]
+    filter_less = param["filterLess"]
+
+    statement = "SELECT "
+    for table_name in tables:
+        att_list = table_name_list[table_name]
+        for att_name in att_list:
+            statement += f'{table_name}.{att_name} AS {table_name}_{att_name}, '
+    statement = statement[:-2]
+    statement += ' FROM '
+    for table in tables:
+        statement += f"{table}, "
+    statement = statement[:-2]
+    where_statement = False
+    if join_on:
+        statement += " WHERE "
+        where_statement = True
+        for join_on_condition in join_on:
+            for key,value in join_on_condition.items():
+                statement += f"{key}.{value}="
+            statement = statement[:-1] + " AND "
+        statement = statement[:-5]
+    
+    if filter_equal:
+        if not where_statement:
+            statement += " WHERE "
+            where_statement = True
+        else:
+            statement += " AND "
+
+        for table_name, table_attribute_list in filter_equal.items():
+            item_list = map(lambda x: (list(x.keys())[0], list(x.values())[0]),table_attribute_list)
+            sorted_list = sorted(item_list, key = lambda x: x[0])
+            for index in range(len(sorted_list)):
+                if index == 0:
+                    if type(sorted_list[index][1]) == int or type(sorted_list[index][1]) == float:
+                        statement += f"({table_name}.{sorted_list[index][0]} = {sorted_list[index][1]} "
+                    else:
+                        statement += f"({table_name}.{sorted_list[index][0]} = '{sorted_list[index][1]}' "
+                else:
+                    if sorted_list[index][0] == sorted_list[index-1][0]:
+                        if type(sorted_list[index][1]) == int or type(sorted_list[index][1]) == float:
+                            statement += f" OR {table_name}.{sorted_list[index][0]} = {sorted_list[index][1]} "
+                        else:
+                            statement += f" OR {table_name}.{sorted_list[index][0]} = '{sorted_list[index][1]}' "
+                    else:
+                        if type(sorted_list[index][1]) == int or type(sorted_list[index][1]) == float:
+                            statement += f") AND ({table_name}.{sorted_list[index][0]} = {sorted_list[index][1]} "
+                        else:
+                            statement += f") AND ({table_name}.{sorted_list[index][0]} = '{sorted_list[index][1]}' "
+            statement += ") AND "
+        statement = statement[:-5] 
+
+    if filter_less:
+        if not where_statement:
+            statement += " WHERE "
+            where_statement = True
+        else:
+            statement += " AND "
+        for table_name, table_attribute_list in filter_less.items():
+            for attribute,value in table_attribute_list.items():
+                statement += f"{table_name}.{attribute} < {value} AND "
+        statement = statement[:-5]
+    statement += ";"
+    print(statement)
+    statement = sqlalchemy.text(statement)
+    try:
+        res = db.execute(statement)
+        db.commit()
+        res = generate_table_return_result2(res)
+        print(res)
+        response["status"] = True
+        response["tableData"] = res
+        response["detail"] = ""
+    except:
+        db.rollback()
+        response["status"] = False
+        response["tableData"] = {}
+        response["detail"] = "Database selection failed"
+    return jsonify(response)
+
+
+    
+        
 
 
 @app.get("/table")
@@ -332,7 +424,7 @@ def get_relation():
         db.commit()
         # ? Data is extracted from the res objects by the custom function for each query case
         # ! Note that you'll have to write custom handling methods for your custom queries
-        data = generate_table_return_result(res)
+        data = generate_table_return_result1(res)
         # ? Response object is instantiated with the formatted data and returned with the success code 200
         return Response(data, 200)
     except Exception as e:
@@ -411,7 +503,9 @@ def delete_row():
         return Response(str(e), 403)
 
 
-def generate_table_return_result(res) -> Dict:
+
+
+def generate_table_return_result1(res) -> Dict:
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
 
@@ -433,6 +527,42 @@ def generate_table_return_result(res) -> Dict:
         The returned object format:
         {
             "columns": ["a","b","c"],
+            "rows": [
+                {"a":1,"b":2,"c":3},
+                {"a":4,"b":5,"c":6}
+            ]
+        }
+    """
+    # ? Returns the Dict
+    return output
+
+def generate_table_return_result2(res) -> Dict:
+    # ? An empty Python list to store the entries/rows/tuples of the relation/table
+    rows = []
+
+    # ? keys of the SELECT query result are the columns/fields of the table/relation
+    columns = list(res.keys())
+    column_output = []
+    for col_name in columns:
+        if col_name not in column_output:
+            column_output.append(col_name)
+
+    # ? Constructing the list of tuples/rows, basically, restructuring the object format
+    for row_number, row in enumerate(res):
+        rows.append({})
+        for column_number, value in enumerate(row):
+            if columns[column_number] not in rows[row_number].keys():
+                rows[row_number][columns[column_number]] = value
+
+    # ? JSON object with the relation data
+    output = {}
+    output["columns"] = column_output  # ? Stores the fields
+    output["rows"] = rows  # ? Stores the tuples
+
+    """
+        The returned object format:
+        {
+            "column": ["a","b","c"],
             "rows": [
                 {"a":1,"b":2,"c":3},
                 {"a":4,"b":5,"c":6}
@@ -527,6 +657,25 @@ if res is not None:
 
 
 """
+SELECT att,COUNT(*)
+FROM table_name
+GROUP BY table_name.att;
+"""
+def generate_group_by_statement(selection: Dict):
+    statement = 'SELECT '
+    statement += f"{selection['att']}" + "," + "COUNT(*)"
+    statement += f" FROM {selection['table']}"
+    statement += f" GROUP BY {selection['table']}.{selection['att']};"
+    return sqlalchemy.text(statement)
+
+def generate_max_min_statement(selection: Dict):
+    statement = 'SELECT'
+    statement += f" MIN ({selection['att']}), MAX ({selection['att']})"
+    statement += f" FROM {selection['table']}"
+    return sqlalchemy.text(statement)
+
+
+"""
 INSERT INTO table_name VALUES(att1 type1, att2 type2, ...);
 param: table: Dict
 insertion: {
@@ -555,7 +704,7 @@ def generate_insert_table_statement(insertion: Dict):
     column_values = "("
     for key, value in body.items():
         column_names += (key+",")
-        if valueTypes[key] == "TEXT" or valueTypes[key] == "TIME":
+        if valueTypes[key] == "TEXT" or valueTypes[key] == "TIME" or valueTypes[key] == "DATE":
             column_values += (f"\'{value}\',")
         else:
             column_values += (f"{value},")
@@ -633,6 +782,7 @@ def create_schema():
 
 def fill_data():
     # fill fake data into database
+    '''
     insertion = {}
     insertion['name'] = "TestRegisterTable"
     insertion['body'] = {}
@@ -647,19 +797,150 @@ def fill_data():
     state = generate_insert_table_statement(insertion)
     db.execute(state)
     db.commit()
+    '''
+
+    insertion = {}
+    insertion['name'] = "provider"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
+    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
+    value_list = [54321,'Junjie','Tian','123@qq.com',19,'Chinese',0,'Male','Chinese']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
+    insertion['name'] = "provider"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
+    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
+    value_list = [55555,'Junjie','Tian','123@qq.com',19,'Chinese',0,'Male','Chinese']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
+    insertion['name'] = "housing_size_type"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['size','size_type']
+    type_list = ['NUMERIC','TEXT']
+    value_list = [80,'middle']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
+    insertion['name'] = "housing_maxprice"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['size','type_of_housing','location','age_of_housing','max_price']
+    type_list = ['NUMERIC','TEXT','TEXT','NUMERIC','NUMERIC']
+    value_list = [80,'condo','Sentosa',3,10000]
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
+    insertion['name'] = "housing"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['housing_id','provider_id','size','type_of_housing','location','age_of_housing','start_time','end_time','min_price','bidding_period','rented','description']
+    type_list = ['NUMERIC','NUMERIC','NUMERIC','TEXT','TEXT','NUMERIC','DATE','DATE','NUMERIC','NUMERIC','TEXT','TEXT']
+    value_list = [12345,54321,80,'condo','Sentosa',3,'2022-09-01','2023-09-01',1000,100,'No','good house near sea']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
+    insertion['name'] = "renter"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['renter_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
+    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
+    value_list = [88888,'Junjie','Tian','123@qq.com',19,'Chinese',0,'Male','Chinese']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
+    insertion['name'] = "bids"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['housing_id','renter_id','start_time','end_time','price','bid_date']
+    type_list = ['NUMERIC','NUMERIC','DATE','DATE','NUMERIC','DATE']
+    value_list = [12345,88888,'2023-04-01','2023-05-01',8000,'2023-03-25']
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+def delete_data():
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS bids;')
+    db.execute(statement)
+    db.commit()
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS renter;')
+    db.execute(statement)
+    db.commit()
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS housing;')
+    db.execute(statement)
+    db.commit()
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS housing_size_type;')
+    db.execute(statement)
+    db.commit()
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS housing_maxprice;')
+    db.execute(statement)
+    db.commit()
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS provider;')
+    db.execute(statement)
+    db.commit()
+
+
 
 # ? The port where the debuggable DB management API is served
-PORT = 2222
+PORT = 2223
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
     # app.run("0.0.0.0", PORT)
-    create_schema()
-    fill_data()
-    statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
-    res = db.execute(statement)
-    db.commit()
-    print(generate_table_return_result(res))
+    # create_schema()
+    # fill_data()
+    # statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
+    # res = db.execute(statement)
+    # db.commit()
+    # print(generate_table_return_result1(res))
+
+    delete_data()
+
 
     table_provider = {
         "name": "provider",
@@ -676,9 +957,34 @@ if __name__ == "__main__":
         "primary_key": "(provider_id)"
     }
     table = generate_create_table_statement(table_provider)
-    db.execute(statement)
+    db.execute(table)
     db.commit()
-    
+
+    table_housing_size_type = {
+        "name": "housing_size_type",
+        "body": {
+            "size": "NUMERIC NOT NULL",
+            "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small'))"},
+        "primary_key": "(size)",
+        }
+    table = generate_create_table_statement(table_housing_size_type)
+    db.execute(table)
+    db.commit()
+
+    table_housing_maxprice = {
+        "name": "housing_maxprice",
+        "body": {
+            "size": "NUMERIC NOT NULL",
+            "type_of_housing": "TEXT NOT NULL",
+            "location": "TEXT NOT NULL",
+            "age_of_housing": "NUMERIC NOT NULL",
+            "max_price": "NUMERIC NOT NULL"
+        },
+        "primary_key": "(size,type_of_housing,location,age_of_housing)"
+        }
+    table = generate_create_table_statement(table_housing_maxprice)
+    db.execute(table)
+    db.commit()
 
     table_housing = {
         "name": "housing",
@@ -688,39 +994,20 @@ if __name__ == "__main__":
             "size": "NUMERIC NOT NULL",
             "type_of_housing": "TEXT NOT NULL",
             "location":"TEXT NOT NULL",
-            "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small'))",
             "age_of_housing":"NUMERIC NOT NULL",
             "start_time": "Date NOT NULL",
             "end_time": "Date NOT NULL",
             "min_price": "NUMERIC NOT NULL",
             "bidding_period": "NUMERIC NOT NULL",
-            "rented": "TEXT NOT NULL"},
+            "rented": "TEXT NOT NULL",
+            "description": "TEXT NOT NULL"},
         "primary_key": "(housing_id)",
         "reference": {
+            "(size)": "housing_size_type(size)",
+            "(size,type_of_housing,location,age_of_housing)": "housing_maxprice(size,type_of_housing,location,age_of_housing)",
             "(provider_id)": "provider(provider_id)"}}
     table = generate_create_table_statement(table_housing)
-    db.execute(statement)
-    db.commit()
-
-    table_housing_maxprice = {
-        "name": "housing",
-        "body": {
-            "size": "NUMERIC NOT NULL",
-            "type_of_housing": "TEXT NOT NULL",
-            "location": "TEXT NOT NULL",
-            "age_of_housing": "NUMERIC NOT NULL",
-            "max_price": "NUMERIC NOT NULL"
-        },
-        "primary_key": "(size,type_of_housing,location,age_of_housing)",
-        "reference": {
-            "(size)": "housing(size)",
-            "(type_of_housing)": "housing(type_of_housing)",
-            "(location)": "housing(location)",
-            "(age_of_housing)": "housing(age_of_housing)"
-        }
-    }
-    table = generate_create_table_statement(table_housing_maxprice)
-    db.execute(statement)
+    db.execute(table)
     db.commit()
 
     table_renter = {
@@ -739,7 +1026,7 @@ if __name__ == "__main__":
         "primary_key": "(renter_id)"
     }
     table = generate_create_table_statement(table_renter)
-    db.execute(statement)
+    db.execute(table)
     db.commit()
 
     table_bids = {
@@ -759,13 +1046,10 @@ if __name__ == "__main__":
         }
     }
     table = generate_create_table_statement(table_bids)
-    db.execute(statement)
+    db.execute(table)
     db.commit()
 
-
-
-
-
+    fill_data()
 
     # server run
     app.run("127.0.0.1", PORT)
