@@ -1,12 +1,18 @@
 import './bid.css'
 import Icon from '../../components/Icon/Icon'
 import PhotoWindow from '../../components/PhotoWindow/PhotoWindow'
+import { useNavigate, useLocation } from "react-router-dom";
 
 function App(){
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 
+    'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
 
     const imgs:Array<string> = ['https://fooddl-1307472723.cos.ap-beijing.myqcloud.com/database/house-sample1.jpg',
     'https://fooddl-1307472723.cos.ap-beijing.myqcloud.com/database/house-sample2.jpg',
     'https://fooddl-1307472723.cos.ap-beijing.myqcloud.com/database/house-sample3.jpg']
+
+    const location = useLocation()
 
     return (
         <div className='App'>
@@ -17,15 +23,15 @@ function App(){
                     <div className='info-box'>
                         <div id='box-head'>
                             <div id='line-head'>
-                                <div className='house-name'>Sesame Street 15</div>
-                                <div className='house-add'>East Coast Park</div>
+                                <div className='house-name'>{location.state.houseInfo.location}</div>
+                                <div className='house-add'>{location.state.houseInfo.houseid}</div>
                             </div>
-                            <div className='house-price'>1600 SGD/month</div>
+                            <div className='house-price'>{location.state.houseInfo.minPrice} SGD/month</div>
                         </div>
                         <div id='box-body'>
                             <div id='body-left'>
                                 <div id='current-bid'>
-                                    <strong>Current bid: </strong><span>1610 SGD</span>
+                                    <strong>Current bid: </strong><span>{location.state.houseInfo.currentBid} SGD/month</span>
                                 </div>
                                 <div id='enter-bid'>
                                     <div>Enter new bid</div>
@@ -36,19 +42,19 @@ function App(){
                             <div id='body-right'>
                                 <div className='info-item'>
                                     <span className='item-title'>Size</span>
-                                    <span className='item-detail'>100 m2</span>
+                                    <span className='item-detail'>{location.state.houseInfo.size} m2</span>
                                 </div>
                                 <div className='info-item'>
-                                    <span className='item-title'>Rooms</span>
-                                    <span className='item-detail'>4</span>
+                                    <span className='item-title'>Size type</span>
+                                    <span className='item-detail'>{location.state.houseInfo.sizeType}</span>
                                 </div>
                                 <div className='info-item'>
                                     <span className='item-title'>Rental period</span>
-                                    <span className='item-detail'>21 Jul 2023 - 15 Dec 2023</span>
+                                    <span className='item-detail'>{location.state.houseInfo.startDate.getDate()} {months[location.state.houseInfo.startDate.getMonth()]} {location.state.houseInfo.startDate.getFullYear()} - {location.state.houseInfo.endDate.getDate()} {months[location.state.houseInfo.endDate.getMonth()]} {location.state.houseInfo.endDate.getFullYear()}</span>
                                 </div>
                                 <div className='info-item'>
                                     <span className='item-title'>Type</span>
-                                    <span className='item-detail'>House</span>
+                                    <span className='item-detail'>{location.state.houseInfo.houseType}</span>
                                 </div>
                             </div>
                         </div>

@@ -108,6 +108,13 @@ def hello():
 @app.route("/sign-in", methods=["POST"])
 def getname():
     param = request.json
+    first_name = param['firstName']
+    last_name = param['lastName']
+    email = param['email']
+    age = param['age']
+    nationality = param['nationality']
+    # TODO: wait for password
+
     att_list = ["firstName", "lastName", "email", "age", "nationality", "password", "type", "token"]
     type_list = ["TEXT", "TEXT", "TEXT", 'INT', "TEXT", "TEXT", "TEXT", "TEXT"]
     value_list = [param[x] for x in att_list[:-1]]
@@ -290,7 +297,7 @@ def provide_house():
 def house_list():
     response = {}
     # get all house info
-    statement = "SELECT housing_id, provider_id, location, min_price, size, start_time, end_time, description FROM housing;"
+    statement = "SELECT housing_id, provider_id, location, min_price, size, start_time, end_time, type_of_housing, description FROM housing;"
     statement = sqlalchemy.text(statement)
     res = db.execute(statement)
     db.commit()
@@ -299,14 +306,16 @@ def house_list():
     # try:
     for house in res['rows']:
         house_info = {}
-        house_info['houseid'] = house['housing_id']
+        house_info['houseid'] = int(house['housing_id'])
         house_info['location'] = house['location']
-        house_info['minPrice'] = house['min_price']
-        house_info['size'] = house['size']
+        house_info['minPrice'] = int(house['min_price'])
+        house_info['size'] = int(house['size'])
         house_info['startDate'] = house['start_time']
         house_info['endDate'] = house['end_time']
         house_info['description'] = house['description']
-        provider_id = house['provider_id']
+        house_info['houseType'] = house['type_of_housing']
+        provider_id = int(house['provider_id'])
+        print(type(house['start_time']))
         # select provider name
         provider_name_selection = f"SELECT first_name, last_name FROM provider WHERE provider_id = '{provider_id}';"
         provider_name_selection = sqlalchemy.text(provider_name_selection)
@@ -328,7 +337,7 @@ def house_list():
         current_bid_res = db.execute(current_bid_selection)
         db.commit()
         current_bid_res = generate_table_return_resulte_rename(current_bid_res)
-        house_info['currentBid'] = current_bid_res['rows'][0]['max']
+        house_info['currentBid'] = int(current_bid_res['rows'][0]['max'])
         response['houseInfoList'].append(house_info)
     response['status'] = True
     response['details'] = ''
@@ -1045,7 +1054,7 @@ if __name__ == "__main__":
         "name": "housing_size_type",
         "body": {
             "size": "NUMERIC NOT NULL CHECK (size>0 AND size<=1000)",
-            "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small') AND (size_type = 'large' IF size>=100) AND (size_type = 'middle' IF (size>=60 AND size<100)) AND (size_type = 'small' IF (size<60)))"},
+            "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small') AND ((size_type = 'large' AND size>=100) OR (size_type = 'middle' AND (size>=60 AND size<100)) OR (size_type = 'small' AND (size<60))))"},
         "primary_key": "(size)",
         }
     table = generate_create_table_statement(table_housing_size_type)

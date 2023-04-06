@@ -129,13 +129,15 @@ No api request.
               "endDate": "",		// Date, housing
               "currentBid": "",	// number, to select
               "description": "",	// string, housing
+              "type": "",			// string
               "images": [
                   "url1",
                   "url2"
               ],					// Array<string>, not in  db
           },
           // ...
-      ]
+      ],
+      "details": "..."
   }
   ```
 
@@ -150,6 +152,7 @@ No api request.
         "houseid": "", //string
         "location": "", //string
         "description": "", //string
+      }
     	"token": ""				// string
     }
 - Response:
@@ -440,5 +443,3 @@ No api request.
     "details": "..."
 }
 ```
-
-### 
