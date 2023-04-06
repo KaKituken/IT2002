@@ -162,7 +162,8 @@ function Admin(){
             })
         })
         console.log(param)
-        navigate('/table', {state: {param}})
+        const isJoin:boolean =(param.fromTable.length !== 1)
+        navigate('/table', {state: {param, isJoin}})
         // let success = await api.postComplexQery(param)
         // if(success.status === true) {
         //     console.log(success.tableData)

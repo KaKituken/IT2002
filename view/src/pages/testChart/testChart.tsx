@@ -10,12 +10,6 @@ function TableDisplay() {
     const location = useLocation()
 
     const [tableData, setTableData] = useState<api.TableData>({ columns: [], rows: [] })
-    let a: api.TableData = { columns: [], rows: [] }
-
-    const handleDeleteClick = (rowIndex: number) => {
-        console.log('Delete button clicked for row:', rowIndex)
-        // Implement your delete functionality here
-    }
 
     const navigate = useNavigate()
 
@@ -28,10 +22,10 @@ function TableDisplay() {
             let success = await api.postComplexQery(requestParam)
             if (success.status) {
                 setTableData(success.tableData)
-                a = success.tableData
                 console.log(success.tableData)
             }
             else {
+                window.alert(success.details)
                 console.log(success.tableData)
             }
         })()
@@ -47,6 +41,50 @@ function TableDisplay() {
     const data = React.useMemo(() => tableData.rows, [tableData.rows])
 
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({ columns, data })
+
+    async function handleDeleteClick(rowIndex: number){
+        if(location.state.isJoin){
+            window.alert("Can't delete entries from a joined table")
+            return
+        }
+        const param:api.DeleteEntryInfo = {entryInfo: {}}
+        tableData.rows.forEach((ele, index) => {
+            param.entryInfo[Object.keys(ele)[0]] = param.entryInfo[Object.values(ele)[0]]
+        })
+        let success = await api.postDeleteEntry(param)
+        if(success.status){
+            // remove rowIndex
+            const newTableData = {...tableData}
+            newTableData.rows.splice(rowIndex, 1)
+            setTableData(newTableData)
+        }
+        else{
+            window.alert(success.details)
+        }
+    }
+
+    async function handleCellChange(e: React.ChangeEvent<HTMLInputElement>, cellInfo: any){
+        if(location.state.isJoin){
+            window.alert("Can't modify entries in a joined table")
+            return
+        }
+        const newRowData = [...tableData.rows];
+        newRowData[cellInfo.row.index][cellInfo.column.id] = e.target.value;
+        let success = await api.postUpdateEntry({
+            orgRow: tableData.rows[cellInfo.row.index],
+            newRow: newRowData[cellInfo.row.index]
+        })
+        if(success.status){
+            const newTableData = {...tableData}
+            newTableData.rows = newRowData
+            setTableData(newTableData)
+        }
+        else{
+            window.alert(success.details)
+        }
+        // setTableData(newData)
+        console.log(newRowData);
+    };
 
     return (
         <div className="chart-page">
@@ -86,8 +124,15 @@ function TableDisplay() {
                                             border: 'solid 1px #E1E1E1',
                                         }}
                                     >
-                                        {cell.render('Cell')}
+                                        <input
+                                        type="text"
+                                        value={cell.value}
+                                        onChange={e => handleCellChange(e, cell)}
+                                        style={{ border: 'none', background: 'transparent' }}
+                                        ></input>
+                                        {/* {cell.render('Cell')} */}
                                     </td>
+                                    
                                 ))}
                                 <td style={{ padding: '8px' }}>
                                     <button
