@@ -446,7 +446,11 @@ def complex_query():
 
 @app.route("/admin/delete", methods="POST")
 def delete():
-    return 
+    param = request.json
+    attribute_dict = param["entryInfo"]
+    target_attribute_dict = {}
+    for key,value in attribute_dict:
+        target_attribute_dict[key[len()]]
 
 
     
