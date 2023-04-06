@@ -403,6 +403,10 @@ def complex_query():
         response["detail"] = "Database selection failed"
     return jsonify(response)
 
+@app.route("/admin/delete", methods="POST")
+def delete():
+    return 
+
 
     
         
@@ -964,7 +968,7 @@ if __name__ == "__main__":
     table_housing_size_type = {
         "name": "housing_size_type",
         "body": {
-            "size": "NUMERIC NOT NULL CHECK (size>0)",
+            "size": "NUMERIC NOT NULL CHECK (size>0 AND size<=1000)",
             "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small'))"},
         "primary_key": "(size)",
         }
@@ -975,7 +979,7 @@ if __name__ == "__main__":
     table_housing_maxprice = {
         "name": "housing_maxprice",
         "body": {
-            "size": "NUMERIC NOT NULL",
+            "size": "NUMERIC NOT NULL CHECK (size>0 AND size<=1000)",
             "type_of_housing": "TEXT NOT NULL",
             "location": "TEXT NOT NULL",
             "age_of_housing": "NUMERIC NOT NULL CHECK(age_of_housing > 0)",
@@ -992,7 +996,7 @@ if __name__ == "__main__":
         "body": {
             "housing_id": "NUMERIC NOT NULL",
             "provider_id": "NUMERIC NOT NULL",
-            "size": "NUMERIC NOT NULL CHECK (size>0)",
+            "size": "NUMERIC NOT NULL CHECK (size>0 AND size<=1000)",
             "type_of_housing": "TEXT NOT NULL",
             "location":"TEXT NOT NULL",
             "age_of_housing":"NUMERIC NOT NULL CHECK (age_of_housing>0)",
