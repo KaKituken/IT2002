@@ -21,8 +21,8 @@ CORS(app)
 
 # ? building our `engine` object from a custom configuration string
 # ? for this project, we'll use the default postgres user, on a database called `postgres` deployed on the same machine
-# YOUR_POSTGRES_PASSWORD = "JUNjun11"
-YOUR_POSTGRES_PASSWORD = "Jishuhou524"
+YOUR_POSTGRES_PASSWORD = "JUNjun11"
+#YOUR_POSTGRES_PASSWORD = "Jishuhou524"
 # connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost/postgres"
 connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost:5432"
 engine = sqlalchemy.create_engine(
@@ -370,7 +370,7 @@ def complex_query():
     for table_name in tables:
         att_list = table_name_list[table_name]
         for att_name in att_list:
-            statement += f'{table_name}.{att_name} AS {table_name}_{att_name}, '
+            statement += f'{table_name}.{att_name} AS {table_name}-{att_name}, '
     statement = statement[:-2]
     statement += ' FROM '
     for table in tables:
@@ -436,22 +436,46 @@ def complex_query():
         print(res)
         response["status"] = True
         response["tableData"] = res
-        response["detail"] = ""
+        response["details"] = ""
     except:
         db.rollback()
         response["status"] = False
         response["tableData"] = {}
-        response["detail"] = "Database selection failed"
+        response["details"] = "Database selection failed"
     return jsonify(response)
 
-@app.route("/admin/delete", methods="POST")
+@app.route("/admin/delete", methods= ["POST"])
 def delete():
     param = request.json
+    response = {}
     attribute_dict = param["entryInfo"]
     target_attribute_dict = {}
-    for key,value in attribute_dict:
-        target_attribute_dict[key[len()]]
+    table_name = ''
+    for key,value in attribute_dict.items():
+        parts = key.split("-")
+        part1 = parts[0]
+        table_name = part1
+        part2 = key[len(part1)+1:]
+        target_attribute_dict[part2] = value
 
+    statement = f"DELETE FROM {table_name} WHERE "
+    for attribute, value in target_attribute_dict.items():
+        if table_name_list[table_name][attribute] == "NUMERIC":
+            statement += (f"{table_name}.{attribute} = {value} AND ")
+        else:
+            statement += (f"{table_name}.{attribute} = '{value}' AND ")
+    statement = statement[:-5] + ";"
+    statement = sqlalchemy.text(statement)
+    try:
+        db.execute(statement)
+        db.commit()
+        response["status"] = True
+        response["details"] = ""
+    except:
+        db.rollback()
+        response["status"] = False
+        response["details"] = "Database deletion failed"
+    return jsonify(response)
 
     
         
@@ -977,7 +1001,7 @@ def delete_data():
 
 
 # ? The port where the debuggable DB management API is served
-PORT = 2222
+PORT = 2223
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
