@@ -45,58 +45,58 @@ data_types = {
 # TODO: create a dictionary of tables
 table_name_list = {
     "provider": {
-        "provider_id": "NUMERIC",
+        "provider_id": "INT",
         "first_name": "TEXT",
         "last_name": "TEXT",
         "email": "TEXT",
-        "age": "NUMERIC",
+        "age": "INT",
         "nationality": "TEXT",
-        "salary": "NUMERIC",
+        "salary": "INT",
         "sex": "TEXT",
         "ethnicity": "TEXT"
     },
     "housing": {
-        "housing_id": "NUMERIC",
-        "provider_id": "NUMERIC",
-        "size": "NUMERIC",
+        "housing_id": "INT",
+        "provider_id": "INT",
+        "size": "INT",
         "type_of_housing": "TEXT",
         "location":"TEXT",
-        "age_of_housing":"NUMERIC",
+        "age_of_housing":"INT",
         "start_time": "Date",
         "end_time": "Date",
-        "min_price": "NUMERIC",
-        "bidding_period": "NUMERIC",
+        "min_price": "FLOAT",
+        "bidding_period": "INT",
         "rented": "TEXT",
         "description": "TEXT"
     },
     "housing_size_type": {
-        "size": "NUMERIC",
+        "size": "INT",
         "size_type": "TEXT"
     },
     "housing_maxprice": {
-        "size": "NUMERIC",
+        "size": "INT",
         "type_of_housing": "TEXT",
         "location": "TEXT",
-        "age_of_housing": "NUMERIC",
-        "max_price": "NUMERIC"
+        "age_of_housing": "INT",
+        "max_price": "INT"
     },
     "renter": {
-        "renter_id": "NUMERIC",
+        "renter_id": "INT",
         "first_name": "TEXT",
         "last_name": "TEXT",
         "email": "TEXT",
-        "age": "NUMERIC",
+        "age": "INT",
         "nationality": "TEXT",
-        "salary": "NUMERIC",
+        "salary": "INT",
         "sex": "TEXT",
         "ethnicity": "TEXT"
     },
     "bids": {
-        "housing_id": "NUMERIC",
-        "renter_id": "NUMERIC",
+        "housing_id": "INT",
+        "renter_id": "INT",
         "start_time": "DATE",
         "end_time": "DATE",
-        "price": "NUMERIC",
+        "price": "FLOAT",
         "bid_date": "DATE"
     }
 }
@@ -189,7 +189,7 @@ def return_table_detail():
             selection = {}
             selection['att'] = attribute_name
             selection['table'] = table_name
-            if table_name_list[table_name][attribute_name] != "NUMERIC":
+            if table_name_list[table_name][attribute_name] not in ["INT","FLOAT"]:
                 statement = generate_group_by_statement(selection)
                 res = db.execute(statement)
                 db.commit()
@@ -270,15 +270,15 @@ def provide_house():
     insertion['valueTypes'] = {}
     insertion['valueTypes']['house_id'] = "TEXT"
     insertion['valueTypes']['provider_id'] = "TEXT"
-    insertion['valueTypes']['size'] = "NUMERIC"
+    insertion['valueTypes']['size'] = "INT"
     insertion['valueTypes']['type_of_housing'] = "TEXT"
     insertion['valueTypes']['location'] = "TEXT"
     insertion['valueTypes']['size_type'] = "TEXT"
-    insertion['valueTypes']['age_of_housing'] = "NUMERIC"
+    insertion['valueTypes']['age_of_housing'] = "INT"
     insertion['valueTypes']['start_time'] = "DATE"
     insertion['valueTypes']['end_time'] = "DATE"
-    insertion['valueTypes']['min_price'] = "NUMERIC"
-    insertion['valueTypes']['bidding_period'] = "NUMERIC"
+    insertion['valueTypes']['min_price'] = "FLOAT"
+    insertion['valueTypes']['bidding_period'] = "INT"
     insertion['valueTypes']['rented'] = "TEXT"
     
 
@@ -306,16 +306,16 @@ def house_list():
     # try:
     for house in res['rows']:
         house_info = {}
-        house_info['houseid'] = int(house['housing_id'])
+        house_info['houseid'] = house['housing_id']
+        print(type(house['housing_id']))
         house_info['location'] = house['location']
-        house_info['minPrice'] = int(house['min_price'])
-        house_info['size'] = int(house['size'])
+        house_info['minPrice'] = house['min_price']
+        house_info['size'] = house['size']
         house_info['startDate'] = house['start_time']
         house_info['endDate'] = house['end_time']
         house_info['description'] = house['description']
         house_info['houseType'] = house['type_of_housing']
-        provider_id = int(house['provider_id'])
-        print(type(house['start_time']))
+        provider_id = house['provider_id']
         # select provider name
         provider_name_selection = f"SELECT first_name, last_name FROM provider WHERE provider_id = '{provider_id}';"
         provider_name_selection = sqlalchemy.text(provider_name_selection)
@@ -337,7 +337,8 @@ def house_list():
         current_bid_res = db.execute(current_bid_selection)
         db.commit()
         current_bid_res = generate_table_return_resulte_rename(current_bid_res)
-        house_info['currentBid'] = int(current_bid_res['rows'][0]['max'])
+        house_info['currentBid'] = current_bid_res['rows'][0]['max']
+        print(type(house_info['currentBid']))
         response['houseInfoList'].append(house_info)
     response['status'] = True
     response['details'] = ''
@@ -469,7 +470,7 @@ def delete():
 
     statement = f"DELETE FROM {table_name} WHERE "
     for attribute, value in target_attribute_dict.items():
-        if table_name_list[table_name][attribute] == "NUMERIC":
+        if table_name_list[table_name][attribute] in ["INT","FLOAT"]:
             statement += (f"{table_name}.{attribute} = {value} AND ")
         else:
             statement += (f"{table_name}.{attribute} = '{value}' AND ")
@@ -511,7 +512,7 @@ def update():
     
     statement = f"UPDATE {table_name} SET "
     for attribute, value in update_attribute_dict.items():
-        if table_name_list[table_name][attribute] == "NUMERIC":
+        if table_name_list[table_name][attribute] in ["INT","FLOAT"]:
             statement += (f"{attribute} = {value},")
         else:
             statement += (f"{attribute} = '{value}',")
@@ -519,7 +520,7 @@ def update():
     statement = statement[:-1] + " WHERE "
 
     for attribute, value in change_attribute_dict.items():
-        if table_name_list[table_name][attribute] == "NUMERIC":
+        if table_name_list[table_name][attribute] in ["INT","FLOAT"]:
             statement += (f"{table_name}.{attribute} = {value} AND ")
         else:
             statement += (f"{table_name}.{attribute} = '{value}' AND ")
@@ -537,6 +538,8 @@ def update():
         response["status"] = False
         response["details"] = "Database update failed"
     return jsonify(response)
+
+
 
 
 
@@ -942,7 +945,7 @@ def fill_data():
     insertion['body'] = {}
     insertion["valueTypes"] = {}
     att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
-    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
+    type_list = ['INT','TEXT','TEXT','TEXT','INT','TEXT','INT','TEXT','TEXT']
     value_list = [54321,'Junjie','Tian','123@qq.com',19,'Chinese',0,'Male','Chinese']
     for att, v in zip(att_list, value_list):
         insertion['body'][att] = v
@@ -957,7 +960,7 @@ def fill_data():
     insertion['body'] = {}
     insertion["valueTypes"] = {}
     att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
-    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
+    type_list = ['INT','TEXT','TEXT','TEXT','INT','TEXT','INT','TEXT','TEXT']
     value_list = [55555,'Junjie','Tian','123@outlook.com',19,'Chinese',0,'Male','Chinese']
     for att, v in zip(att_list, value_list):
         insertion['body'][att] = v
@@ -972,7 +975,7 @@ def fill_data():
     insertion['body'] = {}
     insertion["valueTypes"] = {}
     att_list = ['size','size_type']
-    type_list = ['NUMERIC','TEXT']
+    type_list = ['INT','TEXT']
     value_list = [80,'middle']
     for att, v in zip(att_list, value_list):
         insertion['body'][att] = v
@@ -987,7 +990,7 @@ def fill_data():
     insertion['body'] = {}
     insertion["valueTypes"] = {}
     att_list = ['size','type_of_housing','location','age_of_housing','max_price']
-    type_list = ['NUMERIC','TEXT','TEXT','NUMERIC','NUMERIC']
+    type_list = ['INT','TEXT','TEXT','INT','INT']
     value_list = [80,'condo','Sentosa',3,10000]
     for att, v in zip(att_list, value_list):
         insertion['body'][att] = v
@@ -1002,7 +1005,7 @@ def fill_data():
     insertion['body'] = {}
     insertion["valueTypes"] = {}
     att_list = ['housing_id','provider_id','size','type_of_housing','location','age_of_housing','start_time','end_time','min_price','bidding_period','rented','description']
-    type_list = ['NUMERIC','NUMERIC','NUMERIC','TEXT','TEXT','NUMERIC','DATE','DATE','NUMERIC','NUMERIC','TEXT','TEXT']
+    type_list = ['INT','INT','INT','TEXT','TEXT','INT','DATE','DATE','FLOAT','INT','TEXT','TEXT']
     value_list = [12345,54321,80,'condo','Sentosa',3,'2022-09-01','2023-09-01',1000,100,'no','good house near sea']
     for att, v in zip(att_list, value_list):
         insertion['body'][att] = v
@@ -1017,7 +1020,7 @@ def fill_data():
     insertion['body'] = {}
     insertion["valueTypes"] = {}
     att_list = ['renter_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
-    type_list = ['NUMERIC','TEXT','TEXT','TEXT','NUMERIC','TEXT','NUMERIC','TEXT','TEXT']
+    type_list = ['INT','TEXT','TEXT','TEXT','INT','TEXT','INT','TEXT','TEXT']
     value_list = [88888,'Junjie','Tian','123@qq.com',19,'Chinese',0,'Male','Chinese']
     for att, v in zip(att_list, value_list):
         insertion['body'][att] = v
@@ -1032,7 +1035,7 @@ def fill_data():
     insertion['body'] = {}
     insertion["valueTypes"] = {}
     att_list = ['housing_id','renter_id','start_time','end_time','price','bid_date']
-    type_list = ['NUMERIC','NUMERIC','DATE','DATE','NUMERIC','DATE']
+    type_list = ['INT','INT','DATE','DATE','FLOAT','DATE']
     value_list = [12345,88888,'2023-04-01','2023-05-01',8000,'2023-03-25']
     for att, v in zip(att_list, value_list):
         insertion['body'][att] = v
@@ -1083,13 +1086,13 @@ if __name__ == "__main__":
     table_provider = {
         "name": "provider",
         "body": {
-            "provider_id": "NUMERIC NOT NULL",
+            "provider_id": "INT NOT NULL",
             "first_name": "TEXT NOT NULL",
             "last_name": "TEXT NOT NULL",
             "email": "TEXT UNIQUE NOT NULL",
-            "age": "NUMERIC NOT NULL CHECK(age>=18)",
+            "age": "INT NOT NULL CHECK(age>=18)",
             "nationality": "TEXT NOT NULL",
-            "salary": "NUMERIC NOT NULL CHECK(salary>=0)",
+            "salary": "INT NOT NULL CHECK(salary>=0)",
             "sex": "TEXT NOT NULL",
             "ethnicity": "TEXT NOT NULL"},
         "primary_key": "(provider_id)"
@@ -1101,7 +1104,7 @@ if __name__ == "__main__":
     table_housing_size_type = {
         "name": "housing_size_type",
         "body": {
-            "size": "NUMERIC NOT NULL CHECK (size>0 AND size<=1000)",
+            "size": "INT NOT NULL CHECK (size>0 AND size<=1000)",
             "size_type": "TEXT NOT NULL CHECK(size_type IN ('large','middle','small') AND ((size_type = 'large' AND size>=100) OR (size_type = 'middle' AND (size>=60 AND size<100)) OR (size_type = 'small' AND (size<60))))"},
         "primary_key": "(size)",
         }
@@ -1112,11 +1115,11 @@ if __name__ == "__main__":
     table_housing_maxprice = {
         "name": "housing_maxprice",
         "body": {
-            "size": "NUMERIC NOT NULL CHECK (size>0 AND size<=1000)",
+            "size": "INT NOT NULL CHECK (size>0 AND size<=1000)",
             "type_of_housing": "TEXT NOT NULL",
             "location": "TEXT NOT NULL",
-            "age_of_housing": "NUMERIC NOT NULL CHECK(age_of_housing > 0)",
-            "max_price": "NUMERIC NOT NULL CHECK(max_price > 0)"
+            "age_of_housing": "INT NOT NULL CHECK(age_of_housing > 0)",
+            "max_price": "INT NOT NULL CHECK(max_price > 0)"
         },
         "primary_key": "(size,type_of_housing,location,age_of_housing)"
         }
@@ -1127,16 +1130,16 @@ if __name__ == "__main__":
     table_housing = {
         "name": "housing",
         "body": {
-            "housing_id": "NUMERIC NOT NULL",
-            "provider_id": "NUMERIC NOT NULL",
-            "size": "NUMERIC NOT NULL CHECK (size>0 AND size<=1000)",
+            "housing_id": "INT NOT NULL",
+            "provider_id": "INT NOT NULL",
+            "size": "INT NOT NULL CHECK (size>0 AND size<=1000)",
             "type_of_housing": "TEXT NOT NULL",
             "location":"TEXT NOT NULL",
-            "age_of_housing":"NUMERIC NOT NULL CHECK (age_of_housing>0)",
+            "age_of_housing":"INT NOT NULL CHECK (age_of_housing>0)",
             "start_time": "Date NOT NULL",
             "end_time": "Date NOT NULL CHECK (end_time > start_time)",
-            "min_price": "NUMERIC NOT NULL CHECK (min_price > 0)",
-            "bidding_period": "NUMERIC NOT NULL CHECK (bidding_period > 0)",
+            "min_price": "FLOAT NOT NULL CHECK (min_price > 0)",
+            "bidding_period": "INT NOT NULL CHECK (bidding_period > 0)",
             "rented": "TEXT NOT NULL CHECK (rented IN ('yes', 'no'))",
             "description": "TEXT NOT NULL"},
         "primary_key": "(housing_id)",
@@ -1151,13 +1154,13 @@ if __name__ == "__main__":
     table_renter = {
         "name": "renter",
         "body": {
-            "renter_id": "NUMERIC NOT NULL",
+            "renter_id": "INT NOT NULL",
             "first_name": "TEXT NOT NULL",
             "last_name": "TEXT NOT NULL",
             "email": "TEXT NOT NULL",
-            "age": "NUMERIC NOT NULL CHECK (age>=18)",
+            "age": "INT NOT NULL CHECK (age>=18)",
             "nationality": "TEXT NOT NULL",
-            "salary": "NUMERIC NOT NULL CHECK (salary>=0)",
+            "salary": "INT NOT NULL CHECK (salary>=0)",
             "sex": "TEXT NOT NULL",
             "ethnicity": "TEXT NOT NULL"
         },
@@ -1170,11 +1173,11 @@ if __name__ == "__main__":
     table_bids = {
         "name": "bids",
         "body": {
-            "housing_id": "NUMERIC NOT NULL",
-            "renter_id": "NUMERIC NOT NULL",
+            "housing_id": "INT NOT NULL",
+            "renter_id": "INT NOT NULL",
             "start_time": "DATE NOT NULL",
             "end_time": "DATE NOT NULL CHECK (end_time >= start_time)",
-            "price": "NUMERIC NOT NULL CHECK (price > 0)",
+            "price": "FLOAT NOT NULL CHECK (price > 0)",
             "bid_date": "DATE NOT NULL"
         },
         "primary_key": "(housing_id,renter_id)",
