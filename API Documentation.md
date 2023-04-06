@@ -345,14 +345,15 @@ No api request.
         }
     ],
     "filterEqual": {
-        "table1": {
-            "att1": "value1",
-            "att2": "value2"
-        },
-        "table2": {
-            "att1": "value1",
-            "att2": "value2"
-        },
+        "table1": [
+            {"att1": "value1"},
+            {"att1": "value3"},
+            {"att2": "value2"}
+        ],
+        "table2": [
+            {"att1": "value1"},
+            {"att2": "value2"}
+        ],
     },
     "filterLess": {
         "table1": {

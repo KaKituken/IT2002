@@ -1,8 +1,8 @@
 import apisauce from 'apisauce'
 import { HouseInfo } from '../components/InfoCard/InfoCard'
 
-// const machineIP = "172.25.77.37"
-const machineIP = "127.0.0.1"
+const machineIP = "172.25.77.37"
+// const machineIP = "127.0.0.1"
 const machinePort = "2222"
 const api = apisauce.create({
     baseURL: `http://${machineIP}:${machinePort}`,
@@ -70,11 +70,11 @@ interface ValueCount {
 export interface ConplexQueryCondition {
     fromTable: string[]
     joinOn: Record<string, string>[]
-    filterEqual: Record<string, Record<string, string>>
+    filterEqual: Record<string, Record<string, string|number>[]>
     filterLess: Record<string, Record<string, number>>
 }
 
-interface TableData {
+export interface TableData {
     columns: string[]
     rows: Record<string, any>[]
 }
@@ -150,7 +150,7 @@ export async function getTableName() {
     }
 }
 
-export async function getAttributeInfo(params:string[]) {
+export async function getAttributeInfo(params:Record<string,string[]>) {
     let res = await api.post('/admin/attributes', params)
     if(!res.ok){
         alert("Failed to get attribute info")
@@ -160,7 +160,7 @@ export async function getAttributeInfo(params:string[]) {
 }
 
 export async function postComplexQery(params:ConplexQueryCondition) {
-    let res = await api.post('/complex-query', params)
+    let res = await api.post('/admin/complex-query', params)
     if(!res.ok){
         alert("Failed to post complex query info")
         console.log(res.data)

@@ -50,8 +50,8 @@ function Admin(){
                     "attributeName": "att2",
                     "type": "NUMERIC",
                     "count": [
-                        {"min": 9},
-                        {"max": 20},
+                        {"minValue": 9},
+                        {"maxValue": 20},
                     ],
                }
             ],
@@ -89,7 +89,9 @@ function Admin(){
         console.log('Selected value:', value)
     };
 
-    async function getAllTableInfo(param:string[]){
+    async function getAllTableInfo(tableList:string[]){
+        console.log(tableList)
+        const param = {"tableNameList": tableList}
         let success = await api.getAttributeInfo(param)
         if(success.status){
             setTableInfo(success.tableAttributes)
@@ -162,6 +164,7 @@ function Admin(){
                 param.joinOn.push({[leftAttName]: leftAttName, [rightTableName]: rightAttName})
             }
         }
+        // construct filter Equal
         Object.entries(clickedIndicator).forEach(([tableAttributeName, valueChoosed]) => {
             const parts = tableAttributeName.split('.')
             const tableName = parts[0]
@@ -171,7 +174,7 @@ function Admin(){
             }
             // 遍历 attributeInfo 拿到这个tableName对应的信息
             if(!param.filterEqual[tableName]){
-                param.filterEqual[tableName] = {}
+                param.filterEqual[tableName] = []
             }
             for (let index = 0; index < attributeInfo.length; index++) {
                 const singleTableInfo = attributeInfo[index];
@@ -182,7 +185,7 @@ function Admin(){
                             // use valueChoosed to filter
                             for (let i = 0; i < singleAttributeInfo.count.length; i++) {
                                 if(valueChoosed[i]){
-                                    param.filterEqual[tableName][attName] = Object.keys(singleAttributeInfo.count[i])[0]
+                                    param.filterEqual[tableName].push({[attName]: Object.keys(singleAttributeInfo.count[i])[0]})
                                 }
                             }
                         }
@@ -228,9 +231,10 @@ function Admin(){
                     <div id='from-table'>From table</div>
                     <div id='from-table-display'>
                         {allTableNames.map((tableName, index)=>(
-                            tableChoosenIndicator[index] ? 
-                            <span>{tableName}, </span> : 
-                            <span></span>
+                            tableChoosenIndicator[index] && <span>{tableName}, </span> 
+                            // tableChoosenIndicator[index] ? 
+                            // <span>{tableName}, </span> : 
+                            // <span></span>
                         ))}
                     </div>
                 </div>
@@ -304,11 +308,10 @@ function Admin(){
                     <div id='filter-boxes'>
                         {attributeInfo?.map((tableInfo, index) => (
                             tableInfo['attribute'].map((att, attIndex)=>(
-                                att['type'] !== 'NUMERIC' ? 
+                                att['type'] !== 'NUMERIC' &&
                                 <FilterBox 
                                 onIsClickedChange={handleIsClickedChange}attList={att['count']}
                                 tableName={tableInfo['name'] + '.' + att['attributeName']}></FilterBox> 
-                                : <span></span>
                             ))
                         ))}
                     </div>
@@ -318,7 +321,7 @@ function Admin(){
                                 att['type'] === 'NUMERIC' ? 
                                 <div className='number-bar' id='size-bar'>
                                     <div className='bar-title'>{tableInfo.name + '.' + att.attributeName}</div>
-                                    <FilterBar min={att.count[0]['min']} max={att.count[1]['max']} 
+                                    <FilterBar min={att.count[0]['minValue']} max={att.count[1]['maxValue']} 
                                     onChange={(value) => handleSliderChange(value, tableInfo['name'], att['attributeName'])}></FilterBar>
                                 </div>
                                 : <span></span>
