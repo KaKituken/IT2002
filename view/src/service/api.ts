@@ -1,8 +1,8 @@
 import apisauce from 'apisauce'
 import { HouseInfo } from '../components/InfoCard/InfoCard'
 
-const machineIP = "172.25.77.37"
-// const machineIP = "127.0.0.1"
+// const machineIP = "172.25.77.37"
+const machineIP = "127.0.0.1"
 const machinePort = "2222"
 const api = apisauce.create({
     baseURL: `http://${machineIP}:${machinePort}`,
