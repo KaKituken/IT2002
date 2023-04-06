@@ -1,16 +1,17 @@
 import './InfoCard.css'
 
 export interface HouseInfo{
-    name: string,
     location: string,
-    price: number,
+    id: number,
+    minPrice: number,
     size: number,
-    rooms: number,
+    sizeType: string,
     startDate: Date,
     endDate: Date,
     currentBid: number,
     description: string,
-    images: Array<string>
+    images: Array<string>,
+    onBidClicked: any
 }
 
 function InfoCard(props: HouseInfo){
@@ -36,12 +37,12 @@ function InfoCard(props: HouseInfo){
                 </div>
             </div>
             <div id='InfoCard-info-box'>
-                <h1 id="house-name">{props.name}</h1>
-                <h2 id="house-location">{props.location}</h2>
+                <h1 id="house-name">{props.location}</h1>
+                <h2 id="house-location">{props.id}</h2>
                 <div id='tbox'>
-                    <span>{props.price} SGD/month</span>
+                    <span>{props.minPrice} SGD/month</span>
                     <span>{props.size} m2</span>
-                    <span>{props.rooms} rooms</span>
+                    <span>{props.sizeType}</span>
                 </div>
                 <p>
                     <strong>Renting period: </strong>
@@ -52,7 +53,9 @@ function InfoCard(props: HouseInfo){
                     <span>{props.currentBid} SGD</span>
                 </p>
                 <p>{props.description}</p>
-                <button id='Make-bid'>Make bid</button>
+                <button id='Make-bid' onClick={()=>{
+                    props.onBidClicked(props.id)
+                }}>Make bid</button>
             </div>
         </div>
     )

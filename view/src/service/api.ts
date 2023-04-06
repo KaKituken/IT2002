@@ -99,6 +99,10 @@ export interface UpdateCondition{
 export interface DeleteEntryInfo{
     entryInfo: Record<string, string|number>
 }
+
+export interface AddEntryInfo{
+    entryInfo: Record<string, string|number>
+}
   
 
 export async function signIn(params:SignInForm) {
@@ -138,17 +142,6 @@ export async function uploadHouse(params:ProviderForm) {
     }
     else {
         alert("Failed to upload")
-        console.log(res.data)
-    }
-}
-
-export async function getHouseList() {
-    let res = await api.get('/house-list')
-    if (res.ok){
-        return res.data
-    }
-    else {
-        alert("Failed to get current house list")
         console.log(res.data)
     }
 }
@@ -199,4 +192,45 @@ export async function postUpdateEntry(params:UpdateCondition) {
         console.log(res.data)
     }
     return res.data as Promise<BasicReturn>
+}
+
+export async function postAddRow(params:AddEntryInfo) {
+    let res = await api.post('/admin/add', params)
+    if(!res.ok){
+        alert("Failed to add the entry")
+        console.log(res.data)
+    }
+    return res.data as Promise<BasicReturn>
+}
+
+
+// user page
+export interface GetHouseListReturn{
+    status: boolean
+    houseInfoList: SingleHouseInfo[]
+    details: string
+}
+
+export interface SingleHouseInfo{
+    houseid: number		    // string, housing
+    providerName: string    // string, to select
+    location: string	    // string, housing
+    minPrice: number		// number, housing
+    size: number		    // number, housing
+    sizeType: string	    // number, to select
+    startDate: Date	        // Date, housing
+    endDate: Date		    // Date, housing
+    currentBid: number	    // number, to select
+    description: string	    // string, housing
+    houseType: string
+    images:string[]
+}
+
+export async function getHouseList() {
+    let res = await api.get('/house-list')
+    if(!res.ok){
+        alert("Failed to get house list")
+        console.log(res.data)
+    }
+    return res.data as Promise<GetHouseListReturn>
 }

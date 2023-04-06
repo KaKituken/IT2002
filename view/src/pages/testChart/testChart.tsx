@@ -13,6 +13,10 @@ function TableDisplay() {
 
     const navigate = useNavigate()
 
+    const [showModal, setShowModal] = useState(false);
+    const [newAddRowData, setNewRowData] = useState<{ [key: string]: any }>({});
+
+
     useEffect(() => {
         const requestParam = location.state.param
         console.log(requestParam)
@@ -42,29 +46,29 @@ function TableDisplay() {
 
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({ columns, data })
 
-    async function handleDeleteClick(rowIndex: number){
-        if(location.state.isJoin){
+    async function handleDeleteClick(rowIndex: number) {
+        if (location.state.isJoin) {
             window.alert("Can't delete entries from a joined table")
             return
         }
-        const param:api.DeleteEntryInfo = {entryInfo: {}}
+        const param: api.DeleteEntryInfo = { entryInfo: {} }
         tableData.rows.forEach((ele, index) => {
             param.entryInfo[Object.keys(ele)[0]] = param.entryInfo[Object.values(ele)[0]]
         })
         let success = await api.postDeleteEntry(param)
-        if(success.status){
+        if (success.status) {
             // remove rowIndex
-            const newTableData = {...tableData}
+            const newTableData = { ...tableData }
             newTableData.rows.splice(rowIndex, 1)
             setTableData(newTableData)
         }
-        else{
+        else {
             window.alert(success.details)
         }
     }
 
-    async function handleCellChange(e: React.ChangeEvent<HTMLInputElement>, cellInfo: any){
-        if(location.state.isJoin){
+    async function handleCellChange(e: React.ChangeEvent<HTMLInputElement>, cellInfo: any) {
+        if (location.state.isJoin) {
             window.alert("Can't modify entries in a joined table")
             return
         }
@@ -74,21 +78,37 @@ function TableDisplay() {
             orgRow: tableData.rows[cellInfo.row.index],
             newRow: newRowData[cellInfo.row.index]
         })
-        if(success.status){
-            const newTableData = {...tableData}
+        if (success.status) {
+            const newTableData = { ...tableData }
             newTableData.rows = newRowData
             setTableData(newTableData)
         }
-        else{
+        else {
             window.alert(success.details)
         }
         // setTableData(newData)
         console.log(newRowData);
     };
 
+    async function handleAddRow() {
+        const param:api.AddEntryInfo = {entryInfo: {}}
+        param.entryInfo = newAddRowData
+        let success = await api.postAddRow(param);
+        if (success.status) {
+            const newTableData = { ...tableData };
+            newTableData.rows.push(newAddRowData);
+            setTableData(newTableData);
+            setShowModal(false);
+        } else {
+            window.alert(success.details);
+        }
+        console.log('add')
+    }
+
+
     return (
         <div className="chart-page">
-            <button id="back-btn" onClick={()=>navigate('/admin')}>back</button>
+            <button id="back-btn" onClick={() => navigate('/admin')}>back</button>
             <table {...getTableProps()} style={{ border: 'solid 1px black' }}>
                 <thead>
                     {headerGroups.map((headerGroup) => (
@@ -125,14 +145,14 @@ function TableDisplay() {
                                         }}
                                     >
                                         <input
-                                        type="text"
-                                        value={cell.value}
-                                        onChange={e => handleCellChange(e, cell)}
-                                        style={{ border: 'none', background: 'transparent' }}
+                                            type="text"
+                                            value={cell.value}
+                                            onChange={e => handleCellChange(e, cell)}
+                                            style={{ border: 'none', background: 'transparent' }}
                                         ></input>
                                         {/* {cell.render('Cell')} */}
                                     </td>
-                                    
+
                                 ))}
                                 <td style={{ padding: '8px' }}>
                                     <button
@@ -159,6 +179,32 @@ function TableDisplay() {
                     })}
                 </tbody>
             </table>
+            <button id='add-btn' onClick={() => setShowModal(true)}>Add Row</button>
+            {showModal && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <h2>Add Row</h2>
+                        {tableData.columns.map((columnName) => (
+                            <div key={columnName} className="input-group">
+                                <label>{columnName}</label>
+                                <input
+                                    type="text"
+                                    value={newAddRowData[columnName] || ""}
+                                    onChange={(e) =>
+                                        setNewRowData({
+                                            ...newAddRowData,
+                                            [columnName]: e.target.value,
+                                        })
+                                    }
+                                />
+                            </div>
+                        ))}
+                        <button onClick={handleAddRow}>Submit</button>
+                        <button onClick={() => setShowModal(false)}>Cancel</button>
+                    </div>
+                </div>
+            )}
+
         </div>
     )
 }
