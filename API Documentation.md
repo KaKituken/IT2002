@@ -23,6 +23,7 @@ No api request.
       "nationality": "..",
       "sex": "..",
       "password": "..",
+      "salary": "...",
       "type": "renter/provider"
   }
   ```
@@ -61,7 +62,8 @@ No api request.
   {
       "status": true/false,
       "token": "...",
-      "details": "...",
+      "userType": "...",
+      "details": "..."
   }
   ```
 
