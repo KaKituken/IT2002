@@ -96,7 +96,50 @@ def log_in():
 @app.route("/provide-house", methods = ["POST"])
 def provide_house():
     param = request.json
+    # parse
+    name = param['houseInfo']['name']
+    location = param['houseInfo']['location']
+    price = param['houseInfo']['price']
+    size = param['houseInfo']['size']
+    start_time = param['houseInfo']['startDate']
+    end_time = param['houseInfo']['endDate']
+    description = param['houseInfo']['description']
+    type_of_house = param['houseInfo']['typeOfHouse']
+    age = param['houseInfo']['age']
+    min_price = param['HouseInfo']['minPrice']
+    token = param['token']
+
+    # calculate attributes
+    houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+    providerID = token
+    # if size         # < 60 small, 60 < x < 100 medium 100 < large
+    # size_type = ...
+    period = end_time - start_time
+    rented = False
+
     
+    # insertion
+    insertion = {}
+    insertion['name'] = 'housing'
+    insertion['body'] = {}
+    insertion['body']['house_id'] = houseID
+    insertion['body']['provider_id'] = providerID
+    # ...
+    insertion['valueTypes'] = {}
+    insertion['valueTypes']['house_id'] = "TEXT"
+    insertion['valueTypes']['provider_id'] = "TEXT"
+    # ...
+
+    # return response
+    try:
+        statement = generate_insert_table_statement(insertion)
+        db.execute(statement)
+        db.commit()
+        return jsonify({'status': True, 'details': ''})
+    except Exception as e:
+        db.rollback()
+        return jsonify({'status': False, 'details': 'database insertion failed'})
+
     # house_info=param['name':, 'location', 'price', 'size', 'rooms', 'sortDate', 'endDate', 'currentBid', 'description', 'images']   
     # house_info.location = table_housing.location
     # house_info.price = table_housing.min_price
@@ -344,6 +387,13 @@ def generate_conditional_select_statement(selection: Dict):
             statement += f" {att}={val} AND"
     print(statement[:-4])
     return sqlalchemy.text(statement[:-4])
+
+
+statement = 'SELECT ...'
+statement = sqlalchemy.text(statement)
+res = db.execute(statement)
+if res is not None:
+    ...
 
 
 """

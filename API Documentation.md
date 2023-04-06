@@ -78,15 +78,15 @@ No api request.
   ```json
   {
       "houseInfo":{
-          "name": "", 		// string
           "location": "", 	//  string
           "price": 0, 		// number
           "size": 0, 			// number
-          "rooms": 0, 		// number
           "startDate": "",	// Date
           "endDate": "",		// Date
-          "currentBid": "",	// number
           "description": "",	// string
+          "typeOfHouse": "",  //string
+          "age": 1233,
+          "minPrice": 123,
           "images": [
               "url1",
               "url2"
@@ -132,7 +132,7 @@ No api request.
               "location": "", 	//  string
               "price": 0, 		// number
               "size": 0, 			// number
-              "rooms": 0, 		// number
+              "size_type": "", 		// number
               "startDate": "",	// Date
               "endDate": "",		// Date
               "currentBid": "",	// number
@@ -179,7 +179,6 @@ No api request.
         "location": "", 	//  string
         "type": "", 		// string
         "size": 0, 			// number
-        "rooms": 0, 		// number
         "location": "" //string
         "startDate": "",	// Date
         "endDate": "",		// Date
@@ -231,7 +230,6 @@ No api request.
         "type": "" //string
         "size": "" //string
         "maxprice": 0 //number
-        "rooms": 0 //number
         "startdate": "" //date
         "enddate": "" //date
       }
