@@ -55,6 +55,10 @@ table_name_list = {
         "sex": "TEXT",
         "ethnicity": "TEXT"
     },
+    "provider_password":{
+        "provider_id": "INT",
+        "password": "TEXT"
+    },
     "housing": {
         "housing_id": "INT",
         "provider_id": "INT",
@@ -91,6 +95,10 @@ table_name_list = {
         "sex": "TEXT",
         "ethnicity": "TEXT"
     },
+    "renter_password":{
+        "renter_id": "INT",
+        "password": "TEXT"
+    },
     "bids": {
         "housing_id": "INT",
         "renter_id": "INT",
@@ -113,49 +121,98 @@ def getname():
     email = param['email']
     age = param['age']
     nationality = param['nationality']
-    # TODO: wait for password
-
-    att_list = ["firstName", "lastName", "email", "age", "nationality", "password", "type", "token"]
-    type_list = ["TEXT", "TEXT", "TEXT", 'INT', "TEXT", "TEXT", "TEXT", "TEXT"]
-    value_list = [param[x] for x in att_list[:-1]]
-    value_list.append(hashlib.md5((param['firstName']+param['lastName']+param['email']).encode()).hexdigest())    # calculate the token
-    insertion = {}
-    insertion['name'] = 'TestRegisterTable'
-    insertion['body'] = {}
-    insertion["valueTypes"] = {}
-    for att, v in zip(att_list, value_list):
-        insertion['body'][att] = v
-    for att, t in zip(att_list, type_list):
-        insertion['valueTypes'][att] = t
-    print(insertion)
-    try:
+    password = param['password']
+    sex = param['sex']
+    salary = param['salary']
+    user_type = param['type']
+    if user_type == "provider":
+        att_list = ['provider_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
+        type_list = ['INT','TEXT','TEXT','TEXT','INT','TEXT','INT','TEXT','TEXT']
+        ethnicity = nationality
+        statement = "SELECT max(provider_id) FROM provider;"
+        res = db.execute(sqlalchemy.text(statement))
+        res = generate_table_return_resulte_no_rename(res)
+        new_user_id = res["rows"][0]['max']+1
+        value_list = [new_user_id, first_name, last_name, email, age, nationality, salary, sex, ethnicity]
+        insertion = {}
+        insertion['name'] = 'provider'
+        insertion['body'] = {}
+        insertion["valueTypes"] = {}
+        for att, v in zip(att_list, value_list):
+            insertion['body'][att] = v
+        for att, t in zip(att_list, type_list):
+            insertion['valueTypes'][att] = t
         state = generate_insert_table_statement(insertion)
         db.execute(state)
         db.commit()
-        return jsonify({"status":True, "details": ""})
-    except Exception as e:
-        db.rollback()
-        return jsonify({"status":False, "token": "", "details": "insertion error"})
-    
+        
+        statement = f"INSERT INTO provider_password VALUES ({new_user_id},'{password}');"
+        db.execute(sqlalchemy.text(statement))
+        db.commit()
+    else:
+        att_list = ['renter_id','first_name','last_name','email','age','nationality','salary','sex','ethnicity']
+        type_list = ['INT','TEXT','TEXT','TEXT','INT','TEXT','INT','TEXT','TEXT']
+        ethnicity = nationality
+        statement = "SELECT max(renter_id) FROM renter;"
+        res = db.execute(sqlalchemy.text(statement))
+        res = generate_table_return_resulte_no_rename(res)
+        new_user_id = res["rows"][0]['max']+1
+        value_list = [new_user_id, first_name, last_name, email, age, nationality, salary, sex, ethnicity]
+        insertion = {}
+        insertion['name'] = 'renter'
+        insertion['body'] = {}
+        insertion["valueTypes"] = {}
+        for att, v in zip(att_list, value_list):
+            insertion['body'][att] = v
+        for att, t in zip(att_list, type_list):
+            insertion['valueTypes'][att] = t
+        state = generate_insert_table_statement(insertion)
+        db.execute(state)
+        db.commit()
+        
+        statement = f"INSERT INTO renter_password VALUES ({new_user_id},'{password}');"
+        db.execute(sqlalchemy.text(statement))
+        db.commit()
+    return jsonify({"status": True, "details": ""})
+
+  
 @app.route("/log-in", methods=["POST"])
 def log_in():
     param:Dict = request.json
-    att_list = ["token"]
-    selection = {"table": "TestRegisterTable", "att": att_list, "condition": param}
-    statement = generate_conditional_select_statement(selection)
-    res = db.execute(statement)
-    db.commit()
-    response = {}
+    email = param['email']
+    password = param['password']
+    response= {}
+    
+    statement = f"SELECT * FROM provider, provider_password WHERE provider.provider_id = provider_password.provider_id AND provider.email = '{email}' AND \
+        provider_password.password = '{password}'"
+    res = db.execute(sqlalchemy.text(statement))
+    res = generate_table_return_resulte_no_rename(res)
+    if len(res["rows"]) == 0:
+        pass
+    else:
+        response['status'] = True
+        response['token'] = res["rows"][0]['provider_id']
+        response['userType'] = 'provider'
+        response['details'] = ''
+        return jsonify(response)
+    
+    statement = f"SELECT * FROM renter, renter_password WHERE renter.renter_id = renter_password.renter_id AND renter.email = '{email}' AND \
+        renter_password.password = '{password}'"
+    res = db.execute(sqlalchemy.text(statement))
     res = generate_table_return_resulte_no_rename(res)
     if len(res["rows"]) == 0:
         response['status'] = False
-        response['token'] = ''
-        response['details'] = 'Wrong User Name or Password'
+        response['token'] = ""
+        response['userType'] = ""
+        response['detrails'] = "No user found"
+        return jsonify(response)
     else:
         response['status'] = True
-        response['token'] = res["rows"][0]['token']
+        response['token'] = res["rows"][0]['renter_id']
+        response['userType'] = 'renter'
         response['details'] = ''
-    return jsonify(response)
+        return jsonify(response)
+
 
 @app.route("/admin/table-name", methods=["GET"])
 def return_table():
@@ -1008,6 +1065,36 @@ def fill_data():
     db.commit()
 
     insertion = {}
+    insertion['name'] = "provider_password"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['provider_id',"password"]
+    type_list = ['INT','TEXT']
+    value_list = [54321,"edcba"]
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
+    insertion['name'] = "provider_password"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['provider_id',"password"]
+    type_list = ['INT','TEXT']
+    value_list = [55555,"eeeee"]
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
     insertion['name'] = "housing_size_type"
     insertion['body'] = {}
     insertion["valueTypes"] = {}
@@ -1068,6 +1155,21 @@ def fill_data():
     db.commit()
 
     insertion = {}
+    insertion['name'] = "renter_password"
+    insertion['body'] = {}
+    insertion["valueTypes"] = {}
+    att_list = ['renter_id',"password"]
+    type_list = ['INT','TEXT']
+    value_list = [88888,"fffff"]
+    for att, v in zip(att_list, value_list):
+        insertion['body'][att] = v
+    for att, t in zip(att_list, type_list):
+        insertion['valueTypes'][att] = t
+    state = generate_insert_table_statement(insertion)
+    db.execute(state)
+    db.commit()
+
+    insertion = {}
     insertion['name'] = "bids"
     insertion['body'] = {}
     insertion["valueTypes"] = {}
@@ -1086,6 +1188,9 @@ def delete_data():
     statement = sqlalchemy.text('DROP TABLE IF EXISTS bids;')
     db.execute(statement)
     db.commit()
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS renter_password;')
+    db.execute(statement)
+    db.commit()
     statement = sqlalchemy.text('DROP TABLE IF EXISTS renter;')
     db.execute(statement)
     db.commit()
@@ -1098,7 +1203,10 @@ def delete_data():
     statement = sqlalchemy.text('DROP TABLE IF EXISTS housing_maxprice;')
     db.execute(statement)
     db.commit()
-    statement = sqlalchemy.text('DROP TABLE IF EXISTS provider;')
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS provider_password;')
+    db.execute(statement)
+    db.commit()
+    statement = sqlalchemy.text('DROP TABLE IF EXISTS provider CASCADE;')
     db.execute(statement)
     db.commit()
 
@@ -1138,6 +1246,7 @@ if __name__ == "__main__":
     table = generate_create_table_statement(table_provider)
     db.execute(table)
     db.commit()
+
 
     table_housing_size_type = {
         "name": "housing_size_type",
@@ -1208,6 +1317,7 @@ if __name__ == "__main__":
     db.execute(table)
     db.commit()
 
+
     table_bids = {
         "name": "bids",
         "body": {
@@ -1225,6 +1335,32 @@ if __name__ == "__main__":
         }
     }
     table = generate_create_table_statement(table_bids)
+    db.execute(table)
+    db.commit()
+
+    table_provider_password = {
+        "name": "provider_password",
+        "body": {
+            "provider_id": "INT NOT NULL",
+            "password": "TEXT NOT NULL"
+        },
+        "primary_key": "(provider_id)",
+        "reference": {"(provider_id)":"provider(provider_id)"}
+    }
+    table = generate_create_table_statement(table_provider_password)
+    db.execute(table)
+    db.commit()
+
+    table_renter_password = {
+        "name": "renter_password",
+        "body": {
+            "renter_id": "INT NOT NULL",
+            "password": "TEXT NOT NULL"
+        },
+        "primary_key": "(renter_id)",
+        "reference": {"(renter_id)":"renter(renter_id)"}
+    }
+    table = generate_create_table_statement(table_renter_password)
     db.execute(table)
     db.commit()
 
