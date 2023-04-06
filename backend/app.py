@@ -41,6 +41,63 @@ data_types = {
 }
 
 # ? @app.get is called a decorator, from the Flask class, converting a simple python function to a REST API endpoint (function)
+# TODO: create a dictionary of tables
+table_name_list = {
+    "provider": {
+        "provider_id": "NUMERIC",
+        "first_name": "TEXT",
+        "last_name": "TEXT",
+        "email": "TEXT",
+        "age": "NUMERIC",
+        "nationality": "TEXT",
+        "salary": "NUMERIC",
+        "sex": "TEXT",
+        "ethnicity": "TEXT"
+    },
+    "housing": {
+        "housing_id": "NUMERIC",
+        "provider_id": "NUMERIC",
+        "size": "NUMERIC",
+        "type_of_housing": "TEXT",
+        "location":"TEXT",
+        "age_of_housing":"NUMERIC",
+        "start_time": "Date",
+        "end_time": "Date",
+        "min_price": "NUMERIC",
+        "bidding_period": "NUMERIC",
+        "rented": "TEXT",
+        "description": "TEXT"
+    },
+    "housing_size_type": {
+        "size": "NUMERIC",
+        "size_type": "TEXT"
+    },
+    "housing_maxprice": {
+        "size": "NUMERIC",
+        "type_of_housing": "TEXT",
+        "location": "TEXT",
+        "age_of_housing": "NUMERIC",
+        "max_price": "NUMERIC"
+    },
+    "renter": {
+        "renter_id": "NUMERIC",
+        "first_name": "TEXT",
+        "last_name": "TEXT",
+        "email": "TEXT",
+        "age": "NUMERIC",
+        "nationality": "TEXT",
+        "salary": "NUMERIC",
+        "sex": "TEXT",
+        "ethnicity": "TEXT"
+    },
+    "bids": {
+        "housing_id": "NUMERIC",
+        "renter_id": "NUMERIC",
+        "start_time": "DATE",
+        "end_time": "DATE",
+        "price": "NUMERIC",
+        "bid_date": "DATE"
+    }
 
 
 @app.route("/hello", methods=["GET"])
@@ -92,6 +149,68 @@ def log_in():
         response['details'] = ''
     return jsonify(response)
 
+@app.route("/admin/table-name", methods=["GET"])
+def return_table():
+    global table_name_list
+    response = {}
+    response['status'] = True
+    # fill names of tables into a list
+    return_table_name_list = []
+    for keys in table_name_list:
+        return_table_name_list.append(keys)
+    
+    response['tableNameList'] = return_table_name_list
+    response['details'] = ''
+    return jsonify(response)
+
+@app.route("/admin/attributes", methods=["POST"])
+def return_table_detail():
+    needed_table_name_list = request.json
+    response = {}
+    response['status'] = True
+    response['tableAttributes'] = []
+    # append table names as keys into the dictionary as value of the key 'tableAttributes'
+    for table_name in needed_table_name_list['tableNameList']:
+        response['tableAttributes'].append({'name': table_name, 'attribute': []})
+        # append attribute names as keys into the dictionary as value of the key table_name
+        for attribute_name in table_name_list[table_name]:
+            response['tableAttributes'][-1]['attribute'].append({"attributeName": attribute_name})
+            response['tableAttributes'][-1]['attribute'][-1]["type"] = table_name_list[table_name][attribute_name]
+            response['tableAttributes'][-1]['attribute'][-1]["count"] = []
+
+            selection = {}
+            selection['att'] = attribute_name
+            selection['table'] = table_name
+            if table_name_list[table_name][attribute_name] != "NUMERIC":
+                statement = generate_group_by_statement(selection)
+                res = db.execute(statement)
+                db.commit()
+                returned_result_in_dict = generate_table_return_result(res)
+                for dict in returned_result_in_dict['rows']:
+                    for key1 in dict:
+                        if key1 != 'count':
+                            response['tableAttributes'][-1]['attribute'][-1]['count'].append({f"{dict[key1]}":0})
+                            for key2 in dict:
+                                if key2 == 'count':
+                                    response['tableAttributes'][-1]['attribute'][-1]['count'][-1][f"{dict[key1]}"] = dict[key2]
+                                    break
+                        break
+            else:
+                statement = generate_max_min_statement(selection)
+                res = db.execute(statement)
+                db.commit()
+                returned_result_in_dict = generate_table_return_result(res)
+                for key, value in returned_result_in_dict['rows'][0].items():
+                    if key == 'min':
+                        response['tableAttributes'][-1]['attribute'][-1]['count'].append({'minValue':value})
+                    else:
+                        response['tableAttributes'][-1]['attribute'][-1]['count'].append({'maxValue':value})
+            
+    response['detail'] = ''
+    return response
+
+
+
 
 @app.route("/provide-house", methods = ["POST"])
 def provide_house():
@@ -112,8 +231,11 @@ def provide_house():
     # calculate attributes
     houseID = hashlib.md5((location + description + token)).encode().hexdigest()
     providerID = token
-    # if size         # < 60 small, 60 < x < 100 medium 100 < large
-    # size_type = ...
+    def size_type():
+        if size < 60, size_type = 'small', 
+        elif 60 < size < 100, size_type = 'medium'
+        else size_type = 'large'
+    return size_type    
     period = end_time - start_time
     rented = False
 
@@ -124,11 +246,31 @@ def provide_house():
     insertion['body'] = {}
     insertion['body']['house_id'] = houseID
     insertion['body']['provider_id'] = providerID
-    # ...
+    insertion['body']['size'] = size
+    insertion['body']['type_of_housing'] = type_of_house
+    insertion['body']['location'] = location
+    insertion['body']['size_type'] = size_type
+    insertion['body']['age_of_housing'] = age
+    insertion['body']['start_time'] = start_time
+    insertion['body']['end_time'] = end_time
+    insertion['body']['min_price'] = min_price
+    insertion['body']['bidding_period'] = period
+    insertion['body']['rented'] = rented
+    
     insertion['valueTypes'] = {}
     insertion['valueTypes']['house_id'] = "TEXT"
     insertion['valueTypes']['provider_id'] = "TEXT"
-    # ...
+    insertion['valueTypes']['size'] = "NUMERIC"
+    insertion['valueTypes']['type_of_housing'] = "TEXT"
+    insertion['valueTypes']['location'] = "TEXT"
+    insertion['valueTypes']['size_type'] = "TEXT"
+    insertion['valueTypes']['age_of_housing'] = "NUMERIC"
+    insertion['valueTypes']['start_time'] = "DATE"
+    insertion['valueTypes']['end_time'] = "DATE"
+    insertion['valueTypes']['min_price'] = "NUMERIC"
+    insertion['valueTypes']['bidding_period'] = "NUMERIC"
+    insertion['valueTypes']['rented'] = "TEXT"
+    
 
     # return response
     try:
@@ -140,31 +282,6 @@ def provide_house():
         db.rollback()
         return jsonify({'status': False, 'details': 'database insertion failed'})
 
-    # house_info=param['name':, 'location', 'price', 'size', 'rooms', 'sortDate', 'endDate', 'currentBid', 'description', 'images']   
-    # house_info.location = table_housing.location
-    # house_info.price = table_housing.min_price
-    # house_info.size = table_housing.size
-    # house_info.rooms = table_housing.
-    # house_info.startDate = table_housing.start_time
-    # house_info.endDate = table_housing.end_time
-    # house_info.Maxprice = table_housing.min_price
-    # house_info.description = table_housing.description
-    # att_list = ["token"]
-    #  = {"table": "table_housing", "att": att_list, "condition":param }
-    # statement = generate_conditional_select_statement(selection)
-    # res = db.execute(statement)
-    # db.commit()
-    # response = {}
-    # res = generate_table_return_result(res)
-    # if len(res["rows"]) == 0:
-    #     response['status'] = False
-    #     response['token'] = ''
-    #     response['details'] = 'Wrong User Name or Password'
-    # else:
-    #     response['status'] = True
-    #     response['token'] = res["rows"][0]['token']
-    #     response['details'] = ''
-    # return jsonify(response)
 
 @app.route("/house-list", methods = ['GET'])
 def house_list():
@@ -185,6 +302,19 @@ def house_list():
         response['token'] = res["rows"][0]['token']
         response['details'] = ''
     return jsonify(response)
+
+@app.route("/make-bid", methods = ['POST'])
+def make_bid():
+    param = request.json
+    #parse
+    token = param['token']
+
+    #calculation of attributes
+    houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+
+    
+
+
 
 @app.get("/table")
 def get_relation():
