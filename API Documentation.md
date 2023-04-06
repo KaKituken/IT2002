@@ -371,12 +371,15 @@ No api request.
 
 ```json
 {
-    "status": 
-    "columns": ["a","b","c"],
-    "rows": [
-        {"a":1,"b":2,"c":3},
-        {"a":4,"b":5,"c":6}
-    ]
+    "status": true
+    "tableData": {
+      "columns": ["a","b","c"],
+      "rows": [
+          {"a":1,"b":2,"c":3},
+          {"a":4,"b":5,"c":6}
+      ]
+    },
+    "details": "..."
 }
 ```
 

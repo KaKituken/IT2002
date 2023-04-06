@@ -138,7 +138,7 @@ def log_in():
     res = db.execute(statement)
     db.commit()
     response = {}
-    res = generate_table_return_result(res)
+    res = generate_table_return_result1(res)
     if len(res["rows"]) == 0:
         response['status'] = False
         response['token'] = ''
@@ -185,7 +185,7 @@ def return_table_detail():
                 statement = generate_group_by_statement(selection)
                 res = db.execute(statement)
                 db.commit()
-                returned_result_in_dict = generate_table_return_result(res)
+                returned_result_in_dict = generate_table_return_result1(res)
                 for dict in returned_result_in_dict['rows']:
                     for key1 in dict:
                         if key1 != 'count':
@@ -199,7 +199,7 @@ def return_table_detail():
                 statement = generate_max_min_statement(selection)
                 res = db.execute(statement)
                 db.commit()
-                returned_result_in_dict = generate_table_return_result(res)
+                returned_result_in_dict = generate_table_return_result1(res)
                 for key, value in returned_result_in_dict['rows'][0].items():
                     if key == 'min':
                         response['tableAttributes'][-1]['attribute'][-1]['count'].append({'minValue':value})
@@ -211,13 +211,20 @@ def return_table_detail():
 
 @app.route("/admin/complex-query", methods=["POST"])
 def complex_query():
+    response = {}
     param = request.json
     tables = param["fromTable"]
     join_on = param["joinOn"]
     filter_equal = param["filterEqual"]
     filter_less = param["filterLess"]
-    
-    statement = "SELECT * FROM "
+
+    statement = "SELECT "
+    for table_name in tables:
+        att_list = table_name_list[table_name]
+        for att_name in att_list:
+            statement += f'{table_name}.{att_name} AS {table_name}_{att_name}, '
+    statement = statement[:-2]
+    statement += ' FROM '
     for table in tables:
         statement += f"{table}, "
     statement = statement[:-2]
@@ -274,13 +281,20 @@ def complex_query():
     statement += ";"
     print(statement)
     statement = sqlalchemy.text(statement)
-    #try:
-    res = db.execute(statement)
-    db.commit()
-    res = generate_table_return_result(res)
-    print(res)
-    #except:
-    #    db.rollback()
+    try:
+        res = db.execute(statement)
+        db.commit()
+        res = generate_table_return_result2(res)
+        print(res)
+        response["status"] = True
+        response["tableData"] = res
+        response["detail"] = ""
+    except:
+        db.rollback()
+        response["status"] = False
+        response["tableData"] = {}
+        response["detail"] = "Database selection failed"
+    return jsonify(response)
 
 
     
@@ -303,7 +317,7 @@ def get_relation():
         db.commit()
         # ? Data is extracted from the res objects by the custom function for each query case
         # ! Note that you'll have to write custom handling methods for your custom queries
-        data = generate_table_return_result(res)
+        data = generate_table_return_result1(res)
         # ? Response object is instantiated with the formatted data and returned with the success code 200
         return Response(data, 200)
     except Exception as e:
@@ -384,7 +398,7 @@ def delete_row():
 
 
 
-def generate_table_return_result(res) -> Dict:
+def generate_table_return_result1(res) -> Dict:
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
 
@@ -406,6 +420,42 @@ def generate_table_return_result(res) -> Dict:
         The returned object format:
         {
             "columns": ["a","b","c"],
+            "rows": [
+                {"a":1,"b":2,"c":3},
+                {"a":4,"b":5,"c":6}
+            ]
+        }
+    """
+    # ? Returns the Dict
+    return output
+
+def generate_table_return_result2(res) -> Dict:
+    # ? An empty Python list to store the entries/rows/tuples of the relation/table
+    rows = []
+
+    # ? keys of the SELECT query result are the columns/fields of the table/relation
+    columns = list(res.keys())
+    column_output = []
+    for col_name in columns:
+        if col_name not in column_output:
+            column_output.append(col_name)
+
+    # ? Constructing the list of tuples/rows, basically, restructuring the object format
+    for row_number, row in enumerate(res):
+        rows.append({})
+        for column_number, value in enumerate(row):
+            if columns[column_number] not in rows[row_number].keys():
+                rows[row_number][columns[column_number]] = value
+
+    # ? JSON object with the relation data
+    output = {}
+    output["columns"] = column_output  # ? Stores the fields
+    output["rows"] = rows  # ? Stores the tuples
+
+    """
+        The returned object format:
+        {
+            "column": ["a","b","c"],
             "rows": [
                 {"a":1,"b":2,"c":3},
                 {"a":4,"b":5,"c":6}
@@ -773,7 +823,7 @@ if __name__ == "__main__":
     # statement = sqlalchemy.text("SELECT * FROM TestRegisterTable;")
     # res = db.execute(statement)
     # db.commit()
-    # print(generate_table_return_result(res))
+    # print(generate_table_return_result1(res))
 
     delete_data()
 
