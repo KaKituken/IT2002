@@ -81,11 +81,16 @@ No api request.
           "location": "", 	//  string
           "price": 0, 		// number
           "size": 0, 			// number
-          "rooms": 0, 		// number
           "startDate": "",	// Date
           "endDate": "",		// Date
+<<<<<<< HEAD
+=======
           "MaxBid": "",		// number
+>>>>>>> a5a93a3c69c9bab19437ad027e1b3d1d89a38889
           "description": "",	// string
+          "typeOfHouse": "",  //string
+          "age": 1233,
+          "minPrice": 123,
           "images": [
               "url1",
               "url2"
@@ -114,6 +119,10 @@ No api request.
 - Request: `GET`
 
 - Param: 
+  ```json
+  {
+    "token": ""				// string
+  }
 
 - Response:
 
@@ -127,7 +136,7 @@ No api request.
               "location": "", 	//  string
               "price": 0, 		// number
               "size": 0, 			// number
-              "rooms": 0, 		// number
+              "size_type": "", 		// number
               "startDate": "",	// Date
               "endDate": "",		// Date
               "currentBid": "",	// number
@@ -152,6 +161,8 @@ No api request.
         "houseid": "", //string
     "token": ""				// string
     }
+```   
+
 - Response:
   ```json
   {
@@ -172,7 +183,6 @@ No api request.
         "location": "", 	//  string
         "type": "", 		// string
         "size": 0, 			// number
-        "rooms": 0, 		// number
         "location": "" //string
         "startDate": "",	// Date
         "endDate": "",		// Date
@@ -220,6 +230,15 @@ No api request.
  ```json
     {
       "houseinfo": {
+<<<<<<< HEAD
+        "location": "" //string
+        "type": "" //string
+        "size": "" //string
+        "maxprice": 0 //number
+        "startdate": "" //date
+        "enddate": "" //date
+      }
+=======
         "location": "", //string
         "type": "", //string
         "size": "", //string
@@ -228,6 +247,7 @@ No api request.
         "startdate": "", //date
         "enddate": "", //date
       },
+>>>>>>> a5a93a3c69c9bab19437ad027e1b3d1d89a38889
     "token": ""				// string
     }
 
