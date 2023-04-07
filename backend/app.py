@@ -213,6 +213,128 @@ def log_in():
         response['details'] = ''
         return jsonify(response)
 
+'''
+def generate_conditional_select_statement(selection: Dict):
+    statement = "SELECT"
+    for att in selection["att"]:
+        statement += f" {att},"
+    statement = statement[:-1] + f" FROM {selection['table']}"
+    statement += " WHERE"
+    for att, val in selection["condition"].items():
+        if type(val) is str:
+            statement += f" {att}=\'{val}\' AND"
+        else:
+            statement += f" {att}={val} AND"
+    print(statement[:-4])
+    return sqlalchemy.text(statement[:-4])
+'''
+
+@app.route("/filter-for-houses", methods = ["POST"])
+def filter():
+    try:
+        param = request.json
+        input_dict = param["houseinfo"]
+        response = {}
+        type_string = "("
+        for types in input_dict["type"]:
+            type_string += f"'{types}',"
+        type_string = type_string[:-1]
+        type_string += ")"
+
+        selection = {}
+        selection["att"] = ["h.housing_id", "p.first_name", "p.last_name", "h.location", "h.min_price", "h.size", "hst.size_type", "h.start_time", "h.end_time",\
+        "h.description", "h.type_of_housing"]
+        selection["table"] = "housing h, provider p, housing_size_type hst"
+        selection["condition"] = {}
+
+        for key,value in input_dict.items():
+            if key == "location":
+                if value:
+                    selection["condition"]["h.location"] = f"{value}"
+            if key == "type":
+                if value:
+                    list_value = ''
+                    for house_type in value:
+                        list_value += f"{house_type} OR "
+                    list_value = list_value[:-4]
+                    selection["condition"]["h.type_of_housing"] = list_value
+            if key == "size":
+                if value:
+                    selection["condition"]["h.size"] = value
+        
+        statement = generate_conditional_select_statement(selection)
+
+        for key,value in input_dict.items():
+            if key == "startDate":
+                if value:
+                    statement += f" AND h.start_time <= '{value}'"
+            if key == "endDate":
+                if value:
+                    statement += f" AND h.end_time >= '{value}'"
+        statement += " AND h.provider_id = p.provider_id AND h.size = hst.size"
+        statement += ";"
+        print(statement)
+
+        res_rough_selection = db.execute(sqlalchemy.text(statement))
+        db.commit()
+        res_rough_selection = generate_table_return_resulte_no_rename(res_rough_selection, "bug here")
+        print(res_rough_selection)
+
+        housing_id_list = []
+        housing_max_bid_list = []
+        for housing_id_dict in res_rough_selection["rows"]:
+            housing_id_list.append(housing_id_dict["housing_id"])
+        print('housing_id_list len: ', len(housing_id_list))
+        for housing_id in housing_id_list:
+            statement = f"SELECT max(b.price) FROM bids b WHERE b.housing_id = {housing_id}"
+            res = db.execute(sqlalchemy.text(statement))
+            res = generate_table_return_resulte_no_rename(res)
+            if res["rows"]:
+                housing_max_bid_list.append(res["rows"][0]["max"])
+            else:
+                housing_max_bid_list.append(0)
+        
+        res_with_max_bid = res_rough_selection
+        res_with_max_bid["columns"].append("current_bid")
+
+        for index, bid_price in enumerate(housing_max_bid_list):
+            res_with_max_bid["rows"][index]["current_bid"] = bid_price
+
+        final_res = {}
+        final_res["columns"] = res_with_max_bid["columns"]
+        final_res["rows"] = []
+
+        for index_selected_house in range(0,len(res_with_max_bid["rows"])):
+            if res_with_max_bid["rows"][index_selected_house]["current_bid"] <= input_dict["maxPrice"]:
+                final_res["rows"].append(res_with_max_bid["rows"][index_selected_house])
+
+        response["houseInfoList"] = []
+        for house_dict in final_res["rows"]:
+            response_dict = {}
+            response_dict["houseid"] = house_dict['housing_id']
+            response_dict["providerName"] = f"{house_dict['first_name']}" + " " + f"{house_dict['last_name']}"
+            response_dict["location"] = f"{house_dict['location']}"
+            response_dict["minPrice"] = house_dict['min_price']
+            response_dict["size"] = house_dict['size']
+            response_dict["sizeType"] = f"{house_dict['size_type']}"
+            response_dict["startDate"] = f"{house_dict['start_time']}"
+            response_dict["endDate"] = f"{house_dict['end_time']}"
+            response_dict["currentBid"] = house_dict['current_bid']
+            response_dict["description"] = f"{house_dict['description']}"
+            response_dict["type"] = f"{house_dict['type_of_housing']}"
+            response_dict["images"] = []
+            response["houseInfoList"].append(response_dict)
+        response["status"] = True
+        response["details"] = ""
+    except:
+        response["status"] = False
+        response["houseInfoList"] = []
+        response["details"] = "Filter failed"
+
+    return jsonify(response)
+
+
+
 
 @app.route("/admin/table-name", methods=["GET"])
 def return_table():
@@ -281,15 +403,15 @@ def return_table_detail():
 def provide_house():
     param = request.json
     # parse
-    name = param['houseInfo']['name']
-    location = param['houseInfo']['location']
-    price = param['houseInfo']['price']
-    size = param['houseInfo']['size']
-    start_time = param['houseInfo']['startDate']
-    end_time = param['houseInfo']['endDate']
-    description = param['houseInfo']['description']
-    type_of_house = param['houseInfo']['typeOfHouse']
-    age = param['houseInfo']['age']
+    name = param['houseinfo']['name']
+    location = param['houseinfo']['location']
+    price = param['houseinfo']['price']
+    size = param['houseinfo']['size']
+    start_time = param['houseinfo']['startDate']
+    end_time = param['houseinfo']['endDate']
+    description = param['houseinfo']['description']
+    type_of_house = param['houseinfo']['typeOfHouse']
+    age = param['houseinfo']['age']
     min_price = param['HouseInfo']['minPrice']
     token = param['token']
 
@@ -739,7 +861,8 @@ def delete_row():
 
 
 
-def generate_table_return_resulte_no_rename(res) -> Dict:
+def generate_table_return_resulte_no_rename(res, cmd='no bug') -> Dict:
+    print('generate_table_return_resulte_no_rename calleds' + cmd)
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
 
@@ -747,8 +870,12 @@ def generate_table_return_resulte_no_rename(res) -> Dict:
     columns = list(res.keys())
 
     # ? Constructing the list of tuples/rows, basically, restructuring the object format
+    length = 0
     for row_number, row in enumerate(res):
         rows.append({})
+        print(row_number)
+        length += 1
+        print(length)
         for column_number, value in enumerate(row):
             rows[row_number][columns[column_number]] = value
 
@@ -879,8 +1006,8 @@ def generate_conditional_select_statement(selection: Dict):
             statement += f" {att}=\'{val}\' AND"
         else:
             statement += f" {att}={val} AND"
-    print(statement[:-4])
-    return sqlalchemy.text(statement[:-4])
+    statement = statement [:-4]
+    return statement
 
 '''
 statement = 'SELECT ...'
@@ -1213,8 +1340,8 @@ def delete_data():
 
 
 # ? The port where the debuggable DB management API is served
-# PORT = 2223
-PORT = 2222
+PORT = 2223
+#PORT = 2222
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
