@@ -58,17 +58,24 @@ function App(){
 
     function handleSerchClicked(){
         if(userType === 'Guest'){
-            // window.alert('Please log in first')
-            // return
+            window.alert('Please log in first')
+            return
         }
         navigate('/search')
+    }
+
+    function handleUploadClicked(){
+        navigate('/provider')
     }
 
     return (
         <div className="App">
             <Icon color="black"></Icon>
             <SignUpIcon color='black'></SignUpIcon>
-            <button id='search-btn' onClick={handleSerchClicked}>search for houses</button>
+            <div className='btn-container'>
+                <button className='btn' id='search-btn' onClick={handleSerchClicked}>search for houses</button>
+                <button className='btn' id='add-btn' onClick={handleUploadClicked}>Upload house</button>
+            </div>
             <div id="display-box">
                 {houseInfoList.map((singleHouseInfo, index) => (
                     <InfoCard id={singleHouseInfo.houseid} 

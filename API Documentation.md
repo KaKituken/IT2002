@@ -52,7 +52,8 @@ No api request.
   ```json
   {
       "email": "..",
-      "password": ".."
+      "password": "..",
+      "userType": "..."
   }
   ```
 
@@ -149,9 +150,12 @@ No api request.
 - Param:
   ```json
     {
-      "houseid": "", 			//string
-      "bid": 111,	//number
-    	"token": ""				// string
+      "houseid": "", 			// string
+      "bid": 111,				// number
+    	"token": "",			// number
+      "startDate": "",		// Date
+      "endDate": "",			// Date
+      "bidDate":"",			// Date
     }
 - Response:
 
@@ -159,13 +163,37 @@ No api request.
   {
     "status": true/false,
     "details": "...",
-    "currentBid": "",	// 
   }
+
+### Provider Info
+
+- Router: `/provider-info`
+- Request: `POST`
+- Param:
+
+```json
+{
+    "houseID": 123	//number
+}
+```
+
+- Response
+
+```json
+{
+    "status": true,
+    "details": "...",
+    "providerID" : 12,	//number
+    "providerEmail": "qqq"	// string
+}
+```
+
+
 
  ### Bid for rental provider
 
- - Route: '/bid-for-rental-provider'
- - Request: 'POST'
+ - Route: `/bid-for-rental-provider`
+ - Request: `POST`
  - Param:
   ```json
 {

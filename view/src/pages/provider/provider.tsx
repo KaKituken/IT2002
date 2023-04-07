@@ -74,7 +74,7 @@ function App(){
             <div className="provide-form">
                 <div className="form-item">
                     <p>Location</p>
-                    <input className="form-input" type="number" onChange={e => setLocation(e.target.value)}></input>
+                    <input className="form-input" type="text" onChange={e => setLocation(e.target.value)}></input>
                 </div>
                 <div className="form-item">
                     <p>Size</p>

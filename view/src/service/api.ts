@@ -10,7 +10,8 @@ const api = apisauce.create({
 
 export interface LogInForm {
     email: string,
-    password: string
+    password: string,
+    userType: string
 }
 
 export interface BasicReturn {
@@ -233,6 +234,13 @@ export interface FilterHousesCondition{
     token:string
 }
 
+export interface GetProviderInfoReturn{
+    status: boolean
+    details: string
+    providerID: number
+    providerEmail: string
+}
+
 export async function postFilterHouses(params:FilterHousesCondition) {
     let res = await api.post('/filter-for-houses', params)
     if(!res.ok){
@@ -253,6 +261,24 @@ export async function getHouseList() {
 
 export async function postNewHouse(params:ProviderForm) {
     let res = await api.post('/provide-house', params)
+    if(!res.ok){
+        alert("Failed to get house list")
+        console.log(res.data)
+    }
+    return res.data as Promise<BasicReturn>
+}
+
+export async function getProviderInfo(params:Record<string, number>) {
+    let res = await api.post('/provider-info', params)
+    if(!res.ok){
+        alert("Failed to get house list")
+        console.log(res.data)
+    }
+    return res.data as Promise<GetProviderInfoReturn>
+}
+
+export async function postBid(params:Record<string, number|string|Date>) {
+    let res = await api.post('/make-bid', params)
     if(!res.ok){
         alert("Failed to get house list")
         console.log(res.data)
