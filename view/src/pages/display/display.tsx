@@ -2,7 +2,7 @@ import './display.css'
 import Icon from '../../components/Icon/Icon'
 import InfoCard from '../../components/InfoCard/InfoCard'
 import SignUpIcon from '../../components/SignUpIcon/SignUpIcon'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useAppSelector } from '../../hooks';
 import * as api from '../../service/api'
@@ -10,6 +10,7 @@ import * as api from '../../service/api'
 function App(){
 
     const navigate = useNavigate()
+    const location = useLocation()
     const userType = useAppSelector((state) => state.userInfoTracker.userType)
 
     const [houseInfoList, setHouseInfoList] = useState<api.SingleHouseInfo[]>([])
@@ -20,22 +21,27 @@ function App(){
                 ]
 
     useEffect(()=>{
-        (async () => {
-            let success = await api.getHouseList()
-            if(success.status){
-                const updatedHouseInfoList = success.houseInfoList.map((house) => ({
-                    ...house,
-                    startDate: new Date(house.startDate),
-                    endDate: new Date(house.endDate),
-                  }));
-                setHouseInfoList(updatedHouseInfoList)
-                console.log(success.houseInfoList)
-            }
-            else{
-                window.alert(success.details)
-            }
-        })()
-
+        if(location.state?.houseLis != null){
+            console.log('I should display this')
+            setHouseInfoList(location.state.houseLis)
+        }
+        else{
+            (async () => {
+                let success = await api.getHouseList()
+                if(success.status){
+                    const updatedHouseInfoList = success.houseInfoList.map((house) => ({
+                        ...house,
+                        startDate: new Date(house.startDate),
+                        endDate: new Date(house.endDate),
+                      }));
+                    setHouseInfoList(updatedHouseInfoList)
+                    console.log(success.houseInfoList)
+                }
+                else{
+                    window.alert(success.details)
+                }
+            })()
+        }
     }, [])
 
     function handleBidClicked(houseID: number){
@@ -52,17 +58,24 @@ function App(){
 
     function handleSerchClicked(){
         if(userType === 'Guest'){
-            // window.alert('Please log in first')
-            // return
+            window.alert('Please log in first')
+            return
         }
         navigate('/search')
+    }
+
+    function handleUploadClicked(){
+        navigate('/provider')
     }
 
     return (
         <div className="App">
             <Icon color="black"></Icon>
             <SignUpIcon color='black'></SignUpIcon>
-            <button id='search-btn' onClick={handleSerchClicked}>search for houses</button>
+            <div className='btn-container'>
+                <button className='btn' id='search-btn' onClick={handleSerchClicked}>search for houses</button>
+                <button className='btn' id='add-btn' onClick={handleUploadClicked}>Upload house</button>
+            </div>
             <div id="display-box">
                 {houseInfoList.map((singleHouseInfo, index) => (
                     <InfoCard id={singleHouseInfo.houseid} 

@@ -89,3 +89,7 @@
 #login-btn:hover{
     cursor: pointer;
 }
+
+#input-user-type{
+    margin-top: -25px;
+}

@@ -52,7 +52,8 @@ No api request.
   ```json
   {
       "email": "..",
-      "password": ".."
+      "password": "..",
+      "userType": "..."
   }
   ```
 
@@ -81,15 +82,14 @@ No api request.
   {
       "houseInfo":{
           "location": "", 	//  string
-          "price": 0, 		// number
           "size": 0, 			// number
           "startDate": "",	// Date
           "endDate": "",		// Date
-          "MaxBid": "",		// number
           "description": "",	// string
           "typeOfHouse": "",  //string
           "age": 1233,
           "minPrice": 123,
+          "bidPeriod": 111,
           "images": [
           "url1",
           "url2"
@@ -97,7 +97,7 @@ No api request.
   },
       "token": ""				// string
   }
-
+  
 - Response:
 
   ```json
@@ -150,29 +150,50 @@ No api request.
 - Param:
   ```json
     {
-      "houseInfo":{
-        "houseid": "", //string
-        "location": "", //string
-        "description": "", //string
-      }
-    	"token": ""				// string
+      "houseid": "", 			// string
+      "bid": 111,				// number
+    	"token": "",			// number
+      "startDate": "",		// Date
+      "endDate": "",			// Date
+      "bidDate":"",			// Date
     }
 - Response:
 
   ```json
   {
     "status": true/false,
-    "houseInfo": {
-        
-    },
     "details": "...",
-    "currentBid": "",	// 
+  }
+
+### Provider Info
+
+- Router: `/provider-info`
+- Request: `POST`
+- Param:
+
+```json
+{
+    "houseID": 123	//number
 }
+```
+
+- Response
+
+```json
+{
+    "status": true,
+    "details": "...",
+    "providerID" : 12,	//number
+    "providerEmail": "qqq"	// string
+}
+```
+
+
 
  ### Bid for rental provider
 
- - Route: '/bid-for-rental-provider'
- - Request: 'POST'
+ - Route: `/bid-for-rental-provider`
+ - Request: `POST`
  - Param:
   ```json
 {

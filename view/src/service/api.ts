@@ -10,7 +10,8 @@ const api = apisauce.create({
 
 export interface LogInForm {
     email: string,
-    password: string
+    password: string,
+    userType: string
 }
 
 export interface BasicReturn {
@@ -28,11 +29,6 @@ export interface SignInForm {
     password: string,
     type: string
     salary: number
-}
-
-export interface ProviderForm {
-    houseInfo: HouseInfo
-    token: string
 }
 
 export interface SignInReturn {
@@ -205,7 +201,7 @@ export async function postAddRow(params:AddEntryInfo) {
     return res.data as Promise<BasicReturn>
 }
 
-
+// +============================================
 // user page
 export interface GetHouseListReturn{
     status: boolean
@@ -228,6 +224,32 @@ export interface SingleHouseInfo{
     images:string[]
 }
 
+export interface ProviderForm {
+    houseInfo: Record<string, any>
+    token: string
+}
+
+export interface FilterHousesCondition{
+    houseinfo: Record<string, string|number|string[]|Date|undefined>
+    token:string
+}
+
+export interface GetProviderInfoReturn{
+    status: boolean
+    details: string
+    providerID: number
+    providerEmail: string
+}
+
+export async function postFilterHouses(params:FilterHousesCondition) {
+    let res = await api.post('/filter-for-houses', params)
+    if(!res.ok){
+        alert("Failed to get house list")
+        console.log(res.data)
+    }
+    return res.data as Promise<GetHouseListReturn>
+}
+
 export async function getHouseList() {
     let res = await api.get('/house-list')
     if(!res.ok){
@@ -235,4 +257,31 @@ export async function getHouseList() {
         console.log(res.data)
     }
     return res.data as Promise<GetHouseListReturn>
+}
+
+export async function postNewHouse(params:ProviderForm) {
+    let res = await api.post('/provide-house', params)
+    if(!res.ok){
+        alert("Failed to get house list")
+        console.log(res.data)
+    }
+    return res.data as Promise<BasicReturn>
+}
+
+export async function getProviderInfo(params:Record<string, number>) {
+    let res = await api.post('/provider-info', params)
+    if(!res.ok){
+        alert("Failed to get house list")
+        console.log(res.data)
+    }
+    return res.data as Promise<GetProviderInfoReturn>
+}
+
+export async function postBid(params:Record<string, number|string|Date>) {
+    let res = await api.post('/make-bid', params)
+    if(!res.ok){
+        alert("Failed to get house list")
+        console.log(res.data)
+    }
+    return res.data as Promise<BasicReturn>
 }

@@ -181,37 +181,43 @@ def log_in():
     param:Dict = request.json
     email = param['email']
     password = param['password']
+    user_type = param['userType']
     response= {}
-    
-    statement = f"SELECT * FROM provider, provider_password WHERE provider.provider_id = provider_password.provider_id AND provider.email = '{email}' AND \
-        provider_password.password = '{password}'"
-    res = db.execute(sqlalchemy.text(statement))
-    res = generate_table_return_resulte_no_rename(res)
-    if len(res["rows"]) == 0:
-        pass
-    else:
-        response['status'] = True
-        response['token'] = res["rows"][0]['provider_id']
-        response['userType'] = 'provider'
-        response['details'] = ''
-        return jsonify(response)
-    
-    statement = f"SELECT * FROM renter, renter_password WHERE renter.renter_id = renter_password.renter_id AND renter.email = '{email}' AND \
-        renter_password.password = '{password}'"
-    res = db.execute(sqlalchemy.text(statement))
-    res = generate_table_return_resulte_no_rename(res)
-    if len(res["rows"]) == 0:
-        response['status'] = False
-        response['token'] = ""
-        response['userType'] = ""
-        response['detrails'] = "No user found"
-        return jsonify(response)
-    else:
-        response['status'] = True
-        response['token'] = res["rows"][0]['renter_id']
-        response['userType'] = 'renter'
-        response['details'] = ''
-        return jsonify(response)
+
+    if user_type == 'provider':
+        statement = f"SELECT * FROM provider, provider_password WHERE provider.provider_id = provider_password.provider_id AND provider.email = '{email}' AND \
+            provider_password.password = '{password}'"
+        res = db.execute(sqlalchemy.text(statement))
+        res = generate_table_return_resulte_no_rename(res)
+        if len(res["rows"]) == 0:
+            response['status'] = False
+            response['token'] = ""
+            response['userType'] = ""
+            response['details'] = "No user found"
+            return jsonify(response)
+        else:
+            response['status'] = True
+            response['token'] = res["rows"][0]['provider_id']
+            response['userType'] = 'provider'
+            response['details'] = ''
+            return jsonify(response)
+    if user_type == 'renter':
+        statement = f"SELECT * FROM renter, renter_password WHERE renter.renter_id = renter_password.renter_id AND renter.email = '{email}' AND \
+            renter_password.password = '{password}'"
+        res = db.execute(sqlalchemy.text(statement))
+        res = generate_table_return_resulte_no_rename(res)
+        if len(res["rows"]) == 0:
+            response['status'] = False
+            response['token'] = ""
+            response['userType'] = ""
+            response['details'] = "No user found"
+            return jsonify(response)
+        else:
+            response['status'] = True
+            response['token'] = res["rows"][0]['renter_id']
+            response['userType'] = 'renter'
+            response['details'] = ''
+            return jsonify(response)
 
 '''
 def generate_conditional_select_statement(selection: Dict):
@@ -402,68 +408,116 @@ def return_table_detail():
 @app.route("/provide-house", methods = ["POST"])
 def provide_house():
     param = request.json
-    # parse
-    name = param['houseinfo']['name']
-    location = param['houseinfo']['location']
-    price = param['houseinfo']['price']
-    size = param['houseinfo']['size']
-    start_time = param['houseinfo']['startDate']
-    end_time = param['houseinfo']['endDate']
-    description = param['houseinfo']['description']
-    type_of_house = param['houseinfo']['typeOfHouse']
-    age = param['houseinfo']['age']
-    min_price = param['HouseInfo']['minPrice']
+    # parse 
+    # TODO: 对照和文档一不一样
+    location = param['houseInfo']['location']
+    size = param['houseInfo']['size']
+    start_time = param['houseInfo']['startDate']
+    end_time = param['houseInfo']['endDate']
+    description = param['houseInfo']['description']
+    type_of_house = param['houseInfo']['typeOfHouse']
+    age = param['houseInfo']['age']
+    min_price = param['houseInfo']['minPrice']
+    bid_period = param['houseInfo']['bidPeriod']
     token = param['token']
 
     # calculate attributes
-    houseID = hashlib.md5((location + description + token)).encode().hexdigest()
+    statement = "SELECT max(housing_id) as max_houing_id from housing;"
+    res = generate_table_return_resulte_rename(db.execute(sqlalchemy.text(statement)))
+    db.commit()
+    if len(res['rows']):
+        houseID = 0
+    else:
+        houseID = res['rows'][0]['max_houing_id'] + 1
     providerID = token
 
     if size < 60:
          size_type = 'small', 
-    elif 60 < size and size < 100 :
+    elif 60 <= size and size < 100 :
         size_type = 'medium'
     else:
         size_type = 'large'   
-    period = end_time - start_time
-    rented = False
+    rented = 'no'
 
     
     # insertion
     insertion = {}
     insertion['name'] = 'housing'
     insertion['body'] = {}
-    insertion['body']['house_id'] = houseID
+    insertion['body']['housing_id'] = houseID
     insertion['body']['provider_id'] = providerID
     insertion['body']['size'] = size
     insertion['body']['type_of_housing'] = type_of_house
     insertion['body']['location'] = location
-    insertion['body']['size_type'] = size_type
+    
     insertion['body']['age_of_housing'] = age
     insertion['body']['start_time'] = start_time
     insertion['body']['end_time'] = end_time
     insertion['body']['min_price'] = min_price
-    insertion['body']['bidding_period'] = period
+    insertion['body']['bidding_period'] = bid_period
     insertion['body']['rented'] = rented
+    insertion['body']['description'] = description
     
     insertion['valueTypes'] = {}
-    insertion['valueTypes']['house_id'] = "TEXT"
-    insertion['valueTypes']['provider_id'] = "TEXT"
+    insertion['valueTypes']['housing_id'] = "INT"
+    insertion['valueTypes']['provider_id'] = "INT"
     insertion['valueTypes']['size'] = "INT"
     insertion['valueTypes']['type_of_housing'] = "TEXT"
     insertion['valueTypes']['location'] = "TEXT"
-    insertion['valueTypes']['size_type'] = "TEXT"
     insertion['valueTypes']['age_of_housing'] = "INT"
     insertion['valueTypes']['start_time'] = "DATE"
     insertion['valueTypes']['end_time'] = "DATE"
     insertion['valueTypes']['min_price'] = "FLOAT"
     insertion['valueTypes']['bidding_period'] = "INT"
     insertion['valueTypes']['rented'] = "TEXT"
-    
+    insertion['valueTypes']['description'] = "TEXT"
+
+    type_insertion = {}
+    type_insertion['body'] = {}
+    type_insertion['valueTypes'] = {}
+    type_insertion['name'] = 'housing_size_type'
+    type_insertion['body']['size_type'] = size_type
+    type_insertion['body']['size'] = size
+    type_insertion['valueTypes']['size_type'] = "TEXT"
+    type_insertion['valueTypes']['size'] = "INT"
+
+    max_price = size * 5
+    if type_of_house == 'HDB':
+        max_price += 100
+    elif type_of_house == 'condo':
+        max_price += 200
+    else:
+        max_price += 300
+    if location == 'Clementi':
+        max_price += 100
+    elif location == 'Commonwealth':
+        max_price += 200
+    elif location == 'Orchard':
+        max_price += 300
+    else:
+        max_price += 400
+    max_price_insertion = {}
+    max_price_insertion['name'] = 'housing_maxprice'
+    max_price_insertion['body'] = {}
+    max_price_insertion['valueTypes'] = {}
+    max_price_insertion['body']['size'] = size
+    max_price_insertion['body']['type_of_housing'] = type_of_house
+    max_price_insertion['body']['location'] = location
+    max_price_insertion['body']['age_of_housing'] = age
+    max_price_insertion['body']['max_price'] = max_price
+    max_price_insertion['valueTypes']['size'] = 'INT'
+    max_price_insertion['valueTypes']['type_of_housing'] = 'TEXT'
+    max_price_insertion['valueTypes']['location'] = 'TEXT'
+    max_price_insertion['valueTypes']['age_of_housing'] = 'INT'
+    max_price_insertion['valueTypes']['max_price'] = 'INT'
+    max_price_insert_statement = generate_insert_table_statement(max_price_insertion)
+    type_insert = generate_insert_table_statement(type_insertion)
+    statement = generate_insert_table_statement(insertion)
 
     # return response
     try:
-        statement = generate_insert_table_statement(insertion)
+        db.execute(max_price_insert_statement)
+        db.execute(type_insert)
         db.execute(statement)
         db.commit()
         return jsonify({'status': True, 'details': ''})
@@ -482,68 +536,101 @@ def house_list():
     db.commit()
     res = generate_table_return_resulte_no_rename(res)
     response['houseInfoList'] = []
-    # try:
-    for house in res['rows']:
-        house_info = {}
-        house_info['houseid'] = house['housing_id']
-        print(type(house['housing_id']))
-        house_info['location'] = house['location']
-        house_info['minPrice'] = house['min_price']
-        house_info['size'] = house['size']
-        house_info['startDate'] = house['start_time']
-        house_info['endDate'] = house['end_time']
-        house_info['description'] = house['description']
-        house_info['houseType'] = house['type_of_housing']
-        provider_id = house['provider_id']
-        # select provider name
-        provider_name_selection = f"SELECT first_name, last_name FROM provider WHERE provider_id = '{provider_id}';"
-        provider_name_selection = sqlalchemy.text(provider_name_selection)
-        provider_res = db.execute(provider_name_selection)
-        db.commit()
-        provider_res = generate_table_return_resulte_no_rename(provider_res)
-        house_info['providerName'] = provider_res['rows'][0]['first_name'] + provider_res['rows'][0]['last_name']
-        # select size type
-        size = house['size']
-        size_type_selection = f"SELECT size_type FROM housing_size_type WHERE size = {size};"
-        size_type_selection = sqlalchemy.text(size_type_selection)
-        size_type_res = db.execute(size_type_selection)
-        db.commit()
-        size_type_res = generate_table_return_resulte_no_rename(size_type_res)
-        house_info['sizeType'] = size_type_res['rows'][0]['size_type']
-        # select current bid, which is the max value
-        current_bid_selection = f"SELECT max(price) FROM bids WHERE housing_id = '{house['housing_id']}';"
-        current_bid_selection = sqlalchemy.text(current_bid_selection)
-        current_bid_res = db.execute(current_bid_selection)
-        db.commit()
-        current_bid_res = generate_table_return_resulte_rename(current_bid_res)
-        house_info['currentBid'] = current_bid_res['rows'][0]['max']
-        print(type(house_info['currentBid']))
-        response['houseInfoList'].append(house_info)
-    response['status'] = True
-    response['details'] = ''
-    # except:
-    #     response['status'] = False
-    #     response['details'] = 'get list info error'
+    try:
+        for house in res['rows']:
+            house_info = {}
+            house_info['houseid'] = house['housing_id']
+            print(type(house['housing_id']))
+            house_info['location'] = house['location']
+            house_info['minPrice'] = house['min_price']
+            house_info['size'] = house['size']
+            house_info['startDate'] = house['start_time']
+            house_info['endDate'] = house['end_time']
+            house_info['description'] = house['description']
+            house_info['houseType'] = house['type_of_housing']
+            provider_id = house['provider_id']
+            # select provider name
+            provider_name_selection = f"SELECT first_name, last_name FROM provider WHERE provider_id = '{provider_id}';"
+            provider_name_selection = sqlalchemy.text(provider_name_selection)
+            provider_res = db.execute(provider_name_selection)
+            db.commit()
+            provider_res = generate_table_return_resulte_no_rename(provider_res)
+            house_info['providerName'] = provider_res['rows'][0]['first_name'] + provider_res['rows'][0]['last_name']
+            # select size type
+            size = house['size']
+            size_type_selection = f"SELECT size_type FROM housing_size_type WHERE size = {size};"
+            size_type_selection = sqlalchemy.text(size_type_selection)
+            size_type_res = db.execute(size_type_selection)
+            db.commit()
+            size_type_res = generate_table_return_resulte_no_rename(size_type_res)
+            house_info['sizeType'] = size_type_res['rows'][0]['size_type']
+            # select current bid, which is the max value
+            current_bid_selection = f"SELECT max(price) FROM bids WHERE housing_id = '{house['housing_id']}';"
+            current_bid_selection = sqlalchemy.text(current_bid_selection)
+            current_bid_res = db.execute(current_bid_selection)
+            db.commit()
+            current_bid_res = generate_table_return_resulte_rename(current_bid_res)
+            house_info['currentBid'] = current_bid_res['rows'][0]['max']
+            print(type(house_info['currentBid']))
+            response['houseInfoList'].append(house_info)
+        response['status'] = True
+        response['details'] = ''
+    except:
+        response['status'] = False
+        response['details'] = 'get list info error'
     return jsonify(response)
-        
+
+
+@app.route("/provider-info", methods=['POST'])
+def provider_info():
+    param = request.json
+    house_id = param['houseID']
+    response = {}
+    try:
+        statement = f'SELECT provider.email as email, provider.provider_id as id FROM provider, housing WHERE \
+            provider.provider_id = housing.provider_id AND housing.housing_id = {house_id};'
+        res =generate_table_return_resulte_no_rename(db.execute(sqlalchemy.text(statement)))
+        response['status'] = True
+        response['details'] = ""
+        response['providerID'] = res['rows'][0]['id']
+        response['providerEmail'] = res['rows'][0]['email']
+    except:
+        response['status'] = False
+        response['details'] = 'Get user info failed'
+    return response
 
 
 @app.route("/make-bid", methods = ['POST'])
 def make_bid():
     param = request.json
     #parse
-    location = param['houseInfo']['location']
-    description = param['houseInfo']['description']
+    house_id = param['houseid']
+    bid = param['bid']
     token = param['token']
-    houseID = param['houseInfo']['houseid']
-
-
-
-    #calculation of attributes
-    houseID = hashlib.md5((location + description + token)).encode().hexdigest()
-    
-
-
+    # insert into bids
+    insert_dict = {}
+    insert_dict['name'] = 'bids'
+    insert_dict['body'] = {}
+    insert_dict['valueTypes'] = {}
+    insert_dict['body']['housing_id'] = house_id
+    insert_dict['body']['renter_id'] = token
+    insert_dict['body']['price'] = bid
+    insert_dict['body']['start_time'] = param['startDate']
+    insert_dict['body']['end_time'] = param['endDate']
+    insert_dict['body']['bid_date'] = param['bidDate']
+    insert_dict['valueTypes']['housing_id'] = 'INT'
+    insert_dict['valueTypes']['renter_id'] = 'INT'
+    insert_dict['valueTypes']['price'] = 'FLOAT'
+    insert_dict['valueTypes']['start_time'] = 'DATE'
+    insert_dict['valueTypes']['end_time'] = 'DATE'
+    insert_dict['valueTypes']['bid_date'] = 'DATE'
+    try:
+        statement = generate_insert_table_statement(insert_dict)
+        db.execute(statement)
+        db.commit()
+        return jsonify({'status': True, 'details': ""})
+    except:
+        return jsonify({'status': False, 'details': "Unable to make bid"})
     
 
 @app.route("/admin/complex-query", methods=["POST"])
@@ -756,12 +843,6 @@ def add():
         response["status"] = False
         response["details"] = "Database insertion failed"
     return jsonify(response)
-
-
-
-
-    
-        
 
 
 @app.get("/table")

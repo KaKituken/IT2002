@@ -2,17 +2,67 @@ import './bid.css'
 import Icon from '../../components/Icon/Icon'
 import PhotoWindow from '../../components/PhotoWindow/PhotoWindow'
 import { useNavigate, useLocation } from "react-router-dom";
+import * as api from '../../service/api'
+import { useEffect, useState } from 'react';
+import { useAppSelector } from '../../hooks';
 
 function App(){
 
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 
     'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
 
+    const [bid, setBid] = useState<number>()
+    const [probiderID, setProviderID] = useState<number>()
+    const [probiderEmail, setProviderEmail] = useState<string>()
+
+    const navigate = useNavigate()
+    const userToken = useAppSelector((state) => state.userInfoTracker.userToken)
+
+
     const imgs:Array<string> = ['https://fooddl-1307472723.cos.ap-beijing.myqcloud.com/database/house-sample1.jpg',
     'https://fooddl-1307472723.cos.ap-beijing.myqcloud.com/database/house-sample2.jpg',
     'https://fooddl-1307472723.cos.ap-beijing.myqcloud.com/database/house-sample3.jpg']
 
     const location = useLocation()
+
+    async function handleBidClicked(){
+        const param:Record<string, number|string|Date>= {}
+        if(bid){
+            param['houseid'] = location.state.houseInfo.houseid
+            param['bid'] = bid
+            param['token'] = userToken
+            param['startDate'] = location.state.houseInfo.startDate
+            param['endDate'] = location.state.houseInfo.endDate
+            param['bidDate'] = new Date()
+            let success = await api.postBid(param)
+            if(success.status){
+                window.alert('Bid succeed!')
+                navigate('/display')
+            }
+            else{
+                window.alert(success.details)
+            }
+        }
+        else{
+            window.alert('Pleas give a bid!')
+        }
+    }
+
+    useEffect(()=>{
+        (async () => {
+            const param:Record<string, number> = {
+                houseID: location.state.houseInfo.houseid
+            }
+            let success = await api.getProviderInfo(param)
+            if(success.status){
+                setProviderID(success.providerID)
+                setProviderEmail(success.providerEmail)
+            }
+            else{
+                window.alert(success.details)
+            }
+        })()
+    },[])
 
     return (
         <div className='App'>
@@ -35,9 +85,9 @@ function App(){
                                 </div>
                                 <div id='enter-bid'>
                                     <div>Enter new bid</div>
-                                    <input type="number"></input>
+                                    <input type="number" onChange={e => setBid(Number(e.target.value))}></input>
                                 </div>
-                                <button id='make-bid-btn'>Make bid</button>
+                                <button id='make-bid-btn' onClick={handleBidClicked}>Make bid</button>
                             </div>
                             <div id='body-right'>
                                 <div className='info-item'>
@@ -62,12 +112,15 @@ function App(){
                 </div>
                 <div className='provider-info'>
                     <span id='contact-provider'>Contact provider</span>
-                    <u>Elisa Tan</u>
+                    <u>{location.state.houseInfo.providerName}</u>
                     <div className='provider-photo'>
                         <img src='https://fooddl-1307472723.cos.ap-beijing.myqcloud.com/database/szk.jpeg'></img>
                     </div>
-                    <button className='provider-btn' id='provider-phone-number'>Show phone number</button>
-                    <button className='provider-btn' id='provider-email'>Show email</button>
+                    <button className='provider-btn' id='provider-phone-number' 
+                    onClick={()=>{
+                        window.alert(probiderEmail)
+                    }}>Show Email</button>
+                    {/* <button className='provider-btn' id='provider-email'>Show email</button> */}
                 </div>
             </div>
         </div>
